@@ -1,311 +1,811 @@
-<!doctype html> 
-<html lang="ja"> 
-<head> 
- <meta charset="utf-8" /> 
- <meta name="viewport" content="width=device-width,initial-scale=1" /> 
- <title>確率（並べ替え学習）Parsons風MVP / MathJax（22問：⋅ と ! を使う版）</title> 
- <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script> 
- <style> 
- :root{--bg:#0b1020;--text:#e9ecff;--muted:#aab2dd;--accent:#7c5cff;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444;} 
- *{box-sizing:border-box} 
- body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN",Meiryo,sans-serif; 
- background:radial-gradient(1200px 800px at 20% 10%,#1a2450 0%,var(--bg) 55%),var(--bg);color:var(--text)} 
- header{padding:20px 18px 8px;max-width:1200px;margin:0 auto} 
- h1{margin:0 0 6px;font-size:20px;letter-spacing:.3px} 
- .sub{color:var(--muted);font-size:13px;line-height:1.7} 
- main{max-width:1200px;margin:0 auto;padding:12px 18px 28px;display:grid;grid-template-columns:360px 1fr;gap:16px} 
- @media (max-width:980px){main{grid-template-columns:1fr}} 
- .panel{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08); 
- border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden} 
- .panel h2{margin:0;padding:14px 14px 10px;font-size:14px;color:#dfe4ff;letter-spacing:.2px} 
- .panel .body{padding:0 14px 14px} 
- .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap} 
- label{font-size:12px;color:var(--muted)} 
- select,button{border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.20);color:var(--text);padding:10px 10px;font-size:13px} 
- select{width:100%} 
- button{cursor:pointer;transition:.15s transform,.15s background,.15s border} 
- button:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.22)} 
- .primary{background:linear-gradient(135deg,rgba(124,92,255,.95),rgba(124,92,255,.55));border-color:rgba(124,92,255,.8)} 
- .ghost{background:rgba(0,0,0,.10)} 
- .prompt{padding:14px;border-radius:14px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);line-height:1.7;font-size:14px} 
- .board{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px} 
- @media (max-width:980px){.board{grid-template-columns:1fr}} 
- .zone{background:rgba(0,0,0,.18);border:1px dashed rgba(255,255,255,.18);border-radius:18px;min-height:260px;padding:12px} 
- .zoneHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px} 
- .zoneTitle{font-size:13px;color:#dfe4ff} 
- .zoneHint{font-size:12px;color:var(--muted)} 
- .cardItem{user-select:none;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.10); 
- border-radius:16px;padding:10px 10px 10px 12px;margin:10px 0;display:flex;gap:10px;align-items:flex-start;cursor:grab} 
- .cardItem:active{cursor:grabbing} 
- .badge{min-width:32px;height:22px;border-radius:999px;background:rgba(124,92,255,.20);border:1px solid rgba(124,92,255,.35); 
- display:flex;align-items:center;justify-content:center;font-size:11px;color:#d9d2ff;margin-top:2px} 
- .cardText{font-size:13px;line-height:1.6;color:#eef1ff} 
- .cardItem.distractor .badge{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.35);color:#ffe8b5} 
- .cardItem.invalid{border-color:rgba(239,68,68,.7);box-shadow:0 0 0 1px rgba(239,68,68,.35) inset} 
- .cardItem.valid{border-color:rgba(34,197,94,.65);box-shadow:0 0 0 1px rgba(34,197,94,.25) inset} 
- .dropHover{outline:2px solid rgba(124,92,255,.55);outline-offset:2px} 
- .status{padding:12px 14px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:10px;align-items:flex-start} 
- .pill{padding:6px 10px;border-radius:999px;font-size:12px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.20);color:var(--muted)} 
- .pill.ok{border-color:rgba(34,197,94,.55);color:#bff3d1} 
- .pill.ng{border-color:rgba(239,68,68,.55);color:#ffd0d0} 
- .pill.warn{border-color:rgba(245,158,11,.55);color:#ffe7c2} 
- .msg{font-size:13px;line-height:1.6;color:#eef1ff;flex:1} 
- .solution{margin-top:10px;padding:12px;border-radius:14px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08)} 
- .solution ol{margin:8px 0 0 20px} 
- .solution li{margin:6px 0;line-height:1.6;color:#eef1ff} 
- .footer{max-width:1200px;margin:0 auto;padding:0 18px 22px;color:var(--muted);font-size:12px;line-height:1.6} 
- .mjx-container{margin:0 .08em} 
-/* 固定：常に左上に表示される『入口へ戻る』ボタン */ 
-.fixedBack{ 
- position:fixed; 
- top: calc(12px + env(safe-area-inset-top)); 
- left: calc(12px + env(safe-area-inset-left)); 
- z-index: 9999; 
- display:inline-flex; 
- align-items:center; 
- gap:8px; 
- padding:10px 12px; 
- border-radius:999px; 
- border:1px solid rgba(255,255,255,.16); 
- background: rgba(0,0,0,.45); 
- color: var(--text); 
- text-decoration:none; 
- font-weight:800; 
- font-size:13px; 
- letter-spacing:.02em; 
- backdrop-filter: blur(10px) saturate(1.2); 
- -webkit-backdrop-filter: blur(10px) saturate(1.2); 
- box-shadow: 0 10px 24px rgba(0,0,0,.35); 
- transition:.15s transform,.15s background,.15s border-color; 
-} 
-.fixedBack:hover{ 
- transform: translateY(-1px); 
- background: rgba(0,0,0,.55); 
- border-color: rgba(255,255,255,.26); 
-} 
-.fixedBack:active{ 
- transform: translateY(0); 
-} 
-@media (prefers-reduced-motion: reduce){ 
- .fixedBack{ transition:none; } 
- .fixedBack:hover{ transform:none; } 
-} 
-</style> 
-</head> 
-<body> 
-<a class="fixedBack" href="index.html" aria-label="入口（index.html）へ戻る">← 入口へ戻る</a> 
-<header> 
- <h1>確率（並べ替え学習）</h1> 
- <div class="sub"> 
- 入試では100%出題される単元だ。2次関数が一番重要だろうという意見もあるが微分してしまえばなんとかなる。そのうちに入試までに数学の理論を叩き込まれるので2次関数は受験生にとってそこまで重要ではない。 
- </div> 
-</header> 
-<main> 
- <section class="panel"> 
- <h2>問題</h2> 
- <div class="body"> 
- <div class="row" style="margin-bottom:10px"><label for="problemSelect">問題を選択</label></div> 
- <select id="problemSelect"></select> 
- <div style="height:10px"></div> 
- <div class="prompt" id="prompt"></div> 
- <div style="height:12px"></div> 
- <div class="row"> 
- <button class="primary" id="checkBtn">判定する</button> 
-<button class="ghost" id="answerBtn">解答</button> 
- <button class="ghost" id="resetBtn">リセット</button> 
- </div> 
- </div> 
- </section> 
- <section class="panel"> 
- <h2>並べ替え</h2> 
- <div class="board"> 
- <div class="zone" id="poolZone"> 
- <div class="zoneHeader"><div class="zoneTitle">カード（シャッフル）</div><div class="zoneHint">ドラッグ / クリックで移動</div></div> 
- <div id="pool"></div> 
- </div> 
- <div class="zone" id="answerZone"> 
- <div class="zoneHeader"><div class="zoneTitle">解答エリア</div><div class="zoneHint">上から順に評価</div></div> 
- <div id="answer"></div> 
- </div> 
- </div> 
- <div class="status"> 
- <div class="pill" id="pill">未判定</div> 
- <div class="msg" id="msg">カードを並べて「判定する」を押してください。</div> 
- </div> 
- <div class="body"><div id="solutionWrap" style="display:none"></div></div> 
- </section> 
-</main> 
-<div class="footer"> 
- <div>表記：組み合わせ \\( {}\_n\\mathrm{C}\_r \\)、順列 \\( {}\_n\\mathrm{P}\_r \\)。citeturn14search133turn14search134</div> 
-</div> 
-<script> 
-// 22問（P21,P22：重複あり（戻す）を追加） 
-const PROBLEMS = [ 
-{ id:"P1", title:"P1 定義：確率の定義（サイコロ）", prompt:"サイコロを1回投げる。事象A＝「3の倍数が出る」。\\(P(A)\\) を求めよ。", 
- steps:[ 
- {id:"s1", text:"全事象\\(U\\)の要素数：\\(n(U)=6\\)", requires:[]}, 
- {id:"s2", text:"事象A：\\(3,6\\)なので\\(n(A)=2\\)", requires:["s1"]}, 
- {id:"s3", text:"\\(P(A)=\\frac{2}{6}=\\frac{1}{3}\\)", requires:["s2"]} 
- ]}, 
-{ id:"P2", title:"P2 余事象：少なくとも1回6", prompt:"サイコロを2回投げる。少なくとも1回6が出る確率を求めよ。", 
- steps:[ 
- {id:"s1", text:"余事象：『少なくとも1回6』の余事象は『2回とも6でない』", requires:[]}, 
- {id:"s2", text:"\\(P(6でない)=\\frac56\\)、独立→\\(\\left(\\frac56\\right)^2\\)", requires:["s1"]}, 
- {id:"s3", text:"\\(1-\\left(\\frac56\\right)^2=\\frac{11}{36}\\)", requires:["s2"]} 
- ]}, 
-{ id:"P3", title:"P3 排反：コイン2回で表1回", prompt:"公平なコインを2回投げる。表がちょうど1回出る確率を求めよ。", 
- steps:[ 
- {id:"s1", text:"\\(HT\\) または \\(TH\\)（排反）", requires:[]}, 
- {id:"s2", text:"各確率は\\(\\frac14\\)", requires:["s1"]}, 
- {id:"s3", text:"\\(\\frac14+\\frac14=\\frac12\\)", requires:["s2"]} 
- ]}, 
-{ id:"P4", title:"P4 nCr：玉（赤2白1）", prompt:"赤3個・白4個（計7個）から同時に3個。赤2個白1個となる確率を求めよ。", 
- steps:[ 
- {id:"s1", text:"全事象：\\(n(U)={}_7\\mathrm{C}_3\\)", requires:[]}, 
- {id:"s2", text:"事象A：\\(n(A)={}_3\\mathrm{C}_2⋅{}_4\\mathrm{C}_1\\)", requires:["s1"]}, 
- {id:"s3", text:"\\(P(A)=\\frac{{}_3\\mathrm{C}_2⋅{}_4\\mathrm{C}_1}{{}_7\\mathrm{C}_3}=\\frac{12}{35}\\)", requires:["s2"]} 
- ]}, 
-{ id:"P5", title:"P5 余事象：不良品（少なくとも1個）", prompt:"15個中に不良品2個。3個同時に取り出すとき、少なくとも1個が不良品となる確率。", 
- steps:[ 
- {id:"s1", text:"余事象は『3個とも良品』", requires:[]}, 
- {id:"s2", text:"\\(P(良品のみ)=\\frac{{}_{13}\\mathrm{C}_3}{{}_{15}\\mathrm{C}_3}\\)", requires:["s1"]}, 
- {id:"s3", text:"1-\\frac{{}_{13}\\mathrm{C}_3}{{}_{15}\\mathrm{C}_3}=\\frac{169}{455}", requires:["s2"]} 
- ]}, 
-{ id:"P6", title:"P6 条件付き：同時2個（nCr）", prompt:"赤3個・白2個から2個同時。条件『少なくとも1個赤』のもとで『2個とも赤』となる条件付き確率。", 
- steps:[ 
- {id:"s1", text:"\\(P(B\\mid A)=\\frac{P(B)}{P(A)}\\)", requires:[]}, 
- {id:"s2", text:"\\(P(B)=\\frac{{}_3\\mathrm{C}_2}{{}_5\\mathrm{C}_2}=\\frac{3}{10}\\)", requires:["s1"]}, 
- {id:"s3", text:"\\(P(A)=1-\\frac{{}_2\\mathrm{C}_2}{{}_5\\mathrm{C}_2}=\\frac{9}{10}\\)", requires:["s2"]}, 
- {id:"s4", text:"\\(\\frac{3/10}{9/10}=\\frac{1}{3}\\)", requires:["s3"]} 
- ]}, 
-{ id:"P7", title:"P7 反復試行：コイン5回で表2回", prompt:"公平なコインを5回投げる。表がちょうど2回出る確率。", 
- steps:[ 
- {id:"s1", text:"回数の選び方：\\({}_5\\mathrm{C}_2\\)通り", requires:[]}, 
- {id:"s2", text:"1つの並びの確率：\\(\\left(\\frac12\\right)^5\\)", requires:["s1"]}, 
- {id:"s3", text:"{}_5\\mathrm{C}_2⋅\\left(\\frac12\\right)^5=\\frac{5}{16}", requires:["s2"]} 
- ]}, 
-{ id:"P8", title:"P8 余事象：コイン10回で表1回以上", prompt:"公平なコインを10回投げる。表が1回以上出る確率。", 
- steps:[ 
- {id:"s1", text:"余事象は『全部裏』", requires:[]}, 
- {id:"s2", text:"\\(P(全部裏)=\\left(\\frac12\\right)^{10}\\)", requires:["s1"]}, 
- {id:"s3", text:"1-\\left(\\frac12\\right)^{10}=\\frac{1023}{1024}", requires:["s2"]} 
- ]}, 
-{ id:"P9", title:"P9 nPr：順に引く（条件付き）", prompt:"1〜5のカードから2枚を順に引く（戻さない）。条件『1枚目が奇数』のもとで『2枚目も奇数』となる確率。", 
- steps:[ 
- {id:"s1", text:"全事象：\\({}_5\\mathrm{P}_2=5⋅4=20\\)", requires:[]}, 
- {id:"s2", text:"条件A：\\(n(A)=3⋅4=12\\)", requires:["s1"]}, 
- {id:"s3", text:"条件AかつB：\\(n(A\\cap B)=3⋅2=6\\)", requires:["s2"]}, 
- {id:"s4", text:"\\(P(B\\mid A)=\\frac{6}{12}=\\frac12\\)", requires:["s3"]} 
- ]}, 
-{ id:"P10", title:"P10 期待値：サイコロ", prompt:"公平なサイコロ1回。出目Xの期待値\\(E[X]\\)を求めよ。", 
- steps:[ 
- {id:"s1", text:"\\(P(X=k)=\\frac16\\)", requires:[]}, 
- {id:"s2", text:"\\(E[X]=\\sum_{k=1}^{6} k⋅\\frac16\\)", requires:["s1"]}, 
- {id:"s3", text:"\\(E[X]=\\frac{7}{2}\\)", requires:["s2"]} 
- ]}, 
-{ id:"P11", title:"P11 nPr：AとBが隣り合う（6人）", prompt:"6人（A,B,C,D,E,F）を一列に並べる。AとBが隣り合う確率を求めよ。", 
- steps:[ 
- {id:"s1", text:"全事象：\\(6!=6⋅5⋅4⋅3⋅2⋅1\\)", requires:[]}, 
- {id:"s2", text:"AとBをかたまりにすると5個を並べる：\\(5!=5⋅4⋅3⋅2⋅1\\)", requires:["s1"]}, 
- {id:"s3", text:"かたまり内部は2通り（AB/BA）→有利：\\(2⋅5!\\)", requires:["s2"]}, 
- {id:"s4", text:"確率：\\(\\frac{2⋅5!}{6!}=\\frac{1}{3}\\)", requires:["s3"]} 
- ]}, 
-{ id:"P12", title:"P12 nPr：両端が指定2冊（5冊の本）", prompt:"異なる5冊の本を横一列に並べる。特定の2冊が両端に来る確率を求めよ。", 
- steps:[ 
- {id:"s1", text:"全事象：\\(5!=5⋅4⋅3⋅2⋅1\\)", requires:[]}, 
- {id:"s2", text:"両端2冊の並びは2通り", requires:["s1"]}, 
- {id:"s3", text:"中央3冊の並び：\\(3!=3⋅2⋅1\\)", requires:["s2"]}, 
- {id:"s4", text:"確率：\\(\\frac{2⋅3!}{5!}=\\frac{1}{10}\\)", requires:["s3"]} 
- ]}, 
-{ id:"P13", title:"P13 3桁（0-4）偶数になる確率", prompt:"0,1,2,3,4 の数字カードから3枚（重複なし）で3桁の整数を作る。偶数となる確率。", 
- steps:[ 
- {id:"s1", text:"全事象：百の位0不可→\\(4⋅4⋅3=48\\)", requires:[]}, 
- {id:"s2", text:"偶数→一の位は0,2,4で場合分け", requires:["s1"]}, 
- {id:"s3", text:"一の位0：\\(4⋅3=12\\)。一の位2/4：各\\(3⋅3=9\\)", requires:["s2"]}, 
- {id:"s4", text:"有利30→\\(\\frac{30}{48}=\\frac{5}{8}\\)", requires:["s3"]} 
- ]}, 
-{ id:"P14", title:"P14 nCr：6人から2人（Aを含む）", prompt:"6人から2人を選ぶ。特定の1人（A）が選ばれる確率を求めよ。", 
- steps:[ 
- {id:"s1", text:"全事象：\\({}_6\\mathrm{C}_2\\)", requires:[]}, 
- {id:"s2", text:"Aを含む：残り5人から1人→\\({}_5\\mathrm{C}_1=5\\)", requires:["s1"]}, 
- {id:"s3", text:"\\(\\frac{5}{{}_6\\mathrm{C}_2}=\\frac{1}{3}\\)", requires:["s2"]} 
- ]}, 
-{ id:"P15", title:"P15 条件付き：和が7", prompt:"サイコロ2個。『和が7』のとき『少なくとも一方が1』となる確率。", 
- steps:[ 
- {id:"s1", text:"和7は6通り", requires:[]}, 
- {id:"s2", text:"1を含むのは2通り", requires:["s1"]}, 
- {id:"s3", text:"\\(\\frac{2}{6}=\\frac{1}{3}\\)", requires:["s2"]} 
- ]}, 
-{ id:"P16", title:"P16 独立：3回投げて6が出ない", prompt:"サイコロを3回投げる。1回も6が出ない確率を求めよ。", 
- steps:[ 
- {id:"s1", text:"\\(P(6以外)=\\frac56\\)", requires:[]}, 
- {id:"s2", text:"独立→\\(\\left(\\frac56\\right)^3\\)", requires:["s1"]}, 
- {id:"s3", text:"\\(\\frac{125}{216}\\)", requires:["s2"]} 
- ]}, 
-{ id:"P17", title:"P17 原因の確率（2つの箱）", prompt:"箱A：赤2白1、箱B：赤1白2。等確率で箱を選び1個引く。赤が出たとき箱Aの確率。", 
- steps:[ 
- {id:"s1", text:"\\(P(A)=P(B)=\\frac12\\)", requires:[]}, 
- {id:"s2", text:"\\(P(赤)=\\frac12⋅\\frac23+\\frac12⋅\\frac13=\\frac12\\)", requires:["s1"]}, 
- {id:"s3", text:"\\(P(A\\mid 赤)=\\frac{\\frac12⋅\\frac23}{\\frac12}=\\frac{2}{3}\\)", requires:["s2"]} 
- ]}, 
-{ id:"P18", title:"P18 期待値：コインゲーム", prompt:"コイン1回。表+2点、裏-1点。期待値を求めよ。", 
- steps:[ 
- {id:"s1", text:"確率は各\\(\\frac12\\)", requires:[]}, 
- {id:"s2", text:"\\(E=2⋅\\frac12+(-1)⋅\\frac12\\)", requires:["s1"]}, 
- {id:"s3", text:"\\(E=\\frac12\\)", requires:["s2"]} 
- ]}, 
-{ id:"P19", title:"P19 円順列：円で隣り合う（6人）", prompt:"6人を円形に並べる（回転同一視）。AとBが隣り合う確率。", 
- steps:[ 
- {id:"s1", text:"全事象：円順列→\\(5!=5⋅4⋅3⋅2⋅1\\)", requires:[]}, 
- {id:"s2", text:"ABをかたまり→円で4人を並べる：\\(4!=4⋅3⋅2⋅1\\)", requires:["s1"]}, 
- {id:"s3", text:"AB/BAの2通り→有利：\\(2⋅4!\\)", requires:["s2"]}, 
- {id:"s4", text:"\\(\\frac{2⋅4!}{5!}=\\frac{2}{5}\\)", requires:["s3"]} 
- ]}, 
-{ id:"P20", title:"P20 nPr：1〜6から3枚で3桁、奇数", prompt:"1〜6から異なる3枚を順に並べて3桁の数を作る。奇数となる確率。", 
- steps:[ 
- {id:"s1", text:"全事象：\\({}_6\\mathrm{P}_3=6⋅5⋅4=120\\)", requires:[]}, 
- {id:"s2", text:"奇数→一の位が1,3,5", requires:["s1"]}, 
- {id:"s3", text:"有利：\\(3⋅5⋅4=60\\)", requires:["s2"]}, 
- {id:"s4", text:"\\(\\frac{60}{120}=\\frac12\\)", requires:["s3"]} 
- ]}, 
-{ id:"P21", title:"P21 重複あり：1〜5を2回（戻す）で両方奇数", prompt:"1〜5のカードから2枚を順に引く（戻してから次を引く＝重複を許す）。2枚とも奇数となる確率を求めよ。", 
- steps:[ 
- {id:"s1", text:"全事象：重複ありの順列→\\(5^2=25\\)", requires:[]}, 
- {id:"s2", text:"有利：奇数は3枚、重複あり→\\(3^2=9\\)", requires:["s1"]}, 
- {id:"s3", text:"確率：\\(\\frac{9}{25}\\)", requires:["s2"]} 
- ]}, 
-{ id:"P22", title:"P22 重複あり：0,1,2で3桁（重複可）偶数", prompt:"0,1,2 の数字カードから3回取り出して（毎回戻す＝重複を許す）3桁の整数を作る。偶数となる確率を求めよ。", 
- steps:[ 
- {id:"s1", text:"全事象：百の位は1,2の2通り、十/一は各3通り→\\(2⋅3⋅3=18\\)", requires:[]}, 
- {id:"s2", text:"偶数：一の位が0または2で場合分け", requires:["s1"]}, 
- {id:"s3", text:"有利：一の位0→\\(2⋅3=6\\)、一の位2→\\(2⋅3=6\\) 合計12", requires:["s2"]}, 
- {id:"s4", text:"確率：\\(\\frac{12}{18}=\\frac{2}{3}\\)", requires:["s3"]} 
- ]} 
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>確率（並べ替え学習）P1〜P100（約分済み・箱/並べ替え/トランプ偏重版）</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{--bg:#0b1020;--text:#e9ecff;--muted:#aab2dd;--accent:#7c5cff;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444;}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+      background:radial-gradient(1200px 800px at 20% 10%,#1a2450 0%,var(--bg) 55%),var(--bg);color:var(--text)}
+    header{padding:20px 18px 8px;max-width:1200px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:20px;letter-spacing:.3px}
+    .sub{color:var(--muted);font-size:13px;line-height:1.7}
+    main{max-width:1200px;margin:0 auto;padding:12px 18px 28px;display:grid;grid-template-columns:360px 1fr;gap:16px}
+    @media (max-width:980px){main{grid-template-columns:1fr}}
+    .panel{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden}
+    .panel h2{margin:0;padding:14px 14px 10px;font-size:14px;color:#dfe4ff;letter-spacing:.2px}
+    .panel .body{padding:0 14px 14px}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    label{font-size:12px;color:var(--muted)}
+    select,button{border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.20);color:var(--text);padding:10px 10px;font-size:13px}
+    select{width:100%}
+    button{cursor:pointer;transition:.15s transform,.15s background,.15s border}
+    button:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.22)}
+    .primary{background:linear-gradient(135deg,rgba(124,92,255,.95),rgba(124,92,255,.55));border-color:rgba(124,92,255,.8)}
+    .ghost{background:rgba(0,0,0,.10)}
+    .prompt{padding:14px;border-radius:14px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);line-height:1.7;font-size:14px}
+    .board{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px}
+    @media (max-width:980px){.board{grid-template-columns:1fr}}
+    .zone{background:rgba(0,0,0,.18);border:1px dashed rgba(255,255,255,.18);border-radius:18px;min-height:260px;padding:12px}
+    .zoneHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .zoneTitle{font-size:13px;color:#dfe4ff}
+    .zoneHint{font-size:12px;color:var(--muted)}
+    .cardItem{user-select:none;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;padding:10px 10px 10px 12px;margin:10px 0;display:flex;gap:10px;align-items:flex-start;cursor:grab}
+    .cardItem:active{cursor:grabbing}
+    .badge{min-width:32px;height:22px;border-radius:999px;background:rgba(124,92,255,.20);border:1px solid rgba(124,92,255,.35);
+      display:flex;align-items:center;justify-content:center;font-size:11px;color:#d9d2ff;margin-top:2px}
+    .cardText{font-size:13px;line-height:1.6;color:#eef1ff}
+    .cardItem.invalid{border-color:rgba(239,68,68,.7);box-shadow:0 0 0 1px rgba(239,68,68,.35) inset}
+    .cardItem.valid{border-color:rgba(34,197,94,.65);box-shadow:0 0 0 1px rgba(34,197,94,.25) inset}
+    .dropHover{outline:2px solid rgba(124,92,255,.55);outline-offset:2px}
+    .status{padding:12px 14px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:10px;align-items:flex-start}
+    .pill{padding:6px 10px;border-radius:999px;font-size:12px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.20);color:var(--muted)}
+    .pill.ok{border-color:rgba(34,197,94,.55);color:#bff3d1}
+    .pill.ng{border-color:rgba(239,68,68,.55);color:#ffd0d0}
+    .pill.warn{border-color:rgba(245,158,11,.55);color:#ffe7c2}
+    .msg{font-size:13px;line-height:1.6;color:#eef1ff;flex:1}
+    .solution{margin-top:10px;padding:12px;border-radius:14px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08)}
+    .solution ol{margin:8px 0 0 20px}
+    .solution li{margin:6px 0;line-height:1.6;color:#eef1ff}
+    .footer{max-width:1200px;margin:0 auto;padding:0 18px 22px;color:var(--muted);font-size:12px;line-height:1.6}
+    .mjx-container{margin:0 .08em}
+    .fixedBack{
+      position:fixed; top: calc(12px + env(safe-area-inset-top)); left: calc(12px + env(safe-area-inset-left));
+      z-index: 9999; display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.16); background: rgba(0,0,0,.45); color: var(--text);
+      text-decoration:none; font-weight:800; font-size:13px; letter-spacing:.02em;
+      backdrop-filter: blur(10px) saturate(1.2); -webkit-backdrop-filter: blur(10px) saturate(1.2);
+      box-shadow: 0 10px 24px rgba(0,0,0,.35); transition:.15s transform,.15s background,.15s border-color;
+    }
+    .fixedBack:hover{ transform: translateY(-1px); background: rgba(0,0,0,.55); border-color: rgba(255,255,255,.26);}
+    .fixedBack:active{ transform: translateY(0);}
+    @media (prefers-reduced-motion: reduce){ .fixedBack{ transition:none; } .fixedBack:hover{ transform:none; } }
+  </style>
+</head>
+
+<body>
+  <a class="fixedBack" href="index.html" aria-label="入口（index.html）へ戻る">← 入口へ戻る</a>
+
+  <header>
+    <h1>確率（並べ替え学習）</h1>
+    <div class="sub">
+      P1〜P22は元教材の形式を維持し、P23〜P100は「最終答案が必ず約分済み」になるよう統一。
+      追加問題は <b>箱（玉/不良）・並べ替え（順列/円順列）・トランプ</b> に偏らせています。
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>問題</h2>
+      <div class="body">
+        <div class="row" style="margin-bottom:10px"><label for="problemSelect">問題を選択</label></div>
+        <select id="problemSelect"></select>
+        <div style="height:10px"></div>
+        <div class="prompt" id="prompt"></div>
+        <div style="height:12px"></div>
+        <div class="row">
+          <button class="primary" id="checkBtn">判定する</button>
+          <button class="ghost" id="answerBtn">解答</button>
+          <button class="ghost" id="resetBtn">リセット</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>並べ替え</h2>
+      <div class="board">
+        <div class="zone" id="poolZone">
+          <div class="zoneHeader"><div class="zoneTitle">カード（シャッフル）</div><div class="zoneHint">ドラッグ / クリックで移動</div></div>
+          <div id="pool"></div>
+        </div>
+        <div class="zone" id="answerZone">
+          <div class="zoneHeader"><div class="zoneTitle">解答エリア</div><div class="zoneHint">上から順に評価</div></div>
+          <div id="answer"></div>
+        </div>
+      </div>
+      <div class="status">
+        <div class="pill" id="pill">未判定</div>
+        <div class="msg" id="msg">カードを並べて「判定する」を押してください。</div>
+      </div>
+      <div class="body"><div id="solutionWrap" style="display:none"></div></div>
+    </section>
+  </main>
+
+  <div class="footer">
+    <div>表記：組み合わせ \\( {}\\_n\\mathrm{C}\\_r \\)、順列 \\( {}\\_n\\mathrm{P}\\_r \\)。</div>
+  </div>
+
+<script>
+/* ========= 約分済みを保証する（BigInt分数） ========= */
+function bgcd(a,b){
+  a = a < 0n ? -a : a;
+  b = b < 0n ? -b : b;
+  while(b!==0n){ const t=a%b; a=b; b=t; }
+  return a;
+}
+function reduceFrac(n,d){
+  if(d===0n) return {n:0n,d:1n};
+  if(n===0n) return {n:0n,d:1n};
+  if(d<0n){ n=-n; d=-d; }
+  const g = bgcd(n,d);
+  return {n:n/g, d:d/g};
+}
+function fracLatex(n,d){
+  const r = reduceFrac(n,d);
+  if(r.d===1n) return String(r.n);
+  return `\\\\frac{${r.n}}{${r.d}}`;
+}
+function nCrBig(n,r){
+  n=BigInt(n); r=BigInt(r);
+  if(r<0n || r>n) return 0n;
+  r = r > n-r ? n-r : r;
+  let num=1n, den=1n;
+  for(let k=1n;k<=r;k++){
+    num *= (n-r+k);
+    den *= k;
+    const g = bgcd(num,den);
+    num/=g; den/=g;
+  }
+  return num/den;
+}
+function nPrBig(n,r){
+  n=BigInt(n); r=BigInt(r);
+  if(r<0n || r>n) return 0n;
+  let x=1n;
+  for(let i=0n;i<r;i++) x*=(n-i);
+  return x;
+}
+function normalizeFractionsInText(t){
+  return String(t).replace(/FRAC\\((\\-?\\d+),(\\-?\\d+)\\)/g, (_,a,b)=>fracLatex(BigInt(a),BigInt(b)));
+}
+
+/* ========= P1〜P22（元教材） ========= */
+const PROBLEMS = [
+  /* ※ここはアップロードされた math_1.html の P1〜P22 と同型です [1](https://onedrive.live.com?cid=CE4107C842BEBF65&id=CE4107C842BEBF65!s4c1a9e196aa040f4838499728956a2fa) */
+  { id:"P1", title:"P1 定義：確率の定義（サイコロ）", prompt:"サイコロを1回投げる。事象A＝「3の倍数が出る」。\\(P(A)\\) を求めよ。",
+   steps:[
+    {id:"s1", text:"全事象\\(U\\)の要素数：\\(n(U)=6\\)", requires:[]},
+    {id:"s2", text:"事象A：\\(3,6\\)なので\\(n(A)=2\\)", requires:["s1"]},
+    {id:"s3", text:"\\(P(A)=\\frac{2}{6}=\\frac{1}{3}\\)", requires:["s2"]}
+   ]},
+  { id:"P2", title:"P2 余事象：少なくとも1回6", prompt:"サイコロを2回投げる。少なくとも1回6が出る確率を求めよ。",
+   steps:[
+    {id:"s1", text:"余事象：『少なくとも1回6』の余事象は『2回とも6でない』", requires:[]},
+    {id:"s2", text:"\\(P(6でない)=\\frac56\\)、独立→\\(\\left(\\frac56\\right)^2\\)", requires:["s1"]},
+    {id:"s3", text:"\\(1-\\left(\\frac56\\right)^2=\\frac{11}{36}\\)", requires:["s2"]}
+   ]},
+  { id:"P3", title:"P3 排反：コイン2回で表1回", prompt:"公平なコインを2回投げる。表がちょうど1回出る確率を求めよ。",
+   steps:[
+    {id:"s1", text:"\\(HT\\) または \\(TH\\)（排反）", requires:[]},
+    {id:"s2", text:"各確率は\\(\\frac14\\)", requires:["s1"]},
+    {id:"s3", text:"\\(\\frac14+\\frac14=\\frac12\\)", requires:["s2"]}
+   ]},
+  { id:"P4", title:"P4 nCr：玉（赤2白1）", prompt:"赤3個・白4個（計7個）から同時に3個。赤2個白1個となる確率を求めよ。",
+   steps:[
+    {id:"s1", text:"全事象：\\(n(U)={}\\_7\\mathrm{C}\\_3\\)", requires:[]},
+    {id:"s2", text:"事象A：\\(n(A)={}\\_3\\mathrm{C}\\_2⋅{}\\_4\\mathrm{C}\\_1\\)", requires:["s1"]},
+    {id:"s3", text:"\\(P(A)=\\frac{{}\\_3\\mathrm{C}\\_2⋅{}\\_4\\mathrm{C}\\_1}{{}\\_7\\mathrm{C}\\_3}=\\frac{12}{35}\\)", requires:["s2"]}
+   ]},
+  { id:"P5", title:"P5 余事象：不良品（少なくとも1個）", prompt:"15個中に不良品2個。3個同時に取り出すとき、少なくとも1個が不良品となる確率。",
+   steps:[
+    {id:"s1", text:"余事象は『3個とも良品』", requires:[]},
+    {id:"s2", text:"\\(P(良品のみ)=\\frac{{}\\_{13}\\mathrm{C}\\_3}{{}\\_{15}\\mathrm{C}\\_3}\\)", requires:["s1"]},
+    {id:"s3", text:"1-\\frac{{}\\_{13}\\mathrm{C}\\_3}{{}\\_{15}\\mathrm{C}\\_3}=\\frac{169}{455}", requires:["s2"]}
+   ]},
+  { id:"P6", title:"P6 条件付き：同時2個（nCr）", prompt:"赤3個・白2個から2個同時。条件『少なくとも1個赤』のもとで『2個とも赤』となる条件付き確率。",
+   steps:[
+    {id:"s1", text:"\\(P(B\\mid A)=\\frac{P(B)}{P(A)}\\)", requires:[]},
+    {id:"s2", text:"\\(P(B)=\\frac{{}\\_3\\mathrm{C}\\_2}{{}\\_5\\mathrm{C}\\_2}=\\frac{3}{10}\\)", requires:["s1"]},
+    {id:"s3", text:"\\(P(A)=1-\\frac{{}\\_2\\mathrm{C}\\_2}{{}\\_5\\mathrm{C}\\_2}=\\frac{9}{10}\\)", requires:["s2"]},
+    {id:"s4", text:"\\(\\frac{3/10}{9/10}=\\frac{1}{3}\\)", requires:["s3"]}
+   ]},
+  { id:"P7", title:"P7 反復試行：コイン5回で表2回", prompt:"公平なコインを5回投げる。表がちょうど2回出る確率。",
+   steps:[
+    {id:"s1", text:"回数の選び方：\\({}\\_5\\mathrm{C}\\_2\\)通り", requires:[]},
+    {id:"s2", text:"1つの並びの確率：\\(\\left(\\frac12\\right)^5\\)", requires:["s1"]},
+    {id:"s3", text:"{}\\_5\\mathrm{C}\\_2⋅\\left(\\frac12\\right)^5=\\frac{5}{16}", requires:["s2"]}
+   ]},
+  { id:"P8", title:"P8 余事象：コイン10回で表1回以上", prompt:"公平なコインを10回投げる。表が1回以上出る確率。",
+   steps:[
+    {id:"s1", text:"余事象は『全部裏』", requires:[]},
+    {id:"s2", text:"\\(P(全部裏)=\\left(\\frac12\\right)^{10}\\)", requires:["s1"]},
+    {id:"s3", text:"1-\\left(\\frac12\\right)^{10}=\\frac{1023}{1024}", requires:["s2"]}
+   ]},
+  { id:"P9", title:"P9 nPr：順に引く（条件付き）", prompt:"1〜5のカードから2枚を順に引く（戻さない）。条件『1枚目が奇数』のもとで『2枚目も奇数』となる確率。",
+   steps:[
+    {id:"s1", text:"全事象：\\({}\\_5\\mathrm{P}\\_2=5⋅4=20\\)", requires:[]},
+    {id:"s2", text:"条件A：\\(n(A)=3⋅4=12\\)", requires:["s1"]},
+    {id:"s3", text:"条件AかつB：\\(n(A\\cap B)=3⋅2=6\\)", requires:["s2"]},
+    {id:"s4", text:"\\(P(B\\mid A)=\\frac{6}{12}=\\frac12\\)", requires:["s3"]}
+   ]},
+  { id:"P10", title:"P10 期待値：サイコロ", prompt:"公平なサイコロ1回。出目Xの期待値\\(E[X]\\)を求めよ。",
+   steps:[
+    {id:"s1", text:"\\(P(X=k)=\\frac16\\)", requires:[]},
+    {id:"s2", text:"\\(E[X]=\\sum\\_{k=1}^{6} k⋅\\frac16\\)", requires:["s1"]},
+    {id:"s3", text:"\\(E[X]=\\frac{7}{2}\\)", requires:["s2"]}
+   ]},
+  { id:"P11", title:"P11 nPr：AとBが隣り合う（6人）", prompt:"6人（A,B,C,D,E,F）を一列に並べる。AとBが隣り合う確率を求めよ。",
+   steps:[
+    {id:"s1", text:"全事象：\\(6!=6⋅5⋅4⋅3⋅2⋅1\\)", requires:[]},
+    {id:"s2", text:"AとBをかたまりにすると5個を並べる：\\(5!=5⋅4⋅3⋅2⋅1\\)", requires:["s1"]},
+    {id:"s3", text:"かたまり内部は2通り（AB/BA）→有利：\\(2⋅5!\\)", requires:["s2"]},
+    {id:"s4", text:"確率：\\(\\frac{2⋅5!}{6!}=\\frac{1}{3}\\)", requires:["s3"]}
+   ]},
+  { id:"P12", title:"P12 nPr：両端が指定2冊（5冊の本）", prompt:"異なる5冊の本を横一列に並べる。特定の2冊が両端に来る確率を求めよ。",
+   steps:[
+    {id:"s1", text:"全事象：\\(5!=5⋅4⋅3⋅2⋅1\\)", requires:[]},
+    {id:"s2", text:"両端2冊の並びは2通り", requires:["s1"]},
+    {id:"s3", text:"中央3冊の並び：\\(3!=3⋅2⋅1\\)", requires:["s2"]},
+    {id:"s4", text:"確率：\\(\\frac{2⋅3!}{5!}=\\frac{1}{10}\\)", requires:["s3"]}
+   ]},
+  { id:"P13", title:"P13 3桁（0-4）偶数になる確率", prompt:"0,1,2,3,4 の数字カードから3枚（重複なし）で3桁の整数を作る。偶数となる確率。",
+   steps:[
+    {id:"s1", text:"全事象：百の位0不可→\\(4⋅4⋅3=48\\)", requires:[]},
+    {id:"s2", text:"偶数→一の位は0,2,4で場合分け", requires:["s1"]},
+    {id:"s3", text:"一の位0：\\(4⋅3=12\\)。一の位2/4：各\\(3⋅3=9\\)", requires:["s2"]},
+    {id:"s4", text:"有利30→\\(\\frac{30}{48}=\\frac{5}{8}\\)", requires:["s3"]}
+   ]},
+  { id:"P14", title:"P14 nCr：6人から2人（Aを含む）", prompt:"6人から2人を選ぶ。特定の1人（A）が選ばれる確率を求めよ。",
+   steps:[
+    {id:"s1", text:"全事象：\\({}\\_6\\mathrm{C}\\_2\\)", requires:[]},
+    {id:"s2", text:"Aを含む：残り5人から1人→\\({}\\_5\\mathrm{C}\\_1=5\\)", requires:["s1"]},
+    {id:"s3", text:"\\(\\frac{5}{{}\\_6\\mathrm{C}\\_2}=\\frac{1}{3}\\)", requires:["s2"]}
+   ]},
+  { id:"P15", title:"P15 条件付き：和が7", prompt:"サイコロ2個。『和が7』のとき『少なくとも一方が1』となる確率。",
+   steps:[
+    {id:"s1", text:"和7は6通り", requires:[]},
+    {id:"s2", text:"1を含むのは2通り", requires:["s1"]},
+    {id:"s3", text:"\\(\\frac{2}{6}=\\frac{1}{3}\\)", requires:["s2"]}
+   ]},
+  { id:"P16", title:"P16 独立：3回投げて6が出ない", prompt:"サイコロを3回投げる。1回も6が出ない確率を求めよ。",
+   steps:[
+    {id:"s1", text:"\\(P(6以外)=\\frac56\\)", requires:[]},
+    {id:"s2", text:"独立→\\(\\left(\\frac56\\right)^3\\)", requires:["s1"]},
+    {id:"s3", text:"\\(\\frac{125}{216}\\)", requires:["s2"]}
+   ]},
+  { id:"P17", title:"P17 原因の確率（2つの箱）", prompt:"箱A：赤2白1、箱B：赤1白2。等確率で箱を選び1個引く。赤が出たとき箱Aの確率。",
+   steps:[
+    {id:"s1", text:"\\(P(A)=P(B)=\\frac12\\)", requires:[]},
+    {id:"s2", text:"\\(P(赤)=\\frac12⋅\\frac23+\\frac12⋅\\frac13=\\frac12\\)", requires:["s1"]},
+    {id:"s3", text:"\\(P(A\\mid 赤)=\\frac{\\frac12⋅\\frac23}{\\frac12}=\\frac{2}{3}\\)", requires:["s2"]}
+   ]},
+  { id:"P18", title:"P18 期待値：コインゲーム", prompt:"コイン1回。表+2点、裏-1点。期待値を求めよ。",
+   steps:[
+    {id:"s1", text:"確率は各\\(\\frac12\\)", requires:[]},
+    {id:"s2", text:"\\(E=2⋅\\frac12+(-1)⋅\\frac12\\)", requires:["s1"]},
+    {id:"s3", text:"\\(E=\\frac12\\)", requires:["s2"]}
+   ]},
+  { id:"P19", title:"P19 円順列：円で隣り合う（6人）", prompt:"6人を円形に並べる（回転同一視）。AとBが隣り合う確率。",
+   steps:[
+    {id:"s1", text:"全事象：円順列→\\(5!\\)", requires:[]},
+    {id:"s2", text:"ABをかたまり→円で4人を並べる：\\(4!\\)", requires:["s1"]},
+    {id:"s3", text:"AB/BAの2通り→有利：\\(2⋅4!\\)", requires:["s2"]},
+    {id:"s4", text:"\\(\\frac{2⋅4!}{5!}=\\frac{2}{5}\\)", requires:["s3"]}
+   ]},
+  { id:"P20", title:"P20 nPr：1〜6から3枚で3桁、奇数", prompt:"1〜6から異なる3枚を順に並べて3桁の数を作る。奇数となる確率。",
+   steps:[
+    {id:"s1", text:"全事象：\\({}\\_6\\mathrm{P}\\_3\\)", requires:[]},
+    {id:"s2", text:"奇数→一の位が1,3,5", requires:["s1"]},
+    {id:"s3", text:"有利：\\(3⋅5⋅4\\)", requires:["s2"]},
+    {id:"s4", text:"\\(\\frac12\\)", requires:["s3"]}
+   ]},
+  { id:"P21", title:"P21 重複あり：1〜5を2回（戻す）で両方奇数", prompt:"1〜5のカードから2枚を順に引く（戻してから次を引く＝重複を許す）。2枚とも奇数となる確率を求めよ。",
+   steps:[
+    {id:"s1", text:"全事象：\\(5^2\\)", requires:[]},
+    {id:"s2", text:"有利：\\(3^2\\)", requires:["s1"]},
+    {id:"s3", text:"\\(\\frac{9}{25}\\)", requires:["s2"]}
+   ]},
+  { id:"P22", title:"P22 重複あり：0,1,2で3桁（重複可）偶数", prompt:"0,1,2 の数字カードから3回取り出して（毎回戻す＝重複を許す）3桁の整数を作る。偶数となる確率を求めよ。",
+   steps:[
+    {id:"s1", text:"全事象：\\(2⋅3⋅3\\)", requires:[]},
+    {id:"s2", text:"偶数：一の位0または2", requires:["s1"]},
+    {id:"s3", text:"有利：\\(6+6\\)", requires:["s2"]},
+    {id:"s4", text:"\\(\\frac{2}{3}\\)", requires:["s3"]}
+   ]}
 ];
 
-// --- 追加：正答カードを細分化（S1a/S1b…）し、連続性も判定する ---
+/* ========= 追加P23〜P100（偏重＆約分済み統一） ========= */
+const C = (n,r)=>`{}\\_${n}\\\\mathrm{C}\\_${r}`;
+const P = (n,r)=>`{}\\_${n}\\\\mathrm{P}\\_${r}`;
+
+function addProblem(p){ PROBLEMS.push(p); }
+
+// 超幾何：P(赤=r) = C(R,r)C(W,k-r)/C(N,k)
+function hyperProb(N,R,k,r){
+  const num = nCrBig(R,r) * nCrBig(N-R, k-r);
+  const den = nCrBig(N,k);
+  return reduceFrac(num,den);
+}
+function atLeastOneRed(N,R,k){
+  const den = nCrBig(N,k);
+  const num0 = nCrBig(N-R,k); // 赤0
+  const r0 = reduceFrac(num0,den);
+  return reduceFrac(r0.d - r0.n, r0.d);
+}
+
+// 逐次（戻さない）で列パターン "RWR" など
+function sequentialProb(R,W,seq){
+  let num=1n, den=1n;
+  let r=BigInt(R), w=BigInt(W), t=r+w;
+  for(const ch of seq){
+    if(ch==="R"){ num*=r; den*=t; r-=1n; }
+    else{ num*=w; den*=t; w-=1n; }
+    t-=1n;
+  }
+  return reduceFrac(num,den);
+}
+
+function generateP23toP100(){
+  /* --- P23〜P52：箱（玉/不良/逐次/条件付き/ベイズ） 30問 --- */
+  const boxList = [
+    // [id,title,prompt, maker() => {steps:[...]}]
+    ["P23","箱：赤5白3から2個、両方赤","赤5個・白3個（計8個）から同時に2個。2個とも赤となる確率を求めよ。", ()=>{
+      const ans = hyperProb(8,5,2,2);
+      return [
+        {id:"s1", text:`全事象：\\(n(U)=${C(8,2)}\\)`, requires:[]},
+        {id:"s2", text:`事象A：\\(n(A)=${C(5,2)}\\)`, requires:["s1"]},
+        {id:"s3", text:`\\(P(A)=FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ];
+    }],
+    ["P24","箱：赤4白6から3個、赤1白2","赤4個・白6個（計10個）から同時に3個。赤1個白2個となる確率。", ()=>{
+      const ans = hyperProb(10,4,3,1);
+      return [
+        {id:"s1", text:`全事象：\\(n(U)=${C(10,3)}\\)`, requires:[]},
+        {id:"s2", text:`事象A：\\(n(A)=${C(4,1)}⋅${C(6,2)}\\)`, requires:["s1"]},
+        {id:"s3", text:`\\(P(A)=FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ];
+    }],
+    ["P25","箱：12個中不良3、4個で少なくとも1不良","12個中に不良品が3個ある。4個同時に取り出すとき、少なくとも1個が不良品となる確率。", ()=>{
+      const den = nCrBig(12,4);
+      const good0 = nCrBig(9,4); // 不良0
+      const r0 = reduceFrac(good0,den);
+      const ans = reduceFrac(r0.d - r0.n, r0.d);
+      return [
+        {id:"s1", text:"余事象：不良品が0個（全部良品）", requires:[]},
+        {id:"s2", text:`余事象：\\(\\frac{${C(9,4)}}{${C(12,4)}}\\)`, requires:["s1"]},
+        {id:"s3", text:`\\(1-\\frac{${C(9,4)}}{${C(12,4)}}=FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ];
+    }],
+    ["P26","箱：15個中不良4、5個で不良2","15個中に不良品が4個ある。5個同時に取り出すとき、不良品がちょうど2個となる確率。", ()=>{
+      const ans = hyperProb(15,4,5,2);
+      return [
+        {id:"s1", text:`全事象：\\(n(U)=${C(15,5)}\\)`, requires:[]},
+        {id:"s2", text:`事象A：\\(n(A)=${C(4,2)}⋅${C(11,3)}\\)`, requires:["s1"]},
+        {id:"s3", text:`\\(P(A)=FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ];
+    }],
+    ["P27","逐次：赤5白3から赤→赤→白","赤5個・白3個から1個ずつ3回取り出す（戻さない）。赤→赤→白となる確率。", ()=>{
+      const ans = sequentialProb(5,3,"RRW");
+      return [
+        {id:"s1", text:"戻さない：確率は連鎖で掛ける", requires:[]},
+        {id:"s2", text:"\\(\\frac58\\cdot\\frac47\\cdot\\frac36\\)", requires:["s1"]},
+        {id:"s3", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ];
+    }],
+    ["P28","逐次：赤4白4から赤→白→赤","赤4個・白4個から1個ずつ3回（戻さない）。赤→白→赤となる確率。", ()=>{
+      const ans = sequentialProb(4,4,"RWR");
+      return [
+        {id:"s1", text:"戻さない：分母が8→7→6と変化", requires:[]},
+        {id:"s2", text:"\\(\\frac48\\cdot\\frac47\\cdot\\frac36\\)", requires:["s1"]},
+        {id:"s3", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ];
+    }],
+    ["P29","条件付き：赤4白3、1回目赤のとき2回目も赤","赤4個・白3個から2回1個ずつ引く（戻さない）。条件『1回目が赤』のもとで『2回目も赤』の確率。", ()=>{
+      // 条件付：残り6個中赤3
+      const ans = reduceFrac(3n,6n);
+      return [
+        {id:"s1", text:"条件：1回目が赤→残り6個中赤3個", requires:[]},
+        {id:"s2", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s1"]},
+        {id:"s3", text:"約分：\\(FRAC(1,2)\\)", requires:["s2"]},
+      ];
+    }],
+    ["P30","条件付き：赤5白5、少なくとも1赤のもとで2赤","赤5個・白5個から2個同時。条件『少なくとも1個赤』のもとで『2個とも赤』の条件付き確率。", ()=>{
+      // B:2赤= C5,2/C10,2 =10/45=2/9
+      // A:>=1赤=1-C5,2/C10,2=1-10/45=35/45=7/9
+      // ratio= (2/9)/(7/9)=2/7
+      return [
+        {id:"s1", text:"定義：\\(P(B\\midA)=\\frac{P(B)}{P(A)}\\)", requires:[]},
+        {id:"s2", text:"\\(P(B)=FRAC(2,9)\\)", requires:["s1"]},
+        {id:"s3", text:"\\(P(A)=FRAC(7,9)\\)", requires:["s2"]},
+        {id:"s4", text:"\\(P(B\\midA)=FRAC(2,7)\\)", requires:["s3"]},
+      ];
+    }],
+    ["P31","原因の確率：箱A(赤2白1)箱B(赤1白2)、等確率で赤→箱A","箱A：赤2白1、箱B：赤1白2。等確率で箱を選び1個引く。赤が出たとき箱Aを選んだ確率。", ()=>{
+      // (1/2*2/3) / (1/2*(2/3+1/3)) = 2/3
+      return [
+        {id:"s1", text:"事前：\\(P(A)=P(B)=\\frac12\\)", requires:[]},
+        {id:"s2", text:"全確率：\\(P(赤)=\\frac12⋅\\frac23+\\frac12⋅\\frac13\\)", requires:["s1"]},
+        {id:"s3", text:"ベイズ：\\(P(A\\mid赤)=FRAC(2,3)\\)", requires:["s2"]},
+      ];
+    }],
+    ["P32","原因の確率：箱Aを1/3,箱Bを2/3で選び赤→箱A","箱A：赤2白1、箱B：赤1白2。箱Aを\\(\\frac13\\)、箱Bを\\(\\frac23\\)で選び1個引く。赤が出たとき箱Aを選んだ確率。", ()=>{
+      // 1/3*2/3 / (1/3*2/3 + 2/3*1/3) = 1/2
+      return [
+        {id:"s1", text:"事前：\\(P(A)=\\frac13,\\;P(B)=\\frac23\\)", requires:[]},
+        {id:"s2", text:"全確率：\\(P(赤)=\\frac13⋅\\frac23+\\frac23⋅\\frac13\\)", requires:["s1"]},
+        {id:"s3", text:"ベイズ：\\(P(A\\mid赤)=FRAC(1,2)\\)", requires:["s2"]},
+      ];
+    }],
+  ];
+
+  // 残りP33〜P52を「箱偏重」で自動追加（難度を徐々に上げる）
+  // パラメータ：N,R,k,r（r=-1 は赤>=1）
+  const auto = [
+    [11,6,4,3],[12,8,4,4],[12,5,4,2],[20,2,5,0],[20,2,5,1],[20,2,5,2],
+    [10,6,4,2],[9,5,3,1],[12,6,4,3],[12,6,4,1],[14,7,5,3],[14,7,5,2],
+    [10,3,2,2],[10,3,2,-1],[12,5,4,-1],[12,5,4,2],[9,5,3,3],[9,5,3,-1],
+    [8,4,3,2],[8,4,3,1]
+  ];
+
+  let pidIndex=0;
+  for(const base of boxList){
+    const [pid,title,prompt, maker] = base;
+    addProblem({ id:pid, title, prompt, steps: maker().map(s=>({ ...s, text: normalizeFractionsInText(s.text) })) });
+    pidIndex++;
+  }
+
+  let pnum=33;
+  for(const [N,R,k,r] of auto){
+    const id = `P${pnum}`;
+    let title = `${id} 箱：${N}個中赤${R}、${k}個で`;
+    let prompt = `赤${R}個・白${N-R}個（計${N}個）から同時に${k}個取り出す。`;
+    let steps;
+    if(r===-1){
+      const ans = atLeastOneRed(N,R,k);
+      title += "赤が1個以上";
+      prompt += "赤が少なくとも1個となる確率を求めよ。";
+      steps = [
+        {id:"s1", text:"余事象：赤が0個（全部白）", requires:[]},
+        {id:"s2", text:`余事象：\\(\\frac{${C(N-R,k)}}{${C(N,k)}}\\)`, requires:["s1"]},
+        {id:"s3", text:`求める確率：\\(1-\\frac{${C(N-R,k)}}{${C(N,k)}}=FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ];
+    }else{
+      const ans = hyperProb(N,R,k,r);
+      title += `赤がちょうど${r}個`;
+      prompt += `赤がちょうど${r}個となる確率を求めよ。`;
+      steps = [
+        {id:"s1", text:`全事象：\\(n(U)=${C(N,k)}\\)`, requires:[]},
+        {id:"s2", text:`事象A：\\(n(A)=${C(R,r)}⋅${C(N-R,k-r)}\\)`, requires:["s1"]},
+        {id:"s3", text:`\\(P(A)=FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ];
+    }
+    addProblem({ id, title, prompt, steps: steps.map(s=>({ ...s, text: normalizeFractionsInText(s.text) })) });
+    pnum++;
+    if(pnum>52) break;
+  }
+
+  /* --- P53〜P76：並べ替え（順列/円順列） 24問 --- */
+  function addPerm(id,title,prompt, num, den){
+    const ans = reduceFrac(BigInt(num), BigInt(den));
+    addProblem({
+      id, title, prompt,
+      steps:[
+        {id:"s1", text:"全事象：\\(n!\\)（円順列は\\((n-1)!\\)）", requires:[]},
+        {id:"s2", text:"有利事象：かたまり（ブロック）・余事象・位置の数え上げ", requires:["s1"]},
+        {id:"s3", text:`確率：\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ].map(s=>({ ...s, text: normalizeFractionsInText(s.text) }))
+    });
+  }
+  // 一列n人でAB隣：2/n
+  addPerm("P53","P53 一列：8人でAとBが隣り合う","8人を一列に並べる。AとBが隣り合う確率。", 2, 8);
+  addPerm("P54","P54 余事象：8人でAとBが隣り合わない","8人を一列に並べる。AとBが隣り合わない確率。", 6, 8);
+  addPerm("P55","P55 一列：10人でAとBが隣り合う","10人を一列に並べる。AとBが隣り合う確率。", 2, 10);
+  addPerm("P56","P56 余事象：10人でAとBが隣り合わない","10人を一列に並べる。AとBが隣り合わない確率。", 8, 10);
+
+  // 一列n人で両端：2/(n(n-1))
+  addPerm("P57","P57 一列：8人でAとBが両端","8人を一列に並べる。AとBが両端に来る確率。", 2, 8*7);
+  addPerm("P58","P58 一列：7人でAが左端かつBが右端","7人を一列に並べる。Aが左端かつBが右端となる確率。", 1, 7*6);
+
+  // 間にk人：2*(n-k-1)/(n(n-1))
+  addPerm("P59","P59 一列：8人でAとBの間に2人","8人を一列に並べる。AとBの間にちょうど2人はさまる確率。", 2*(8-2-1), 8*7);
+  addPerm("P60","P60 一列：9人でAとBの間に3人","9人を一列に並べる。AとBの間にちょうど3人はさまる確率。", 2*(9-3-1), 9*8);
+
+  // ABC連続：一列 n=7 は 1/7、n=9 は 1/12
+  addPerm("P61","P61 一列：7人でA,B,Cが連続（順不同）","7人を一列に並べる。A,B,Cが連続して並ぶ確率（順序は問わない）。", 1, 7);
+  addPerm("P62","P62 一列：9人でA,B,Cが連続（順不同）","9人を一列に並べる。A,B,Cが連続して並ぶ確率（順序は問わない）。", 1, 12);
+  // ABCこの順：n=9 は 1/72
+  addPerm("P63","P63 一列：9人でA,B,CがABCの順で連続","9人を一列に並べる。A,B,Cがこの順（ABC）で連続して並ぶ確率。", 1, 72);
+
+  // 円順列：n人（回転同一視）でAB隣 2/(n-1)
+  addPerm("P64","P64 円順列：8人でAとBが隣り合う","8人を円形に並べる（回転同一視）。AとBが隣り合う確率。", 2, 7);
+  addPerm("P65","P65 円順列：9人でAとBが隣り合う","9人を円形に並べる（回転同一視）。AとBが隣り合う確率。", 2, 8);
+
+  // 円で隣でない（9人）：1-2/8=3/4
+  addPerm("P66","P66 円順列：9人でAとBが隣り合わない","9人を円形に並べる（回転同一視）。AとBが隣り合わない確率。", 3, 4);
+
+  // 8人円で向かい合う（固定すると1/7）
+  addPerm("P67","P67 円順列：8人でAとBが向かい合う","8人を円形に並べる（回転同一視）。AとBが向かい合う確率。", 1, 7);
+
+  // 7人円でABC連続：4!*3!/6! = 1/5
+  addPerm("P68","P68 円順列：7人でA,B,Cが連続（順不同）","7人を円形に並べる（回転同一視）。A,B,Cが連続して並ぶ確率。", 1, 5);
+
+  // 追加で埋め（同型の難易度上げ）
+  addPerm("P69","P69 一列：6人でAとBが隣り合わない","6人を一列に並べる。AとBが隣り合わない確率。", 4, 6);
+  addPerm("P70","P70 一列：12人でAとBが隣り合う","12人を一列に並べる。AとBが隣り合う確率。", 2, 12);
+  addPerm("P71","P71 一列：12人でAとBが隣り合わない","12人を一列に並べる。AとBが隣り合わない確率。", 10, 12);
+  addPerm("P72","P72 一列：9人でAとBが両端","9人を一列に並べる。AとBが両端に来る確率。", 2, 9*8);
+  addPerm("P73","P73 一列：10人でAが左端","10人を一列に並べる。Aが左端に来る確率。", 1, 10);
+  addPerm("P74","P74 一列：10人でAが左端かつBが右端","10人を一列に並べる。Aが左端かつBが右端に来る確率。", 1, 10*9);
+  addPerm("P75","P75 一列：11人でAとBの間に4人","11人を一列に並べる。AとBの間にちょうど4人はさまる確率。", 2*(11-4-1), 11*10);
+  addPerm("P76","P76 一列：11人でA,B,Cが連続（順不同）","11人を一列に並べる。A,B,Cが連続して並ぶ確率。", 6, 11*10); // (9!*3!)/11! = 6/(11*10)
+
+  /* --- P77〜P100：トランプ 24問（約分済み統一） --- */
+  function addCard(id,title,prompt, steps){
+    addProblem({ id, title, prompt, steps: steps.map(s=>({ ...s, text: normalizeFractionsInText(s.text) }))});
+  }
+  const C52_2 = nCrBig(52,2);
+  const C52_3 = nCrBig(52,3);
+  const C52_5 = nCrBig(52,5);
+  const C52_7 = nCrBig(52,7);
+
+  // P77: 2枚でAが1枚以上
+  {
+    const r0 = reduceFrac(nCrBig(48,2), C52_2);
+    const ans = reduceFrac(r0.d - r0.n, r0.d);
+    addCard("P77","P77 トランプ：2枚でAが1枚以上","トランプ52枚から2枚同時に引く。Aが少なくとも1枚含まれる確率。",
+      [
+        {id:"s1", text:"余事象：Aが0枚（A以外48枚から2枚）", requires:[]},
+        {id:"s2", text:"余事象：\\(\\frac{{}\\_48\\mathrm{C}\\_2}{{}\\_52\\mathrm{C}\\_2}\\)", requires:["s1"]},
+        {id:"s3", text:`\\(1-\\frac{{}\\_48\\mathrm{C}\\_2}{{}\\_52\\mathrm{C}\\_2}=FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ]);
+  }
+  // P78: 5枚でAが2枚
+  {
+    const ans = reduceFrac(nCrBig(4,2)*nCrBig(48,3), C52_5);
+    addCard("P78","P78 トランプ：5枚でAがちょうど2枚","トランプ52枚から5枚同時に引く。Aがちょうど2枚となる確率。",
+      [
+        {id:"s1", text:"全事象：\\({}\\_52\\mathrm{C}\\_5\\)", requires:[]},
+        {id:"s2", text:"有利：\\({}\\_4\\mathrm{C}\\_2⋅{}\\_48\\mathrm{C}\\_3\\)", requires:["s1"]},
+        {id:"s3", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ]);
+  }
+  // P79: フラッシュ
+  {
+    const ans = reduceFrac(4n*nCrBig(13,5), C52_5);
+    addCard("P79","P79 トランプ：フラッシュ（同一スート5枚）","トランプ52枚から5枚同時に引く。5枚がすべて同じスートとなる確率（ストレートフラッシュも含む）。",
+      [
+        {id:"s1", text:"全事象：\\({}\\_52\\mathrm{C}\\_5\\)", requires:[]},
+        {id:"s2", text:"有利：\\(4⋅{}\\_13\\mathrm{C}\\_5\\)", requires:["s1"]},
+        {id:"s3", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ]);
+  }
+  // P80: ワンペア
+  {
+    const num = 13n*nCrBig(4,2)*nCrBig(12,3)*(4n**3n);
+    const ans = reduceFrac(num, C52_5);
+    addCard("P80","P80 トランプ：ワンペア（ちょうど1組）","トランプ52枚から5枚同時に引く。ちょうど1組だけ同数で、残り3枚はすべて異なる数字となる確率。",
+      [
+        {id:"s1", text:"全事象：\\({}\\_52\\mathrm{C}\\_5\\)", requires:[]},
+        {id:"s2", text:"ペア：\\(13⋅{}\\_4\\mathrm{C}\\_2\\)", requires:["s1"]},
+        {id:"s3", text:"残り：\\({}\\_12\\mathrm{C}\\_3⋅4^3\\)", requires:["s2"]},
+        {id:"s4", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s3"]},
+      ]);
+  }
+  // P81: フルハウス
+  {
+    const num = 13n*nCrBig(4,3)*12n*nCrBig(4,2);
+    const ans = reduceFrac(num, C52_5);
+    addCard("P81","P81 トランプ：フルハウス","トランプ52枚から5枚同時に引く。フルハウスとなる確率。",
+      [
+        {id:"s1", text:"全事象：\\({}\\_52\\mathrm{C}\\_5\\)", requires:[]},
+        {id:"s2", text:"有利：\\(13⋅{}\\_4\\mathrm{C}\\_3⋅12⋅{}\\_4\\mathrm{C}\\_2\\)", requires:["s1"]},
+        {id:"s3", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ]);
+  }
+  // P82: キング1枚以上
+  {
+    const r0 = reduceFrac(nCrBig(48,5), C52_5);
+    const ans = reduceFrac(r0.d - r0.n, r0.d);
+    addCard("P82","P82 トランプ：5枚にキングが1枚以上","トランプ52枚から5枚同時に引く。キングが少なくとも1枚含まれる確率。",
+      [
+        {id:"s1", text:"余事象：キング0枚（48枚から5枚）", requires:[]},
+        {id:"s2", text:"\\(1-\\frac{{}\\_48\\mathrm{C}\\_5}{{}\\_52\\mathrm{C}\\_5}\\)", requires:["s1"]},
+        {id:"s3", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ]);
+  }
+  // P83: 3枚のスートが全て異なる
+  {
+    const ans = reduceFrac(nCrBig(4,3)*(13n**3n), C52_3);
+    addCard("P83","P83 トランプ：3枚のスートがすべて異なる","トランプ52枚から3枚同時に引く。3枚のスートがすべて異なる確率。",
+      [
+        {id:"s1", text:"全事象：\\({}\\_52\\mathrm{C}\\_3\\)", requires:[]},
+        {id:"s2", text:"有利：\\({}\\_4\\mathrm{C}\\_3⋅13^3\\)", requires:["s1"]},
+        {id:"s3", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ]);
+  }
+  // P84: 条件付き 1枚目スペード→2枚目スペード（4/17）
+  addCard("P84","P84 トランプ：条件付き（1枚目スペード→2枚目スペード）","トランプ52枚から2枚を順に引く（戻さない）。条件『1枚目がスペード』のもとで『2枚目もスペード』の確率。",
+    [
+      {id:"s1", text:"条件：残り51枚中スペードは12枚", requires:[]},
+      {id:"s2", text:"\\(FRAC(12,51)\\)", requires:["s1"]},
+      {id:"s3", text:"約分：\\(FRAC(4,17)\\)", requires:["s2"]},
+    ]);
+
+  // P85: 7枚で4スート全て含む（包除）
+  {
+    const T = C52_7;
+    const miss = 4n*nCrBig(39,7) - 6n*nCrBig(26,7) + 4n*nCrBig(13,7);
+    const fav = T - miss;
+    const ans = reduceFrac(fav,T);
+    addCard("P85","P85 トランプ：7枚に4スートがすべて含まれる（包除）","トランプ52枚から7枚同時に引く。4つのスートがすべて少なくとも1枚ずつ含まれる確率。",
+      [
+        {id:"s1", text:"余事象：あるスートが0枚（包除）", requires:[]},
+        {id:"s2", text:"余事象：\\(4⋅{}\\_39\\mathrm{C}\\_7-6⋅{}\\_26\\mathrm{C}\\_7+4⋅{}\\_13\\mathrm{C}\\_7\\)", requires:["s1"]},
+        {id:"s3", text:`\\(1-\\frac{余事象}{{}\\_52\\mathrm{C}\\_7}=FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ]);
+  }
+
+  // P86: ストレート（10通り×4^5）
+  {
+    const ans = reduceFrac(10n*(4n**5n), C52_5);
+    addCard("P86","P86 トランプ：ストレート（10通り、スート自由）","トランプ52枚から5枚同時に引く。数字が5つ連続となる確率（スート自由、ストレートフラッシュ含む）。",
+      [
+        {id:"s1", text:"連続の型：10通り", requires:[]},
+        {id:"s2", text:"各数字のスートは自由→\\(4^5\\)", requires:["s1"]},
+        {id:"s3", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ]);
+  }
+
+  // P87: 少なくとも1枚Aのもとで2枚ともA（1/33）
+  addCard("P87","P87 トランプ：条件付き（少なくとも1枚Aのもとで2枚ともA）","トランプ52枚から2枚同時に引く。条件『少なくとも1枚がA』のもとで『2枚ともA』の条件付き確率。",
+    [
+      {id:"s1", text:"定義：\\(P(B\\midA)=\\frac{P(B)}{P(A)}\\)", requires:[]},
+      {id:"s2", text:"\\(P(B)=\\frac{{}\\_4\\mathrm{C}\\_2}{{}\\_52\\mathrm{C}\\_2}\\)", requires:["s1"]},
+      {id:"s3", text:"\\(P(A)=1-\\frac{{}\\_48\\mathrm{C}\\_2}{{}\\_52\\mathrm{C}\\_2}\\)", requires:["s2"]},
+      {id:"s4", text:"\\(FRAC(1,33)\\)", requires:["s3"]},
+    ]);
+
+  // 残りP88〜P100（トランプで埋め）
+  const fillers = [
+    ["P88","2枚が同じ色（赤/黒）","トランプ52枚から2枚同時に引く。2枚が同じ色（赤同士または黒同士）となる確率。",
+      ()=> reduceFrac( 2n*nCrBig(26,2), C52_2 ),
+      (ans)=>[
+        {id:"s1", text:"有利：\\({}\\_26\\mathrm{C}\\_2+{}\\_26\\mathrm{C}\\_2\\)", requires:[]},
+        {id:"s2", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s1"]},
+      ]
+    ],
+    ["P89","2枚が同じスート","トランプ52枚から2枚同時に引く。2枚が同じスートとなる確率。",
+      ()=> reduceFrac( 4n*nCrBig(13,2), C52_2 ),
+      (ans)=>[
+        {id:"s1", text:"有利：\\(4⋅{}\\_13\\mathrm{C}\\_2\\)", requires:[]},
+        {id:"s2", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s1"]},
+      ]
+    ],
+    ["P90","5枚がすべて赤","トランプ52枚から5枚同時に引く。5枚がすべて赤（ハート/ダイヤ）となる確率。",
+      ()=> reduceFrac( nCrBig(26,5), C52_5 ),
+      (ans)=>[
+        {id:"s1", text:"赤は26枚", requires:[]},
+        {id:"s2", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s1"]},
+      ]
+    ],
+    ["P91","5枚にハートが1枚以上（余事象）","トランプ52枚から5枚同時に引く。ハートが1枚以上含まれる確率。",
+      ()=>{
+        const r0 = reduceFrac(nCrBig(39,5), C52_5);
+        return reduceFrac(r0.d-r0.n, r0.d);
+      },
+      (ans)=>[
+        {id:"s1", text:"余事象：ハート0枚→他39枚から5枚", requires:[]},
+        {id:"s2", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s1"]},
+      ]
+    ],
+    ["P92","5枚でAがちょうど1枚","トランプ52枚から5枚同時に引く。Aがちょうど1枚となる確率。",
+      ()=> reduceFrac(nCrBig(4,1)*nCrBig(48,4), C52_5),
+      (ans)=>[
+        {id:"s1", text:"有利：\\({}\\_4\\mathrm{C}\\_1⋅{}\\_48\\mathrm{C}\\_4\\)", requires:[]},
+        {id:"s2", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s1"]},
+      ]
+    ],
+    ["P93","5枚でAが0枚","トランプ52枚から5枚同時に引く。Aが0枚となる確率。",
+      ()=> reduceFrac(nCrBig(48,5), C52_5),
+      (ans)=>[
+        {id:"s1", text:"A以外48枚から5枚", requires:[]},
+        {id:"s2", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s1"]},
+      ]
+    ],
+    ["P94","5枚でAが1枚以上（余事象）","トランプ52枚から5枚同時に引く。Aが1枚以上含まれる確率。",
+      ()=>{
+        const r0 = reduceFrac(nCrBig(48,5), C52_5);
+        return reduceFrac(r0.d-r0.n,r0.d);
+      },
+      (ans)=>[
+        {id:"s1", text:"余事象：Aが0枚", requires:[]},
+        {id:"s2", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s1"]},
+      ]
+    ],
+    ["P95","スリーカード（ちょうど3枚同数）","トランプ52枚から5枚同時に引く。ちょうど1つの数字が3枚現れ、残り2枚は互いに異なる数字となる確率。",
+      ()=>{
+        const num = 13n*nCrBig(4,3)*nCrBig(12,2)*(4n**2n);
+        return reduceFrac(num, C52_5);
+      },
+      (ans)=>[
+        {id:"s1", text:"有利：\\(13⋅{}\\_4\\mathrm{C}\\_3⋅{}\\_12\\mathrm{C}\\_2⋅4^2\\)", requires:[]},
+        {id:"s2", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s1"]},
+      ]
+    ],
+    ["P96","5枚がすべて異なる数字（ペアなし）","トランプ52枚から5枚同時に引く。5枚の数字がすべて異なる確率。",
+      ()=>{
+        const num = nCrBig(13,5)*(4n**5n);
+        return reduceFrac(num, C52_5);
+      },
+      (ans)=>[
+        {id:"s1", text:"数字を5種類選ぶ：\\({}\\_13\\mathrm{C}\\_5\\)", requires:[]},
+        {id:"s2", text:"スートは自由→\\(4^5\\)", requires:["s1"]},
+        {id:"s3", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s2"]},
+      ]
+    ],
+    ["P97","条件付き：1枚目がAのとき2枚目もA","トランプ52枚から2枚を順に引く（戻さない）。条件『1枚目がA』のもとで『2枚目もA』の確率。",
+      ()=> reduceFrac(3n,51n),
+      (ans)=>[
+        {id:"s1", text:"条件：残り51枚中Aは3枚", requires:[]},
+        {id:"s2", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s1"]},
+      ]
+    ],
+    ["P98","7枚でAが2枚以上（余事象）","トランプ52枚から7枚同時に引く。Aが2枚以上含まれる確率。",
+      ()=>{
+        const den = nCrBig(52,7);
+        const a0 = nCrBig(48,7);
+        const a1 = nCrBig(4,1)*nCrBig(48,6);
+        const num = den - (a0 + a1);
+        return reduceFrac(num,den);
+      },
+      (ans)=>[
+        {id:"s1", text:"余事象：Aが0枚 または 1枚（排反）", requires:[]},
+        {id:"s2", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s1"]},
+      ]
+    ],
+    ["P99","7枚がすべて同一スート","トランプ52枚から7枚同時に引く。7枚がすべて同じスートとなる確率。",
+      ()=> reduceFrac(4n*nCrBig(13,7), C52_7),
+      (ans)=>[
+        {id:"s1", text:"有利：スート4通り×13枚から7枚", requires:[]},
+        {id:"s2", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s1"]},
+      ]
+    ],
+    ["P100","7枚にキングが2枚以上（余事象）","トランプ52枚から7枚同時に引く。キングが2枚以上含まれる確率。",
+      ()=>{
+        const den = nCrBig(52,7);
+        const k0 = nCrBig(48,7);
+        const k1 = nCrBig(4,1)*nCrBig(48,6);
+        const num = den - (k0 + k1);
+        return reduceFrac(num,den);
+      },
+      (ans)=>[
+        {id:"s1", text:"余事象：キングが0枚 または 1枚", requires:[]},
+        {id:"s2", text:`\\(FRAC(${ans.n},${ans.d})\\)`, requires:["s1"]},
+      ]
+    ],
+  ];
+
+  for(const f of fillers){
+    const [id,title,prompt, make, build] = f;
+    const ans = make();
+    addCard(id, `${id} トランプ：${title}`, prompt, build(ans));
+  }
+}
+
+/* ========= 元ファイルの「：で分割＋連続必須」ロジック ========= */
 function splitOneStepText(stepText){
-  const t = String(stepText || '').trim();
-  // 「見出し：内容」の形なら 2枚に分割
+  const t = String(stepText||'').trim();
   const idx = t.indexOf('：');
   if(idx>0){
     const head = t.slice(0, idx).trim();
     const body = t.slice(idx+1).trim();
-    // head を「〜を求める。」系に（例：全事象→全事象を求める。）
-    let a = head;
+    let a=head;
     if(!/を求める$/.test(a)) a = a + 'を求める';
     if(!/[。．]$/.test(a)) a = a + '。';
     return [a, body];
   }
   return [t];
 }
-
 function expandSteps(originalSteps){
   const meta=[];
   const lastOf=new Map();
   const letters='abcdefghijklmnopqrstuvwxyz';
   let stepNo=1;
-
   for(const s of originalSteps){
     const parts = splitOneStepText(s.text);
     const ids = parts.map((_,i)=> parts.length===1 ? s.id : `${s.id}${letters[i]}`);
@@ -314,180 +814,162 @@ function expandSteps(originalSteps){
     lastOf.set(s.id, ids[ids.length-1]);
     stepNo++;
   }
-
   const expanded=[];
   for(const m of meta){
     const {orig, parts, ids, labels} = m;
     for(let i=0;i<parts.length;i++){
       const id = ids[i];
-      const immediateAfter = (i>0) ? ids[i-1] : null; // ★ 連続必須（直前）
+      const immediateAfter = (i>0) ? ids[i-1] : null;
       const baseReq = (orig.requires||[]).map(r => lastOf.get(r) || r);
       const req = immediateAfter ? Array.from(new Set([...baseReq, immediateAfter])) : baseReq;
-      expanded.push({id, label: labels[i], text: parts[i], requires: req, immediateAfter});
+      expanded.push({id, label:labels[i], text: normalizeFractionsInText(parts[i]), requires:req, immediateAfter});
     }
   }
   return expanded;
 }
- 
-// --- アプリ共通 --- 
-let current=null, currentExpandedSteps=[], poolCards=[], answerCards=[]; 
-const sel=document.getElementById('problemSelect'); 
-const promptEl=document.getElementById('prompt'); 
-const poolEl=document.getElementById('pool'); 
-const answerEl=document.getElementById('answer'); 
-const checkBtn=document.getElementById('checkBtn'); 
-const resetBtn=document.getElementById('resetBtn'); 
-const answerBtn=document.getElementById('answerBtn'); 
-const pill=document.getElementById('pill'); 
-const msg=document.getElementById('msg'); 
-const poolZone=document.getElementById('poolZone'); 
-const answerZone=document.getElementById('answerZone'); 
-const solutionWrap=document.getElementById('solutionWrap'); 
-function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;} 
-function setStatus(type,text){pill.className='pill'+(type?(' '+type):'');pill.textContent=type==='ok'?'正解':type==='ng'?'不正解':type==='warn'?'途中':'未判定';msg.textContent=text;} 
-function typesetMath(){ if(window.MathJax && MathJax.typesetPromise){return MathJax.typesetPromise([promptEl,poolEl,answerEl,solutionWrap]).catch(()=>{});} return Promise.resolve(); } 
-function createCardEl(card){ 
- const div=document.createElement('div'); 
- div.className='cardItem'+(card.kind==='distractor'?' distractor':''); 
- div.draggable=true; div.dataset.cardId=card.id; div.dataset.zone=card.zone; 
- const badge=document.createElement('div'); badge.className='badge'; badge.textContent=card.label; 
- const text=document.createElement('div'); text.className='cardText'; text.textContent=card.text; 
- div.appendChild(badge); div.appendChild(text); 
- div.addEventListener('dragstart',(e)=>{e.dataTransfer.setData('text/plain',JSON.stringify({id:card.id,from:card.zone}));e.dataTransfer.effectAllowed='move';}); 
- div.addEventListener('click',()=>moveCard(card.id, card.zone==='pool'?'answer':'pool')); 
- return div; 
-} 
-function render(){ 
- poolEl.innerHTML=''; answerEl.innerHTML=''; 
- poolCards.forEach(c=>poolEl.appendChild(createCardEl(c))); 
- answerCards.forEach(c=>answerEl.appendChild(createCardEl(c))); 
- return typesetMath(); 
-} 
-function moveCard(id,toZone){ 
- let card=null; 
- const take=(arr)=>{const idx=arr.findIndex(x=>x.id===id); if(idx>=0){card=arr[idx];arr.splice(idx,1);return true;} return false;}; 
- take(poolCards)
- take(answerCards); if(!card) return; 
- card.zone=toZone; (toZone==='pool'?poolCards:answerCards).push(card); 
- clearMarking(); setStatus('', '移動しました。並べ終えたら「判定する」。'); solutionWrap.style.display='none'; 
- render(); 
-} 
-function clearMarking(){[...document.querySelectorAll('.cardItem')].forEach(el=>{el.classList.remove('invalid');el.classList.remove('valid');});} 
-function markOrderFeedback(result){const els=[...answerEl.querySelectorAll('.cardItem')];const byId=new Map();els.forEach(el=>byId.set(el.dataset.cardId,el));result.orderChecks.forEach(ch=>{const el=byId.get(ch.id); if(!el) return; el.classList.add(ch.ok?'valid':'invalid');});} 
+
+/* ========= アプリ本体 ========= */
+let current=null, currentExpandedSteps=[], poolCards=[], answerCards=[];
+const sel=document.getElementById('problemSelect');
+const promptEl=document.getElementById('prompt');
+const poolEl=document.getElementById('pool');
+const answerEl=document.getElementById('answer');
+const checkBtn=document.getElementById('checkBtn');
+const resetBtn=document.getElementById('resetBtn');
+const answerBtn=document.getElementById('answerBtn');
+const pill=document.getElementById('pill');
+const msg=document.getElementById('msg');
+const poolZone=document.getElementById('poolZone');
+const answerZone=document.getElementById('answerZone');
+const solutionWrap=document.getElementById('solutionWrap');
+
+function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function setStatus(type,text){pill.className='pill'+(type?(' '+type):'');pill.textContent=type==='ok'?'正解':type==='ng'?'不正解':type==='warn'?'途中':'未判定';msg.textContent=text;}
+function typesetMath(){ if(window.MathJax && MathJax.typesetPromise){return MathJax.typesetPromise([promptEl,poolEl,answerEl,solutionWrap]).catch(()=>{});} return Promise.resolve(); }
+
+function createCardEl(card){
+  const div=document.createElement('div');
+  div.className='cardItem';
+  div.draggable=true; div.dataset.cardId=card.id; div.dataset.zone=card.zone;
+  const badge=document.createElement('div'); badge.className='badge'; badge.textContent=card.label;
+  const text=document.createElement('div'); text.className='cardText'; text.textContent=card.text;
+  div.appendChild(badge); div.appendChild(text);
+  div.addEventListener('dragstart',(e)=>{e.dataTransfer.setData('text/plain',JSON.stringify({id:card.id,from:card.zone}));e.dataTransfer.effectAllowed='move';});
+  div.addEventListener('click',()=>moveCard(card.id, card.zone==='pool'?'answer':'pool'));
+  return div;
+}
+function render(){
+  poolEl.innerHTML=''; answerEl.innerHTML='';
+  poolCards.forEach(c=>poolEl.appendChild(createCardEl(c)));
+  answerCards.forEach(c=>answerEl.appendChild(createCardEl(c)));
+  return typesetMath();
+}
+function moveCard(id,toZone){
+  let card=null;
+  const take=(arr)=>{const idx=arr.findIndex(x=>x.id===id); if(idx>=0){card=arr[idx];arr.splice(idx,1);return true;} return false;};
+  take(poolCards) || take(answerCards);
+  if(!card) return;
+  card.zone=toZone; (toZone==='pool'?poolCards:answerCards).push(card);
+  clearMarking(); setStatus('', '移動しました。並べ終えたら「判定する」。'); solutionWrap.style.display='none';
+  render();
+}
+function clearMarking(){[...document.querySelectorAll('.cardItem')].forEach(el=>{el.classList.remove('invalid');el.classList.remove('valid');});}
 function buildSolutionBox(){
- const div=document.createElement('div'); div.className='solution';
- const ol=document.createElement('ol');
- currentExpandedSteps.forEach(s=>{const li=document.createElement('li'); li.textContent=s.text; ol.appendChild(li);});
- div.appendChild(ol); return div;
+  const div=document.createElement('div'); div.className='solution';
+  const ol=document.createElement('ol');
+  currentExpandedSteps.forEach(s=>{const li=document.createElement('li'); li.textContent=s.text; ol.appendChild(li);});
+  div.appendChild(ol); return div;
 }
 function evaluate(){
- const stepIds=new Set(currentExpandedSteps.map(s=>s.id));
- const stepMap=new Map(currentExpandedSteps.map(s=>[s.id,s]));
- const ans=answerCards.map(c=>c.id);
- const seen=new Set(); const dup=[]; for(const id of ans){ if(seen.has(id)) dup.push(id); seen.add(id); }
- const extras=ans.filter(id=>!stepIds.has(id));
- const missing=[...stepIds].filter(id=>!ans.includes(id));
- const orderChecks=[]; const placed=new Set(); let firstBad=null;
-
- for(let idx=0; idx<ans.length; idx++){
-   const id = ans[idx];
-   if(!stepIds.has(id)){
-     orderChecks.push({id,ok:false,missingReq:[]});
-     if(!firstBad) firstBad={id,reason:'不要カード（正答に含まれない）を入れています。'};
-     continue;
-   }
-   const step = stepMap.get(id);
-   const req = (step.requires||[]);
-   const missReq = req.filter(r=>!placed.has(r));
-   let ok = (missReq.length===0);
-
-   // ★連続条件：immediateAfter があるカードは直前がそれでないとNG
-   if(ok && step.immediateAfter){
-     const prev = (idx>0) ? ans[idx-1] : null;
-     if(prev !== step.immediateAfter){
-       ok = false;
-       if(!firstBad) firstBad={id,reason:`連続条件：このカードの直前は ${step.immediateAfter} にしてください。`};
-     }
-   }
-
-   orderChecks.push({id,ok,missingReq:missReq});
-   if(!ok && !firstBad && missReq.length>0) firstBad={id,reason:`このカードの前に必要：${missReq.join(', ')}`};
-   placed.add(id);
- }
-
- const correctSet=extras.length===0 && missing.length===0 && dup.length===0;
- const correctOrder=correctSet && orderChecks.filter(x=>stepIds.has(x.id)).every(x=>x.ok);
- const total=currentExpandedSteps.length;
- const okCount=orderChecks.filter(x=>stepIds.has(x.id)&&x.ok).length;
- const progress=total?Math.round((okCount/total)*100):0;
- return {correctSet,correctOrder,missing,extras,dup,firstBad,progress,orderChecks};
+  const stepIds=new Set(currentExpandedSteps.map(s=>s.id));
+  const stepMap=new Map(currentExpandedSteps.map(s=>[s.id,s]));
+  const ans=answerCards.map(c=>c.id);
+  const extras=ans.filter(id=>!stepIds.has(id));
+  const missing=[...stepIds].filter(id=>!ans.includes(id));
+  const orderChecks=[]; const placed=new Set(); let firstBad=null;
+  for(let idx=0; idx<ans.length; idx++){
+    const id = ans[idx];
+    if(!stepIds.has(id)){
+      orderChecks.push({id,ok:false});
+      if(!firstBad) firstBad={id,reason:'不要カード（正答に含まれない）を入れています。'};
+      continue;
+    }
+    const step = stepMap.get(id);
+    const req = (step.requires||[]);
+    const missReq = req.filter(r=>!placed.has(r));
+    let ok = (missReq.length===0);
+    if(ok && step.immediateAfter){
+      const prev = (idx>0) ? ans[idx-1] : null;
+      if(prev !== step.immediateAfter){
+        ok = false;
+        if(!firstBad) firstBad={id,reason:`連続条件：このカードの直前は ${step.immediateAfter} にしてください。`};
+      }
+    }
+    orderChecks.push({id,ok});
+    if(!ok && !firstBad && missReq.length>0) firstBad={id,reason:`このカードの前に必要：${missReq.join(', ')}`};
+    placed.add(id);
+  }
+  const correctSet=extras.length===0 && missing.length===0;
+  const correctOrder=correctSet && orderChecks.filter(x=>stepIds.has(x.id)).every(x=>x.ok);
+  return {correctSet,correctOrder,missing,extras,firstBad};
 }
-function enableDrop(zoneEl,toZone){ 
- zoneEl.addEventListener('dragover',(e)=>{e.preventDefault();zoneEl.classList.add('dropHover');e.dataTransfer.dropEffect='move';}); 
- zoneEl.addEventListener('dragleave',()=>zoneEl.classList.remove('dropHover')); 
- zoneEl.addEventListener('drop',(e)=>{e.preventDefault();zoneEl.classList.remove('dropHover');try{const p=JSON.parse(e.dataTransfer.getData('text/plain'));moveCard(p.id,toZone);}catch(_){}}); 
-} 
+function enableDrop(zoneEl,toZone){
+  zoneEl.addEventListener('dragover',(e)=>{e.preventDefault();zoneEl.classList.add('dropHover');e.dataTransfer.dropEffect='move';});
+  zoneEl.addEventListener('dragleave',()=>zoneEl.classList.remove('dropHover'));
+  zoneEl.addEventListener('drop',(e)=>{e.preventDefault();zoneEl.classList.remove('dropHover');try{const p=JSON.parse(e.dataTransfer.getData('text/plain'));moveCard(p.id,toZone);}catch(_){}} );
+}
 function loadProblem(problemId){
- current=PROBLEMS.find(p=>p.id===problemId)||PROBLEMS[0];
- promptEl.textContent=current.prompt;
-
- // 正答ステップを細分化（S1a/S1b…）
- currentExpandedSteps = expandSteps(current.steps);
-
- const cards=[];
- currentExpandedSteps.forEach(s=>cards.push({
-   id:s.id,
-   kind:'step',
-   label:s.label,
-   text:s.text,
-   requires:s.requires||[],
-   zone:'pool'
- }));
-
- poolCards=shuffle(cards); answerCards=[];
- solutionWrap.style.display='none'; solutionWrap.innerHTML=''; clearMarking();
- setStatus('', 'カードを並べて「判定する」を押してください。');
- render();
+  current=PROBLEMS.find(p=>p.id===problemId) || PROBLEMS[0];
+  promptEl.textContent=current.prompt;
+  currentExpandedSteps = expandSteps(current.steps);
+  const cards=[];
+  currentExpandedSteps.forEach(s=>cards.push({ id:s.id, label:s.label, text:s.text, zone:'pool' }));
+  poolCards=shuffle(cards); answerCards=[];
+  solutionWrap.style.display='none'; solutionWrap.innerHTML=''; clearMarking();
+  setStatus('', 'カードを並べて「判定する」を押してください。');
+  render();
 }
-function populateSelect(){ 
- sel.innerHTML=''; 
- PROBLEMS.forEach(p=>{const opt=document.createElement('option');opt.value=p.id;opt.textContent=p.title;sel.appendChild(opt);}); 
-} 
-sel.addEventListener('change',()=>loadProblem(sel.value)); 
-resetBtn.addEventListener('click',()=>loadProblem(sel.value)); 
-answerBtn.addEventListener('click',()=>{ 
- clearMarking(); 
- // 学習用：おすすめの並び（解答）を表示する（カードは自動配置しない） 
- setStatus('warn','解答（おすすめの並び）を表示しました。自力で並べてから「判定する」で確認できます。'); 
- solutionWrap.style.display='block'; 
- solutionWrap.innerHTML=''; 
- solutionWrap.appendChild(buildSolutionBox()); 
- typesetMath(); 
-}); 
-checkBtn.addEventListener('click',()=>{ 
- clearMarking(); 
- const r=evaluate(); 
- if(r.correctOrder){ 
- setStatus('ok','完璧！'); 
- solutionWrap.style.display='block'; solutionWrap.innerHTML=''; 
- solutionWrap.appendChild(buildSolutionBox()); 
- typesetMath(); 
- } else if(r.correctSet){ 
- setStatus('warn',`カードはそろっています。順序を調整（進捗 ${r.progress}%）。`); 
- if(r.firstBad) msg.textContent=`順序ヒント：${r.firstBad.reason}`; 
- solutionWrap.style.display='none'; 
- } else { 
- if(r.extras.length>0) setStatus('ng',`誤カードが混ざっています（${r.extras.length}枚）。`); 
- else if(r.missing.length>0) setStatus('ng',`正解カードが足りません（${r.missing.length}枚）。`); 
- else setStatus('ng','まだ整っていません。'); 
- solutionWrap.style.display='none'; 
- } 
-}); 
-enableDrop(poolZone,'pool'); 
-enableDrop(answerZone,'answer'); 
-populateSelect(); 
-sel.value='P11'; 
-loadProblem('P11'); 
-</script> 
-</body> 
+function populateSelect(){
+  sel.innerHTML='';
+  PROBLEMS.forEach(p=>{const opt=document.createElement('option');opt.value=p.id;opt.textContent=p.title;sel.appendChild(opt);});
+}
+sel.addEventListener('change',()=>loadProblem(sel.value));
+resetBtn.addEventListener('click',()=>loadProblem(sel.value));
+answerBtn.addEventListener('click',()=>{
+  clearMarking();
+  setStatus('warn','解答（おすすめの並び）を表示しました。自力で並べてから「判定する」で確認できます。');
+  solutionWrap.style.display='block';
+  solutionWrap.innerHTML='';
+  solutionWrap.appendChild(buildSolutionBox());
+  typesetMath();
+});
+checkBtn.addEventListener('click',()=>{
+  clearMarking();
+  const r=evaluate();
+  if(r.correctOrder){
+    setStatus('ok','完璧！');
+    solutionWrap.style.display='block'; solutionWrap.innerHTML='';
+    solutionWrap.appendChild(buildSolutionBox());
+    typesetMath();
+  } else if(r.correctSet){
+    setStatus('warn','カードはそろっています。順序を調整してください。');
+    if(r.firstBad) msg.textContent=`順序ヒント：${r.firstBad.reason}`;
+    solutionWrap.style.display='none';
+  } else {
+    if(r.extras.length>0) setStatus('ng',`誤カードが混ざっています（${r.extras.length}枚）。`);
+    else if(r.missing.length>0) setStatus('ng',`正解カードが足りません（${r.missing.length}枚）。`);
+    else setStatus('ng','まだ整っていません。');
+    solutionWrap.style.display='none';
+  }
+});
+enableDrop(poolZone,'pool');
+enableDrop(answerZone,'answer');
+
+// 追加生成→セレクト反映
+generateP23toP100();
+populateSelect();
+sel.value='P23';
+loadProblem('P23');
+</script>
+</body>
 </html>
