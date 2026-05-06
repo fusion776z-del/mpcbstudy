@@ -271,8 +271,51 @@ const PROBLEMS = [
   {id:"s3", text:"観測値の方が大きい→＋の零点誤差 \\( +0.03\\,\\mathrm{mm}\\)", requires:["s2"]}
  ]}
 ];
+
+// --- 追加：正答カードを細分化（S1a/S1b…）し、連続性も判定する ---
+function splitOneStepText(stepText){
+  const t = String(stepText || '').trim();
+  const idx = t.indexOf('：');
+  if(idx>0){
+    const head = t.slice(0, idx).trim();
+    const body = t.slice(idx+1).trim();
+    let a = head;
+    if(!/を求める$/.test(a)) a = a + 'を求める';
+    if(!/[。．]$/.test(a)) a = a + '。';
+    return [a, body];
+  }
+  return [t];
+}
+
+function expandSteps(originalSteps){
+  const meta=[];
+  const lastOf=new Map();
+  const letters='abcdefghijklmnopqrstuvwxyz';
+  let stepNo=1;
+  for(const s of originalSteps){
+    const parts = splitOneStepText(s.text);
+    const ids = parts.map((_,i)=> parts.length===1 ? s.id : `${s.id}${letters[i]}`);
+    const labels = parts.map((_,i)=> parts.length===1 ? `S${stepNo}` : `S${stepNo}${letters[i]}`);
+    meta.push({orig:s, parts, ids, labels});
+    lastOf.set(s.id, ids[ids.length-1]);
+    stepNo++;
+  }
+  const expanded=[];
+  for(const m of meta){
+    const {orig, parts, ids, labels} = m;
+    for(let i=0;i<parts.length;i++){
+      const id = ids[i];
+      const immediateAfter = (i>0) ? ids[i-1] : null;
+      const baseReq = (orig.requires||[]).map(r => lastOf.get(r) || r);
+      const req = immediateAfter ? Array.from(new Set([...baseReq, immediateAfter])) : baseReq;
+      expanded.push({id, label: labels[i], text: parts[i], requires: req, immediateAfter});
+    }
+  }
+  return expanded;
+}
+
 // --- アプリ共通 ---
-let current=null, poolCards=[], answerCards=[];
+let current=null, currentExpandedSteps=[], poolCards=[], answerCards=[];
 const sel=document.getElementById('problemSelect');
 const promptEl=document.getElementById('prompt');
 const poolEl=document.getElementById('pool');
@@ -329,42 +372,50 @@ function clearMarking(){[...document.querySelectorAll('.cardItem')].forEach(el=>
 function markOrderFeedback(result){const els=[...answerEl.querySelectorAll('.cardItem')];const byId=new Map();els.forEach(el=>byId.set(el.dataset.cardId,el));result.orderChecks.forEach(ch=>{const el=byId.get(ch.id); if(!el) return; el.classList.add(ch.ok?'valid':'invalid');});}
 
 function buildSolutionBox(){
-  const div=document.createElement('div'); div.className='solution';
-  div.innerHTML='<div style="color:#aab2dd;font-size:12px">参考：おすすめの並び（依存関係を満たせば別の並びでもOK）</div>';
-  const ol=document.createElement('ol');
-  current.steps.forEach(s=>{const li=document.createElement('li'); li.textContent=s.text; ol.appendChild(li);});
-  div.appendChild(ol); return div;
+ const div=document.createElement('div'); div.className='solution';
+ const ol=document.createElement('ol');
+ currentExpandedSteps.forEach(s=>{const li=document.createElement('li'); li.textContent=s.text; ol.appendChild(li);});
+ div.appendChild(ol); return div;
 }
-
 function evaluate(){
-  const stepIds=new Set(current.steps.map(s=>s.id));
-  const stepMap=new Map(current.steps.map(s=>[s.id,s]));
-  const ans=answerCards.map(c=>c.id);
-  const seen=new Set(); const dup=[]; for(const id of ans){ if(seen.has(id)) dup.push(id); seen.add(id); }
-  const extras=ans.filter(id=>!stepIds.has(id));
-  const missing=[...stepIds].filter(id=>!ans.includes(id));
-  const orderChecks=[]; const placed=new Set(); let firstBad=null;
-  for(const id of ans){
-    if(!stepIds.has(id)){
-      orderChecks.push({id,ok:false,missingReq:[]});
-      if(!firstBad) firstBad={id,reason:'不要カード（誤カード）を入れています。'};
-      continue;
-    }
-    const req=(stepMap.get(id).requires||[]);
-    const missReq=req.filter(r=>!placed.has(r));
-    const ok=missReq.length===0;
-    orderChecks.push({id,ok,missingReq:missReq});
-    if(!ok && !firstBad) firstBad={id,reason:`このカードの前に必要：${missReq.join(', ')}`};
-    placed.add(id);
-  }
-  const correctSet=extras.length===0 && missing.length===0 && dup.length===0;
-  const correctOrder=correctSet && orderChecks.filter(x=>stepIds.has(x.id)).every(x=>x.ok);
-  const total=current.steps.length;
-  const okCount=orderChecks.filter(x=>stepIds.has(x.id)&&x.ok).length;
-  const progress=total?Math.round((okCount/total)*100):0;
-  return {correctSet,correctOrder,missing,extras,dup,firstBad,progress,orderChecks};
-}
+ const stepIds=new Set(currentExpandedSteps.map(s=>s.id));
+ const stepMap=new Map(currentExpandedSteps.map(s=>[s.id,s]));
+ const ans=answerCards.map(c=>c.id);
+ const seen=new Set(); const dup=[]; for(const id of ans){ if(seen.has(id)) dup.push(id); seen.add(id); }
+ const extras=ans.filter(id=>!stepIds.has(id));
+ const missing=[...stepIds].filter(id=>!ans.includes(id));
+ const orderChecks=[]; const placed=new Set(); let firstBad=null;
 
+ for(let idx=0; idx<ans.length; idx++){
+   const id = ans[idx];
+   if(!stepIds.has(id)){
+     orderChecks.push({id,ok:false,missingReq:[]});
+     if(!firstBad) firstBad={id,reason:'不要カード（正答に含まれない）を入れています。'};
+     continue;
+   }
+   const step = stepMap.get(id);
+   const req = (step.requires||[]);
+   const missReq = req.filter(r=>!placed.has(r));
+   let ok = (missReq.length===0);
+   if(ok && step.immediateAfter){
+     const prev = (idx>0) ? ans[idx-1] : null;
+     if(prev !== step.immediateAfter){
+       ok = false;
+       if(!firstBad) firstBad={id,reason:`連続条件：このカードの直前は ${step.immediateAfter} にしてください。`};
+     }
+   }
+   orderChecks.push({id,ok,missingReq:missReq});
+   if(!ok && !firstBad && missReq.length>0) firstBad={id,reason:`このカードの前に必要：${missReq.join(', ')}`};
+   placed.add(id);
+ }
+
+ const correctSet=extras.length===0 && missing.length===0 && dup.length===0;
+ const correctOrder=correctSet && orderChecks.filter(x=>stepIds.has(x.id)).every(x=>x.ok);
+ const total=currentExpandedSteps.length;
+ const okCount=orderChecks.filter(x=>stepIds.has(x.id)&&x.ok).length;
+ const progress=total?Math.round((okCount/total)*100):0;
+ return {correctSet,correctOrder,missing,extras,dup,firstBad,progress,orderChecks};
+}
 function enableDrop(zoneEl,toZone){
   zoneEl.addEventListener('dragover',(e)=>{e.preventDefault();zoneEl.classList.add('dropHover');e.dataTransfer.dropEffect='move';});
   zoneEl.addEventListener('dragleave',()=>zoneEl.classList.remove('dropHover'));
@@ -372,16 +423,26 @@ function enableDrop(zoneEl,toZone){
 }
 
 function loadProblem(problemId){
-  current=PROBLEMS.find(p=>p.id===problemId)||PROBLEMS[0];
-  promptEl.innerHTML = escapeHTML(current.prompt).replace(/\n/g,'<br>');
-  const cards=[]; let n=1;
-  current.steps.forEach(s=>cards.push({id:s.id,kind:'step',label:`S${n++}`,text:s.text,requires:s.requires||[],zone:'pool'}));
-poolCards=shuffle(cards); answerCards=[];
-  solutionWrap.style.display='none'; solutionWrap.innerHTML=''; clearMarking();
-  setStatus('', 'カードを並べて「判定する」を押してください。');
-  render();
-}
+ current=PROBLEMS.find(p=>p.id===problemId)||PROBLEMS[0];
+ promptEl.innerHTML = escapeHTML(current.prompt).replaceAll('\r\n','\n').replaceAll('\n','<br>');
 
+ currentExpandedSteps = expandSteps(current.steps);
+
+ const cards=[];
+ currentExpandedSteps.forEach(s=>cards.push({
+   id:s.id,
+   kind:'step',
+   label:s.label,
+   text:s.text,
+   requires:s.requires||[],
+   zone:'pool'
+ }));
+
+ poolCards=shuffle(cards); answerCards=[];
+ solutionWrap.style.display='none'; solutionWrap.innerHTML=''; clearMarking();
+ setStatus('', 'カードを並べて「判定する」を押してください。');
+ render();
+}
 function populateSelect(){
   sel.innerHTML='';
   PROBLEMS.forEach(p=>{const opt=document.createElement('option');opt.value=p.id;opt.textContent=p.title;sel.appendChild(opt);});
