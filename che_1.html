@@ -151,125 +151,145 @@
 <script>
 // 20問（モル計算：質量⇄mol⇄粒子数／気体／溶液／反応量）
 const PROBLEMS = [
-{ id:"P1", title:"P1 基本：質量→mol", prompt:"炭素 C を 12g 用意した。物質量は何 mol か。\n（(mathrm{C}) のモル質量は (12,mathrm{g/mol})）",
+{ id:"P1", title:"P1 基本：質量→mol", prompt:"炭素 C を 12 g 用意した。物質量は何 mol か。\n（C のモル質量は 12 g/mol）",
  steps:[
-  {id:"s1", text:"式：n=m/M", requires:[]},
-  {id:"s2", text:"代入：n=12/12=1mol", requires:["s1"]},
-  {id:"s3", text:"答：1mol", requires:["s2"]}
+  {id:"g0", text:"ガイド：質量 m とモル質量 M が与えられているので、物質量 n は n=m/M を使って求める。", requires:[]},
+ {id:"s1", text:"式：n=m/M", requires:[]},
+  {id:"s2", text:"代入：n=12/12=1 mol", requires:["s1"]},
+  {id:"s3", text:"答：1 mol", requires:["s2"]}
  ]},
-{ id:"P2", title:"P2 基本：mol→質量", prompt:"水 H₂O が 0.50mol ある。質量 m を求めよ。\n（(mathrm{H₂O}) のモル質量は (18,mathrm{g/mol})）",
+{ id:"P2", title:"P2 基本：mol→質量", prompt:"水 H₂O が 0.50 mol ある。質量 m を求めよ。\n（H₂O のモル質量は 18 g/mol）",
  steps:[
-  {id:"s1", text:"式：m=nM", requires:[]},
-  {id:"s2", text:"代入：m=0.50×18=9.0g", requires:["s1"]},
-  {id:"s3", text:"答：9.0g", requires:["s2"]}
+  {id:"g0", text:"ガイド：物質量 n とモル質量 M が与えられているので、質量 m は m=nM を使って求める。", requires:[]},
+ {id:"s1", text:"式：m=nM", requires:[]},
+  {id:"s2", text:"代入：m=0.50×18=9.0 g", requires:["s1"]},
+  {id:"s3", text:"答：9.0 g", requires:["s2"]}
  ]},
-{ id:"P3", title:"P3 粒子数：mol→分子数", prompt:"酸素分子 O₂ が 0.20mol ある。分子数 N を求めよ。\n（(N_A=6.0×10²³mathrm{mol⁻¹}）",
+{ id:"P3", title:"P3 粒子数：mol→分子数", prompt:"酸素分子 O₂ が 0.20 mol ある。分子数 N を求めよ。\n（N_A=6.0×10²³mathrm{mol⁻¹}）",
  steps:[
-  {id:"s1", text:"式：N=nN_A", requires:[]},
+  {id:"g0", text:"ガイド：物質量 n から粒子数 N を出すときは、N=nN_A（アボガドロ定数）を使う。", requires:[]},
+ {id:"s1", text:"式：N=nN_A", requires:[]},
   {id:"s2", text:"代入：N=0.20×6.0×10²³=1.2×10²³ 個", requires:["s1"]},
   {id:"s3", text:"答：1.2×10²³ 個", requires:["s2"]}
  ]},
-{ id:"P4", title:"P4 粒子数：個数→mol", prompt:"ナトリウム原子が 3.0×10²³ 個ある。物質量 n を求めよ。\n（(N_A=6.0×10²³mathrm{mol⁻¹}）",
+{ id:"P4", title:"P4 粒子数：個数→mol", prompt:"ナトリウム原子が 3.0×10²³ 個ある。物質量 n を求めよ。\n（N_A=6.0×10²³mathrm{mol⁻¹}）",
  steps:[
-  {id:"s1", text:"式：n=N/N_A", requires:[]},
-  {id:"s2", text:"代入：n=frac{3.0×10²³}{6.0×10²³}=0.50mol", requires:["s1"]},
-  {id:"s3", text:"答：0.50mol", requires:["s2"]}
+  {id:"g0", text:"ガイド：粒子数 N から物質量 n を出すときは、n=N/N_A を使う。", requires:[]},
+ {id:"s1", text:"式：n=N/N_A", requires:[]},
+  {id:"s2", text:"代入：n=3.0×10²³/6.0×10²³=0.50 mol", requires:["s1"]},
+  {id:"s3", text:"答：0.50 mol", requires:["s2"]}
  ]},
-{ id:"P5", title:"P5 モル質量：化学式から", prompt:"硫酸 H₂SO₄ のモル質量 M を求めよ。\n（(H=1,\\ S=32,\\ O=16）",
+{ id:"P5", title:"P5 モル質量：化学式から", prompt:"硫酸 H₂SO₄ のモル質量 M を求めよ。\n（H=1,\\ S=32,\\ O=16）",
  steps:[
-  {id:"s1", text:"合計：M=2×1+1×32+4×16", requires:[]},
-  {id:"s2", text:"計算：M=2+32+64=98g/mol", requires:["s1"]},
-  {id:"s3", text:"答：98g/mol", requires:["s2"]}
+  {id:"g0", text:"ガイド：化学式の各原子量を足し合わせて、モル質量 M（g/mol）を求める。", requires:[]},
+ {id:"s1", text:"合計：M=2×1+1×32+4×16", requires:[]},
+  {id:"s2", text:"計算：M=2+32+64=98 g/mol", requires:["s1"]},
+  {id:"s3", text:"答：98 g/mol", requires:["s2"]}
  ]},
-{ id:"P6", title:"P6 質量→mol：NaCl", prompt:"食塩 NaCl を 11.7g 量り取った。物質量を求めよ。\n（(Na=23,\\ Cl=35.5）",
+{ id:"P6", title:"P6 質量→mol：NaCl", prompt:"食塩 NaCl を 11.7 g 量り取った。物質量を求めよ。\n（Na=23,\\ Cl=35.5）",
  steps:[
-  {id:"s1", text:"モル質量：M=23+35.5=58.5g/mol", requires:[]},
+  {id:"g0", text:"ガイド：まず化学式からモル質量 M を求め、次に n=m/M で物質量を求める。", requires:[]},
+ {id:"s1", text:"モル質量：M=23+35.5=58.5 g/mol", requires:[]},
   {id:"s2", text:"式：n=m/M=11.7/58.5", requires:["s1"]},
-  {id:"s3", text:"計算：n=0.20mol", requires:["s2"]}
+  {id:"s3", text:"計算：n=0.20 mol", requires:["s2"]}
  ]},
-{ id:"P7", title:"P7 気体：mol→体積（標準状態）", prompt:"標準状態で二酸化炭素 CO₂ が 0.50mol ある。体積 V を求めよ。\n（(1mol=22.4L）",
+{ id:"P7", title:"P7 気体：mol→体積（標準状態）", prompt:"標準状態で二酸化炭素 CO₂ が 0.50 mol ある。体積 V を求めよ。\n（1 mol=22.4 L）",
  steps:[
-  {id:"s1", text:"関係：V=22.4nL", requires:[]},
-  {id:"s2", text:"代入：V=22.4×0.50=11.2L", requires:["s1"]},
-  {id:"s3", text:"答：11.2L", requires:["s2"]}
+  {id:"g0", text:"ガイド：標準状態の気体は 1 mol = 22.4 L を使う。n が分かれば V=22.4 n。", requires:[]},
+ {id:"s1", text:"関係：V=22.4nL", requires:[]},
+  {id:"s2", text:"代入：V=22.4×0.50=11.2 L", requires:["s1"]},
+  {id:"s3", text:"答：11.2 L", requires:["s2"]}
  ]},
-{ id:"P8", title:"P8 気体：体積→mol（標準状態）", prompt:"標準状態で窒素 N₂ が 5.60L ある。物質量を求めよ。\n（(1mol=22.4L）",
+{ id:"P8", title:"P8 気体：体積→mol（標準状態）", prompt:"標準状態で窒素 N₂ が 5.60 L ある。物質量を求めよ。\n（1 mol=22.4 L）",
  steps:[
-  {id:"s1", text:"式：n=V/22.4", requires:[]},
-  {id:"s2", text:"代入：n=5.60/22.4=0.250mol", requires:["s1"]},
-  {id:"s3", text:"答：0.250mol", requires:["s2"]}
+  {id:"g0", text:"ガイド：標準状態の気体は 1 mol = 22.4 L を使う。V が分かれば n=V/22.4。", requires:[]},
+ {id:"s1", text:"式：n=V/22.4", requires:[]},
+  {id:"s2", text:"代入：n=5.60/22.4=0.250 mol", requires:["s1"]},
+  {id:"s3", text:"答：0.250 mol", requires:["s2"]}
  ]},
-{ id:"P9", title:"P9 溶液：モル濃度", prompt:"(NaOH を 0.20mol 溶かして溶液を 0.50L にした。モル濃度 c を求めよ。",
+{ id:"P9", title:"P9 溶液：モル濃度", prompt:"(NaOH を 0.20 mol 溶かして溶液を 0.50 L にした。モル濃度 c を求めよ。",
  steps:[
-  {id:"s1", text:"定義：c=n/V", requires:[]},
-  {id:"s2", text:"代入：c=0.20/0.50=0.40mol/L", requires:["s1"]},
-  {id:"s3", text:"答：0.40mol/L", requires:["s2"]}
+  {id:"g0", text:"ガイド：モル濃度 c は c=n/V（V は L）。n と V が与えられているので c=n/V。", requires:[]},
+ {id:"s1", text:"定義：c=n/V", requires:[]},
+  {id:"s2", text:"代入：c=0.20/0.50=0.40 mol/L", requires:["s1"]},
+  {id:"s3", text:"答：0.40 mol/L", requires:["s2"]}
  ]},
-{ id:"P10", title:"P10 溶液：濃度と体積→mol", prompt:"(0.50mol/L の塩酸を 200mL 取った。含まれる HCl の物質量を求めよ。",
+{ id:"P10", title:"P10 溶液：濃度と体積→mol", prompt:"0.50 mol/L の塩酸を 200 mL 取った。含まれる HCl の物質量を求めよ。",
  steps:[
-  {id:"s1", text:"単位換算：200mL=0.200L", requires:[]},
+  {id:"g0", text:"ガイド：モル濃度 c と体積 V（L）が与えられたら、溶質の物質量は n=cV。まず mL→L に直す。", requires:[]},
+ {id:"s1", text:"単位換算：200 mL=0.200 L", requires:[]},
   {id:"s2", text:"式：n=cV", requires:["s1"]},
-  {id:"s3", text:"代入：n=0.50×0.200=0.100mol", requires:["s2"]}
+  {id:"s3", text:"代入：n=0.50×0.200=0.100 mol", requires:["s2"]}
  ]},
-{ id:"P11", title:"P11 希釈：mol保存", prompt:"(2.0mol/L の NaCl 水溶液を 50mL 取り、水を加えて 200mL にした。希釈後のモル濃度を求めよ。",
+{ id:"P11", title:"P11 希釈：mol保存", prompt:"2.0 mol/L の NaCl 水溶液を 50 mL 取り、水を加えて 200 mL にした。希釈後のモル濃度を求めよ。",
  steps:[
-  {id:"s1", text:"溶質のmolは保存：c₁V₁=c₂V₂", requires:[]},
-  {id:"s2", text:"体積をLへ：V₁=0.050L,\\ V₂=0.200L", requires:["s1"]},
-  {id:"s3", text:"計算：c₂=2.0×0.050/0.200=0.50mol/L", requires:["s2"]}
+  {id:"g0", text:"ガイド：希釈では溶質の物質量が変わらないので c1V1=c2V2 を使う（体積は L）。", requires:[]},
+ {id:"s1", text:"溶質のmolは保存：c₁V₁=c₂V₂", requires:[]},
+  {id:"s2", text:"体積をLへ：V₁=0.050 L,\\ V₂=0.200 L", requires:["s1"]},
+  {id:"s3", text:"計算：c₂=2.0×0.050/0.200=0.50 mol/L", requires:["s2"]}
  ]},
-{ id:"P12", title:"P12 溶液作成：必要質量", prompt:"(0.30mol/L の硫酸ナトリウム Na₂SO₄ 水溶液を 0.40L 作る。必要な溶質の質量を求めよ。\n（(Na=23,S=32,O=16）",
+{ id:"P12", title:"P12 溶液作成：必要質量", prompt:"0.30 mol/L の硫酸ナトリウム Na₂SO₄ 水溶液を 0.40 L 作る。必要な溶質の質量を求めよ。\n（Na=23 S=32 O=16）",
  steps:[
-  {id:"s1", text:"物質量：n=cV=0.30×0.40=0.12mol", requires:[]},
-  {id:"s2", text:"モル質量：M=2×23+32+4×16=142g/mol", requires:["s1"]},
-  {id:"s3", text:"質量：m=nM=0.12×142=17.0g", requires:["s2"]}
+  {id:"g0", text:"ガイド：溶液作成は、まず n=cV で必要な物質量を出し、次に m=nM で必要質量を出す。", requires:[]},
+ {id:"s1", text:"物質量：n=cV=0.30×0.40=0.12 mol", requires:[]},
+  {id:"s2", text:"モル質量：M=2×23+32+4×16=142 g/mol", requires:["s1"]},
+  {id:"s3", text:"質量：m=nM=0.12×142=17.0 g", requires:["s2"]}
  ]},
-{ id:"P13", title:"P13 混合：同じ溶質の濃度", prompt:"(0.20mol/L の KCl 100mL と、(0.50mol/L の KCl 200mL を混ぜた。混合後のモル濃度を求めよ。",
+{ id:"P13", title:"P13 混合：同じ溶質の濃度", prompt:"0.20 mol/L の KCl 100 mL と、0.50 mol/L の KCl 200 mL を混ぜた。混合後のモル濃度を求めよ。",
  steps:[
-  {id:"s1", text:"各mol：n₁=0.20×0.100=0.020, n₂=0.50×0.200=0.100", requires:[]},
-  {id:"s2", text:"全mol：n=0.020+0.100=0.120mol", requires:["s1"]},
-  {id:"s3", text:"全体積：V=0.100+0.200=0.300L → c=0.120/0.300=0.40mol/L", requires:["s2"]}
+  {id:"g0", text:"ガイド：混合はそれぞれ n=cV を求めて足し、全体積で割って c=n/V を出す（体積は L）。", requires:[]},
+ {id:"s1", text:"各mol：n₁=0.20×0.100=0.020, n₂=0.50×0.200=0.100", requires:[]},
+  {id:"s2", text:"全mol：n=0.020+0.100=0.120 mol", requires:["s1"]},
+  {id:"s3", text:"全体積：V=0.100+0.200=0.300 L → c=0.120/0.300=0.40 mol/L", requires:["s2"]}
  ]},
-{ id:"P14", title:"P14 質量%：求める", prompt:"食塩 5.0g を水 95.0g に溶かした。質量パーセント濃度を求めよ。",
+{ id:"P14", title:"P14 質量%：求める", prompt:"食塩 5.0 g を水 95.0 g に溶かした。質量パーセント濃度を求めよ。",
  steps:[
-  {id:"s1", text:"溶液の質量：m_{sol}=5.0+95.0=100.0g", requires:[]},
+  {id:"g0", text:"ガイド：質量％は 溶質/溶液×100。溶液質量＝溶質＋溶媒 を先に求める。", requires:[]},
+ {id:"s1", text:"溶液の質量：m_{sol}=5.0+95.0=100.0 g", requires:[]},
   {id:"s2", text:"質量%：w=5.0/100.0×100=5.0\\%", requires:["s1"]},
   {id:"s3", text:"答：5.0\\%", requires:["s2"]}
  ]},
-{ id:"P15", title:"P15 質量%：溶質質量", prompt:"(10.0\\% の砂糖水 250g に含まれる砂糖の質量を求めよ。",
+{ id:"P15", title:"P15 質量%：溶質質量", prompt:"(10.0\\% の砂糖水 250 g に含まれる砂糖の質量を求めよ。",
  steps:[
-  {id:"s1", text:"定義：w=frac{m_{solute}}{m_{solution}}×100", requires:[]},
+  {id:"g0", text:"ガイド：質量％ w から溶質質量を出すには、m_solute=(w/100)×m_solution を使う。", requires:[]},
+ {id:"s1", text:"定義：w=frac{m_{solute}}{m_{solution}}×100", requires:[]},
   {id:"s2", text:"変形：m_{solute}=w/100m_{solution}", requires:["s1"]},
-  {id:"s3", text:"代入：m_{solute}=0.10×250=25.0g", requires:["s2"]}
+  {id:"s3", text:"代入：m_{solute}=0.10×250=25.0 g", requires:["s2"]}
  ]},
-{ id:"P16", title:"P16 反応量：H2生成", prompt:"亜鉛 Zn 6.5g を過剰の塩酸と反応させる。(Zn+2HCl→ ZnCl₂+H₂ のとき、発生する H₂ の物質量を求めよ。\n（(Zn=65）",
+{ id:"P16", title:"P16 反応量：H2生成", prompt:"亜鉛 Zn 6.5 g を過剰の塩酸と反応させる。Zn+2HCl→ ZnCl₂+H₂ のとき、発生する H₂ の物質量を求めよ。\n（Zn=65）",
  steps:[
-  {id:"s1", text:"Znのmol：n(Zn)=6.5/65=0.10mol", requires:[]},
+  {id:"g0", text:"ガイド：反応量は「まずモルに直す→反応式の係数比で対応→必要な物質量」を出す。", requires:[]},
+ {id:"s1", text:"Znのmol：n(Zn)=6.5/65=0.10 mol", requires:[]},
   {id:"s2", text:"係数比：Zn:H₂=1:1", requires:["s1"]},
-  {id:"s3", text:"よってn(H₂)=0.10mol", requires:["s2"]}
+  {id:"s3", text:"よってn(H₂)=0.10 mol", requires:["s2"]}
  ]},
-{ id:"P17", title:"P17 反応量：必要O2", prompt:"メタン CH₄ 0.50mol を完全燃焼させる。(CH₄+2O₂→ CO₂+2H₂O より必要な O₂ の物質量を求めよ。",
+{ id:"P17", title:"P17 反応量：必要O2", prompt:"メタン CH₄ 0.50 mol を完全燃焼させる。(CH₄+2O₂→ CO₂+2H₂O より必要な O₂ の物質量を求めよ。",
  steps:[
-  {id:"s1", text:"係数比：CH₄:O₂=1:2", requires:[]},
-  {id:"s2", text:"計算：n(O₂)=2×0.50=1.0mol", requires:["s1"]},
-  {id:"s3", text:"答：1.0mol", requires:["s2"]}
+  {id:"g0", text:"ガイド：反応量は係数比で決まる。与えられた CH₄ の物質量に係数比（1:2）を掛ける。", requires:[]},
+ {id:"s1", text:"係数比：CH₄:O₂=1:2", requires:[]},
+  {id:"s2", text:"計算：n(O₂)=2×0.50=1.0 mol", requires:["s1"]},
+  {id:"s3", text:"答：1.0 mol", requires:["s2"]}
  ]},
-{ id:"P18", title:"P18 結晶水：水の質量", prompt:"硫酸銅(II)五水和物 CuSO₄・5H₂O 25.0g に含まれる結晶水 H₂O の質量を求めよ。\n（(Cu=64,S=32,O=16,H=1）",
+{ id:"P18", title:"P18 結晶水：水の質量", prompt:"硫酸銅(II)五水和物 CuSO₄・5H₂O 25.0 g に含まれる結晶水 H₂O の質量を求めよ。\n（Cu=64 S=32 O=16 H=1）",
  steps:[
-  {id:"s1", text:"モル質量：M=(64+32+4×16)+5×18=160+90=250g/mol", requires:[]},
-  {id:"s2", text:"物質量：n=25.0/250=0.100mol", requires:["s1"]},
-  {id:"s3", text:"水は5倍：n(H₂O)=0.500mol → m=0.500×18=9.0g", requires:["s2"]}
+  {id:"g0", text:"ガイド：結晶水は 1 式量に含まれる水の個数に注目。まず全体をモルにし、水のモル→質量へ。", requires:[]},
+ {id:"s1", text:"モル質量：M=(64+32+4×16)+5×18=160+90=250 g/mol", requires:[]},
+  {id:"s2", text:"物質量：n=25.0/250=0.100 mol", requires:["s1"]},
+  {id:"s3", text:"水は5倍：n(H₂O)=0.500 mol → m=0.500×18=9.0 g", requires:["s2"]}
  ]},
-{ id:"P19", title:"P19 原子数：O原子の個数", prompt:"炭酸カルシウム CaCO₃ が 0.10mol ある。含まれる酸素原子の個数を求めよ。\n（(N_A=6.0×10²³mathrm{mol⁻¹}）",
+{ id:"P19", title:"P19 原子数：O原子の個数", prompt:"炭酸カルシウム CaCO₃ が 0.10 mol ある。含まれる酸素原子の個数を求めよ。\n（N_A=6.0×10²³mathrm{mol⁻¹}）",
  steps:[
-  {id:"s1", text:"1式量にOは3個 → O原子のmol：n(O)=3×0.10=0.30mol", requires:[]},
+  {id:"g0", text:"ガイド：原子数は「1 式量あたりの原子個数×物質量」で原子のモルを出し、N=nN_A で個数へ。", requires:[]},
+ {id:"s1", text:"1式量にOは3個 → O原子のmol：n(O)=3×0.10=0.30 mol", requires:[]},
   {id:"s2", text:"個数：N=0.30×6.0×10²³=1.8×10²³ 個", requires:["s1"]},
   {id:"s3", text:"答：1.8×10²³ 個", requires:["s2"]}
  ]},
-{ id:"P20", title:"P20 気体：生成体積（分解反応）", prompt:"炭酸カルシウム CaCO₃ 10.0g を加熱分解する。(CaCO₃→ CaO+CO₂ のとき発生する CO₂ の標準状態での体積を求めよ。\n（(Ca=40,C=12,O=16、(1mol=22.4L）",
+{ id:"P20", title:"P20 気体：生成体積（分解反応）", prompt:"炭酸カルシウム CaCO₃ 10.0 g を加熱分解する。CaCO₃→ CaO+CO₂ のとき発生する CO₂ の標準状態での体積を求めよ。\n（Ca=40 C=12 O=16、1 mol=22.4 L）",
  steps:[
-  {id:"s1", text:"モル質量：M=40+12+3×16=100g/mol", requires:[]},
-  {id:"s2", text:"物質量：n(CaCO₃)=10.0/100=0.100mol", requires:["s1"]},
-  {id:"s3", text:"係数比1:1 → n(CO₂)=0.100mol → V=22.4×0.100=2.24L", requires:["s2"]}
+  {id:"g0", text:"ガイド：分解反応は「モルに直す→係数比→標準状態なら 22.4 L/mol」で体積へ。", requires:[]},
+ {id:"s1", text:"モル質量：M=40+12+3×16=100 g/mol", requires:[]},
+  {id:"s2", text:"物質量：n(CaCO₃)=10.0/100=0.100 mol", requires:["s1"]},
+  {id:"s3", text:"係数比1:1 → n(CO₂)=0.100 mol → V=22.4×0.100=2.24 L", requires:["s2"]}
  ]}
 ];
 // --- アプリ共通 ---
