@@ -1,0 +1,467 @@
+<!doctype html> 
+<html lang="ja"> 
+<head> 
+ <meta charset="utf-8" /> 
+ <meta name="viewport" content="width=device-width,initial-scale=1" /> 
+ <title>物理基礎：相対速度（並べ替え学習）Parsons風MVP / MathJax（20問）</title> 
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script> 
+ <style> 
+ :root{--bg:#0b1020;--text:#e9ecff;--muted:#aab2dd;--accent:#7c5cff;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444;} 
+ \*{box-sizing:border-box} 
+ body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN",Meiryo,sans-serif; 
+ background:radial-gradient(1200px 800px at 20% 10%,#1a2450 0%,var(--bg) 55%),var(--bg);color:var(--text)} 
+ header{padding:20px 18px 8px;max-width:1200px;margin:0 auto} 
+ h1{margin:0 0 6px;font-size:20px;letter-spacing:.3px} 
+ .sub{color:var(--muted);font-size:13px;line-height:1.7} 
+ main{max-width:1200px;margin:0 auto;padding:12px 18px 28px;display:grid;grid-template-columns:360px 1fr;gap:16px} 
+ @media (max-width:980px){main{grid-template-columns:1fr}} 
+ .panel{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08); 
+ border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden} 
+ .panel h2{margin:0;padding:14px 14px 10px;font-size:14px;color:#dfe4ff;letter-spacing:.2px} 
+ .panel .body{padding:0 14px 14px} 
+ .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap} 
+ label{font-size:12px;color:var(--muted)} 
+ select,button{border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.20);color:var(--text);padding:10px 10px;font-size:13px} 
+ select{width:100%} 
+ button{cursor:pointer;transition:.15s transform,.15s background,.15s border} 
+ button:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.22)} 
+ .primary{background:linear-gradient(135deg,rgba(124,92,255,.95),rgba(124,92,255,.55));border-color:rgba(124,92,255,.8)} 
+ .ghost{background:rgba(0,0,0,.10)} 
+ .prompt{padding:14px;border-radius:14px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);line-height:1.7;font-size:14px} 
+ .board{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px} 
+ @media (max-width:980px){.board{grid-template-columns:1fr}} 
+ .zone{background:rgba(0,0,0,.18);border:1px dashed rgba(255,255,255,.18);border-radius:18px;min-height:260px;padding:12px} 
+ .zoneHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px} 
+ .zoneTitle{font-size:13px;color:#dfe4ff} 
+ .zoneHint{font-size:12px;color:var(--muted)} 
+ .cardItem{user-select:none;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.10); 
+ border-radius:16px;padding:10px 10px 10px 12px;margin:10px 0;display:flex;gap:10px;align-items:flex-start;cursor:grab} 
+ .cardItem:active{cursor:grabbing} 
+ .badge{min-width:32px;height:22px;border-radius:999px;background:rgba(124,92,255,.20);border:1px solid rgba(124,92,255,.35); 
+ display:flex;align-items:center;justify-content:center;font-size:11px;color:#d9d2ff;margin-top:2px} 
+ .cardText{font-size:13px;line-height:1.6;color:#eef1ff} 
+ .cardItem.distractor .badge{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.35);color:#ffe8b5} 
+ .cardItem.invalid{border-color:rgba(239,68,68,.7);box-shadow:0 0 0 1px rgba(239,68,68,.35) inset} 
+ .cardItem.valid{border-color:rgba(34,197,94,.65);box-shadow:0 0 0 1px rgba(34,197,94,.25) inset} 
+ .dropHover{outline:2px solid rgba(124,92,255,.55);outline-offset:2px} 
+ .status{padding:12px 14px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:10px;align-items:flex-start} 
+ .pill{padding:6px 10px;border-radius:999px;font-size:12px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.20);color:var(--muted)} 
+ .pill.ok{border-color:rgba(34,197,94,.55);color:#bff3d1} 
+ .pill.ng{border-color:rgba(239,68,68,.55);color:#ffd0d0} 
+ .pill.warn{border-color:rgba(245,158,11,.55);color:#ffe7c2} 
+ .msg{font-size:13px;line-height:1.6;color:#eef1ff;flex:1} 
+ .solution{margin-top:10px;padding:12px;border-radius:14px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08)} 
+ .solution ol{margin:8px 0 0 20px} 
+ .solution li{margin:6px 0;line-height:1.6;color:#eef1ff} 
+ .footer{max-width:1200px;margin:0 auto;padding:0 18px 22px;color:var(--muted);font-size:12px;line-height:1.6} 
+ .mjx-container{margin:0 .08em} 
+/* 固定：常に左上に表示される『入口へ戻る』ボタン */ 
+.fixedBack{ 
+ position:fixed; 
+ top: calc(12px + env(safe-area-inset-top)); 
+ left: calc(12px + env(safe-area-inset-left)); 
+ z-index: 9999; 
+ display:inline-flex; 
+ align-items:center; 
+ gap:8px; 
+ padding:10px 12px; 
+ border-radius:999px; 
+ border:1px solid rgba(255,255,255,.16); 
+ background: rgba(0,0,0,.45); 
+ color: var(--text); 
+ text-decoration:none; 
+ font-weight:800; 
+ font-size:13px; 
+ letter-spacing:.02em; 
+ backdrop-filter: blur(10px) saturate(1.2); 
+ -webkit-backdrop-filter: blur(10px) saturate(1.2); 
+ box-shadow: 0 10px 24px rgba(0,0,0,.35); 
+ transition:.15s transform,.15s background,.15s border-color; 
+} 
+.fixedBack:hover{ 
+ transform: translateY(-1px); 
+ background: rgba(0,0,0,.55); 
+ border-color: rgba(255,255,255,.26); 
+} 
+.fixedBack:active{ 
+ transform: translateY(0); 
+} 
+@media (prefers-reduced-motion: reduce){ 
+ .fixedBack{ transition:none; } 
+ .fixedBack:hover{ transform:none; } 
+} 
+</style> 
+</head> 
+<body> 
+<a class="fixedBack" href="index.html" aria-label="入口（index.html）へ戻る">← 入口へ戻る</a> 
+<header> 
+ <h1>物理基礎：相対速度（並べ替え学習）</h1> 
+ <div class="sub"> 
+相対速度は『動いている自分を止める』が合言葉。\\(\\vec{v}_{A/B}=\\vec{v}_A-\\vec{v}_B\\) を徹底して、1次元は符号、2次元は成分で処理する。 
+</div> 
+</header> 
+<main> 
+ <section class="panel"> 
+ <h2>問題</h2> 
+ <div class="body"> 
+ <div class="row" style="margin-bottom:10px"><label for="problemSelect">問題を選択</label></div> 
+ <select id="problemSelect"></select> 
+ <div style="height:10px"></div> 
+ <div class="prompt" id="prompt"></div> 
+ <div style="height:12px"></div> 
+ <div class="row"> 
+ <button class="primary" id="checkBtn">判定する</button> 
+<button class="ghost" id="answerBtn">解答</button> 
+ <button class="ghost" id="resetBtn">リセット</button> 
+ </div> 
+ </div> 
+ </section> 
+ <section class="panel"> 
+ <h2>並べ替え</h2> 
+ <div class="board"> 
+ <div class="zone" id="poolZone"> 
+ <div class="zoneHeader"><div class="zoneTitle">カード（シャッフル）</div><div class="zoneHint">ドラッグ / クリックで移動</div></div> 
+ <div id="pool"></div> 
+ </div> 
+ <div class="zone" id="answerZone"> 
+ <div class="zoneHeader"><div class="zoneTitle">解答エリア</div><div class="zoneHint">上から順に評価</div></div> 
+ <div id="answer"></div> 
+ </div> 
+ </div> 
+ <div class="status"> 
+ <div class="pill" id="pill">未判定</div> 
+ <div class="msg" id="msg">カードを並べて「判定する」を押してください。</div> 
+ </div> 
+ <div class="body"><div id="solutionWrap" style="display:none"></div></div> 
+ </section> 
+</main> 
+<div class="footer"> 
+ <div>表記：相対速度 \\(\\vec{v}_{A/B}=\\vec{v}_A-\\vec{v}_B\\)、合成速度 \\(\\vec{v}=\\vec{v}_1+\\vec{v}_2\\)。単位は基本 \\(\\mathrm{m/s}\\)（必要なら \\(\\mathrm{km/h}\\)）。</div> 
+</div> 
+<script> 
+// 20問（相対速度：1次元＋2次元ベクトル） 
+const PROBLEMS = [ 
+{ id:"P1", title:"P1 基本：同方向の相対速度", prompt:"同一直線上を東向きに、A列車は\\(20\\,\\mathrm{m/s}\\)、B列車は\\(12\\,\\mathrm{m/s}\\)で走る。Bから見たAの相対速度を求めよ。", 
+ steps:[ 
+ {id:"s1", text:"定義：相対速度 \\(v_{A/B}=v_A-v_B\\)", requires:[]}, 
+ {id:"s2", text:"代入：\\(v_{A/B}=20-12=8\\,\\mathrm{m/s}\\)", requires:["s1"]}, 
+ {id:"s3", text:"正なので東向き：『東向き\\(8\\,\\mathrm{m/s}\\)』", requires:["s2"]} 
+ ]}, 
+{ id:"P2", title:"P2 反対方向：すれ違いの相対速度", prompt:"東向きを正とする。A列車は東へ\\(15\\,\\mathrm{m/s}\\)、B列車は西へ\\(10\\,\\mathrm{m/s}\\)で走る。Aから見たBの相対速度を求めよ。", 
+ steps:[ 
+ {id:"s1", text:"符号化：\\(v_A=+15\\)、Bは西向きなので\\(v_B=-10\\)", requires:[]}, 
+ {id:"s2", text:"定義：\\(v_{B/A}=v_B-v_A\\)", requires:["s1"]}, 
+ {id:"s3", text:"計算：\\(v_{B/A}=-10-15=-25\\,\\mathrm{m/s}\\)", requires:["s2"]}, 
+ {id:"s4", text:"負→西向き\\(25\\,\\mathrm{m/s}\\)（速さは\\(25\\)）", requires:["s3"]} 
+ ]}, 
+{ id:"P3", title:"P3 追い越し：追いつく時間", prompt:"同一直線上で東向きに、車Aは\\(25\\,\\mathrm{m/s}\\)、車Bは\\(20\\,\\mathrm{m/s}\\)。AはBの\\(200\\,\\mathrm{m}\\)後ろからスタートする。AがBに追いつくまでの時間を求めよ。", 
+ steps:[ 
+ {id:"s1", text:"相対速度：\\(v_{A/B}=25-20=5\\,\\mathrm{m/s}\\)", requires:[]}, 
+ {id:"s2", text:"追いつく条件：相対的に距離\\(200\\,\\mathrm{m}\\)を詰める", requires:["s1"]}, 
+ {id:"s3", text:"時間：\\(t=\\frac{200}{5}=40\\,\\mathrm{s}\\)", requires:["s2"]} 
+ ]}, 
+{ id:"P4", title:"P4 車内歩行：地面に対する速度（同方向）", prompt:"列車は東向き\\(15\\,\\mathrm{m/s}\\)で走る。車内で人が進行方向へ\\(1.5\\,\\mathrm{m/s}\\)で歩く（列車に対して）。地面に対する人の速度を求めよ。", 
+ steps:[ 
+ {id:"s1", text:"合成：\\(v_{人}=v_{列車}+v_{人/列車}\\)", requires:[]}, 
+ {id:"s2", text:"代入：\\(v_{人}=15+1.5=16.5\\,\\mathrm{m/s}\\)", requires:["s1"]}, 
+ {id:"s3", text:"向きは東：『東向き\\(16.5\\,\\mathrm{m/s}\\)』", requires:["s2"]} 
+ ]}, 
+{ id:"P5", title:"P5 車内歩行：地面に対する速度（逆方向）", prompt:"列車は東向き\\(15\\,\\mathrm{m/s}\\)。車内で人が西向き（後ろ向き）に\\(2\\,\\mathrm{m/s}\\)で歩く（列車に対して）。地面に対する人の速度を求めよ。", 
+ steps:[ 
+ {id:"s1", text:"符号化：東を正。\\(v_{列車}=+15\\)、\\(v_{人/列車}=-2\\)", requires:[]}, 
+ {id:"s2", text:"合成：\\(v_{人}=15+(-2)=13\\,\\mathrm{m/s}\\)", requires:["s1"]}, 
+ {id:"s3", text:"正→東向き\\(13\\,\\mathrm{m/s}\\)", requires:["s2"]} 
+ ]}, 
+{ id:"P6", title:"P6 2次元：川の流れとボート（合成速度）", prompt:"川の流れは東へ\\(4\\,\\mathrm{m/s}\\)。ボートは水に対して北へ\\(3\\,\\mathrm{m/s}\\)で進む。地面に対するボートの速さと向きを求めよ（北基準）。", 
+ steps:[ 
+ {id:"s1", text:"ベクトル合成：\\(\\vec{v}=\\vec{v}_{船/水}+\\vec{v}_{水/地}\\)", requires:[]}, 
+ {id:"s2", text:"成分：北\\(3\\)、東\\(4\\)なので速さ\\(\\sqrt{3^2+4^2}=5\\,\\mathrm{m/s}\\)", requires:["s1"]}, 
+ {id:"s3", text:"向き：北から東へ\\(\\tan\\theta=\\frac{4}{3}\\) → \\(\\theta\\approx53.1^\\circ\\)", requires:["s2"]} 
+ ]}, 
+{ id:"P7", title:"P7 2次元：真北に渡る（上流向きにこぐ）", prompt:"川幅\\(240\\,\\mathrm{m}\\)。流れは東へ\\(2\\,\\mathrm{m/s}\\)。ボートは水に対して速さ\\(5\\,\\mathrm{m/s}\\)。地面に対して真北に進むには、北から西へ何度向けてこげばよいか。また渡り終える時間を求めよ。", 
+ steps:[ 
+ {id:"s1", text:"真北条件：東西成分が0 → 船の西成分が\\(2\\,\\mathrm{m/s}\\)必要", requires:[]}, 
+ {id:"s2", text:"角度：船速\\(5\\)で西成分\\(2\\) → \\(\\sin\\theta=\\frac{2}{5}\\)（北から西へ）", requires:["s1"]}, 
+ {id:"s3", text:"北成分：\\(v_{北}=\\sqrt{5^2-2^2}=\\sqrt{21}\\approx4.58\\,\\mathrm{m/s}\\)", requires:["s2"]}, 
+ {id:"s4", text:"時間：\\(t=\\frac{240}{4.58}\\approx52.4\\,\\mathrm{s}\\)", requires:["s3"]} 
+ ]}, 
+{ id:"P8", title:"P8 2次元：風の中の飛行機（合成速度）", prompt:"飛行機の対気速度は北へ\\(200\\,\\mathrm{km/h}\\)。風は東へ\\(60\\,\\mathrm{km/h}\\)。地面に対する速さと、北から東へ何度ずれるかを求めよ。", 
+ steps:[ 
+ {id:"s1", text:"合成：\\(\\vec{v}_{地}=\\vec{v}_{機/空}+\\vec{v}_{風/地}\\)", requires:[]}, 
+ {id:"s2", text:"速さ：\\(v=\\sqrt{200^2+60^2}\\approx208.8\\,\\mathrm{km/h}\\)", requires:["s1"]}, 
+ {id:"s3", text:"角度：\\(\\tan\\theta=\\frac{60}{200}\\) → \\(\\theta\\approx16.7^\\circ\\)", requires:["s2"]} 
+ ]}, 
+{ id:"P9", title:"P9 2次元：真北に飛ぶ（風を打ち消す）", prompt:"風が東へ\\(50\\,\\mathrm{km/h}\\)吹く。飛行機の対気速度は\\(250\\,\\mathrm{km/h}\\)。地面に対して真北に進むには機首を北から西へ何度向けるべきか。また地面に対する速さを求めよ。", 
+ steps:[ 
+ {id:"s1", text:"真北条件：東西成分0 → 機の西成分が\\(50\\,\\mathrm{km/h}\\)", requires:[]}, 
+ {id:"s2", text:"角度：\\(250\\)で西成分\\(50\\) → \\(\\sin\\theta=\\frac{50}{250}=0.2\\)", requires:["s1"]}, 
+ {id:"s3", text:"地上速：北成分\\(=\\sqrt{250^2-50^2}\\approx244.9\\,\\mathrm{km/h}\\)", requires:["s2"]} 
+ ]}, 
+{ id:"P10", title:"P10 雨：車から見た雨（相対速度）", prompt:"雨は地面に対して鉛直下向き\\(8\\,\\mathrm{m/s}\\)で落ちる。車は東向き\\(12\\,\\mathrm{m/s}\\)で走る。車から見た雨の速度（成分）と速さ、鉛直からの傾き角を求めよ。", 
+ steps:[ 
+ {id:"s1", text:"相対速度：\\(\\vec{v}_{雨/車}=\\vec{v}_{雨/地}-\\vec{v}_{車/地}\\)", requires:[]}, 
+ {id:"s2", text:"成分：東成分\\(-12\\)、鉛直成分\\(-8\\)（後ろ向き＋下向き）", requires:["s1"]}, 
+ {id:"s3", text:"速さ：\\(v=\\sqrt{12^2+8^2}=\\sqrt{208}\\approx14.4\\,\\mathrm{m/s}\\)", requires:["s2"]}, 
+ {id:"s4", text:"鉛直から：\\(\\tan\\theta=\\frac{12}{8}=1.5\\) → \\(\\theta\\approx56.3^\\circ\\)", requires:["s3"]} 
+ ]}, 
+{ id:"P11", title:"P11 エスカレーター：歩く速さの合成", prompt:"エスカレーターは上向き\\(0.5\\,\\mathrm{m/s}\\)。人はエスカレーターに対して上向き\\(1.0\\,\\mathrm{m/s}\\)で歩く。地面に対する人の速さを求めよ。", 
+ steps:[ 
+ {id:"s1", text:"合成：\\(v_{人}=v_{esc}+v_{人/esc}\\)", requires:[]}, 
+ {id:"s2", text:"計算：\\(v_{人}=0.5+1.0=1.5\\,\\mathrm{m/s}\\)", requires:["s1"]}, 
+ {id:"s3", text:"向きは上：『上向き\\(1.5\\,\\mathrm{m/s}\\)』", requires:["s2"]} 
+ ]}, 
+{ id:"P12", title:"P12 川：渡り時間と流され距離", prompt:"人は水に対して真北へ\\(1.5\\,\\mathrm{m/s}\\)で泳げる。川の流れは東へ\\(0.5\\,\\mathrm{m/s}\\)。川幅\\(100\\,\\mathrm{m}\\)を渡るのにかかる時間と、下流（東）へ流される距離を求めよ。", 
+ steps:[ 
+ {id:"s1", text:"北成分は\\(1.5\\)なので渡る時間：\\(t=\\frac{100}{1.5}\\approx66.7\\,\\mathrm{s}\\)", requires:[]}, 
+ {id:"s2", text:"流され距離：\\(x=0.5\\times66.7\\approx33.3\\,\\mathrm{m}\\)", requires:["s1"]}, 
+ {id:"s3", text:"結論：時間\\(66.7\\,\\mathrm{s}\\)、流され\\(33.3\\,\\mathrm{m}\\)", requires:["s2"]} 
+ ]}, 
+{ id:"P13", title:"P13 すれ違い：川沿いの2船", prompt:"川に沿って直線上を進む。船Aは下流へ\\(6\\,\\mathrm{km/h}\\)、船Bは上流へ\\(4\\,\\mathrm{km/h}\\)。2船の距離が\\(5\\,\\mathrm{km}\\)のとき、出会うまでの時間を求めよ。", 
+ steps:[ 
+ {id:"s1", text:"反対向きなので相対速度：\\(v_{rel}=6+4=10\\,\\mathrm{km/h}\\)", requires:[]}, 
+ {id:"s2", text:"時間：\\(t=\\frac{5}{10}=0.5\\,\\mathrm{h}\\)", requires:["s1"]}, 
+ {id:"s3", text:"分にすると\\(30\\,\\mathrm{min}\\)", requires:["s2"]} 
+ ]}, 
+{ id:"P14", title:"P14 追えない：相対速度で距離が増える", prompt:"同一直線上で東向き。ランナーは\\(8\\,\\mathrm{m/s}\\)、犬は\\(10\\,\\mathrm{m/s}\\)で走り、犬は最初\\(40\\,\\mathrm{m}\\)前にいる。\\(30\\,\\mathrm{s}\\)後の距離を求めよ。", 
+ steps:[ 
+ {id:"s1", text:"相対速度（犬−ランナー）：\\(v_{D/R}=10-8=2\\,\\mathrm{m/s}\\)", requires:[]}, 
+ {id:"s2", text:"増える距離：\\(\\Delta x=2\\times30=60\\,\\mathrm{m}\\)", requires:["s1"]}, 
+ {id:"s3", text:"最終距離：\\(40+60=100\\,\\mathrm{m}\\)", requires:["s2"]} 
+ ]}, 
+{ id:"P15", title:"P15 円周上：向かい合いから出会う時間", prompt:"円形トラック（周長\\(400\\,\\mathrm{m}\\)）を2人が逆向きに走る。速さは\\(6\\,\\mathrm{m/s}\\)と\\(4\\,\\mathrm{m/s}\\)。スタート時、2人はちょうど向かい合う位置（弧長\\(200\\,\\mathrm{m}\\)）にいる。最初に出会うまでの時間を求めよ。", 
+ steps:[ 
+ {id:"s1", text:"逆向きなので相対速度：\\(v_{rel}=6+4=10\\,\\mathrm{m/s}\\)", requires:[]}, 
+ {id:"s2", text:"出会い条件：弧長\\(200\\,\\mathrm{m}\\)を詰める", requires:["s1"]}, 
+ {id:"s3", text:"時間：\\(t=\\frac{200}{10}=20\\,\\mathrm{s}\\)", requires:["s2"]} 
+ ]}, 
+{ id:"P16", title:"P16 動く歩道：逆向きに歩く", prompt:"動く歩道は東向き\\(1.2\\,\\mathrm{m/s}\\)。人は歩道に対して西向き\\(0.8\\,\\mathrm{m/s}\\)で歩く。地面に対する人の速度を求めよ（向きも）。", 
+ steps:[ 
+ {id:"s1", text:"合成：\\(v_{人}=v_{歩道}+v_{人/歩道}\\)", requires:[]}, 
+ {id:"s2", text:"代入：\\(v_{人}=1.2+(-0.8)=0.4\\,\\mathrm{m/s}\\)", requires:["s1"]}, 
+ {id:"s3", text:"正→東向き\\(0.4\\,\\mathrm{m/s}\\)", requires:["s2"]} 
+ ]}, 
+{ id:"P17", title:"P17 2次元：速度ベクトルの差", prompt:"平面上で、Aの速度は\\(\\vec{v}_A=(3,4)\\,\\mathrm{m/s}\\)、Bの速度は\\(\\vec{v}_B=(1,-2)\\,\\mathrm{m/s}\\)（成分は東,北）。Aから見たBの相対速度ベクトルと速さを求めよ。", 
+ steps:[ 
+ {id:"s1", text:"定義：\\(\\vec{v}_{B/A}=\\vec{v}_B-\\vec{v}_A\\)", requires:[]}, 
+ {id:"s2", text:"差：\\(\\vec{v}_{B/A}=(1-3,\\,-2-4)=(-2,-6)\\,\\mathrm{m/s}\\)", requires:["s1"]}, 
+ {id:"s3", text:"速さ：\\(\\vec{v}=\\sqrt{(-2)^2+(-6)^2}=\\sqrt{40}\\approx6.32\\,\\mathrm{m/s}\\)", requires:["s2"]} 
+ ]}, 
+{ id:"P18", title:"P18 2次元：同じ大きさの直交ベクトル", prompt:"川の流れが東へ\\(5\\,\\mathrm{m/s}\\)。ボートは水に対して北へ\\(5\\,\\mathrm{m/s}\\)。地面に対する速さと向きを求めよ（北から東へ）。", 
+ steps:[ 
+ {id:"s1", text:"成分：北\\(5\\)、東\\(5\\)", requires:[]}, 
+ {id:"s2", text:"速さ：\\(v=\\sqrt{5^2+5^2}=5\\sqrt{2}\\approx7.07\\,\\mathrm{m/s}\\)", requires:["s1"]}, 
+ {id:"s3", text:"向き：\\(\\tan\\theta=\\frac{5}{5}=1\\) → \\(\\theta=45^\\circ\\)", requires:["s2"]} 
+ ]}, 
+{ id:"P19", title:"P19 列車から見るランナー：相対速度", prompt:"列車は東へ\\(20\\,\\mathrm{m/s}\\)で走る。地面に対して東へ\\(5\\,\\mathrm{m/s}\\)で走るランナーを、列車から見るとどう見えるか。相対速度（向きと大きさ）を求めよ。", 
+ steps:[ 
+ {id:"s1", text:"相対速度：\\(v_{R/T}=v_R-v_T\\)", requires:[]}, 
+ {id:"s2", text:"代入：\\(v_{R/T}=5-20=-15\\,\\mathrm{m/s}\\)", requires:["s1"]}, 
+ {id:"s3", text:"負→西向き\\(15\\,\\mathrm{m/s}\\)で後ろへ流れるように見える", requires:["s2"]} 
+ ]}, 
+{ id:"P20", title:"P20 風向き：向かい風で移動時間", prompt:"飛行機の対気速度は東へ\\(180\\,\\mathrm{km/h}\\)。向かい風が西へ\\(30\\,\\mathrm{km/h}\\)（つまり東向き成分を減らす）。東へ\\(300\\,\\mathrm{km}\\)進むのにかかる時間を求めよ。", 
+ steps:[ 
+ {id:"s1", text:"地上速度：\\(v_{地}=180-30=150\\,\\mathrm{km/h}\\)", requires:[]}, 
+ {id:"s2", text:"時間：\\(t=\\frac{300}{150}=2\\,\\mathrm{h}\\)", requires:["s1"]}, 
+ {id:"s3", text:"分にすると\\(120\\,\\mathrm{min}\\)", requires:["s2"]} 
+ ]} 
+];
+
+// --- 追加：正答カードを細分化（S1a/S1b…）し、連続性も判定する ---
+function splitOneStepText(stepText){
+  const t = String(stepText || '').trim();
+  const idx = t.indexOf('：');
+  if(idx>0){
+    const head = t.slice(0, idx).trim();
+    const body = t.slice(idx+1).trim();
+    let a = head;
+    if(!/を求める$/.test(a)) a = a + 'を求める';
+    if(!/[。．]$/.test(a)) a = a + '。';
+    return [a, body];
+  }
+  return [t];
+}
+
+function expandSteps(originalSteps){
+  const meta=[];
+  const lastOf=new Map();
+  const letters='abcdefghijklmnopqrstuvwxyz';
+  let stepNo=1;
+  for(const s of originalSteps){
+    const parts = splitOneStepText(s.text);
+    const ids = parts.map((_,i)=> parts.length===1 ? s.id : `${s.id}${letters[i]}`);
+    const labels = parts.map((_,i)=> parts.length===1 ? `S${stepNo}` : `S${stepNo}${letters[i]}`);
+    meta.push({orig:s, parts, ids, labels});
+    lastOf.set(s.id, ids[ids.length-1]);
+    stepNo++;
+  }
+  const expanded=[];
+  for(const m of meta){
+    const {orig, parts, ids, labels} = m;
+    for(let i=0;i<parts.length;i++){
+      const id = ids[i];
+      const immediateAfter = (i>0) ? ids[i-1] : null;
+      const baseReq = (orig.requires||[]).map(r => lastOf.get(r) || r);
+      const req = immediateAfter ? Array.from(new Set([...baseReq, immediateAfter])) : baseReq;
+      expanded.push({id, label: labels[i], text: parts[i], requires: req, immediateAfter});
+    }
+  }
+  return expanded;
+}
+ 
+// --- アプリ共通 --- 
+let current=null, currentExpandedSteps=[], poolCards=[], answerCards=[]; 
+const sel=document.getElementById('problemSelect'); 
+const promptEl=document.getElementById('prompt'); 
+const poolEl=document.getElementById('pool'); 
+const answerEl=document.getElementById('answer'); 
+const checkBtn=document.getElementById('checkBtn'); 
+const resetBtn=document.getElementById('resetBtn'); 
+const answerBtn=document.getElementById('answerBtn'); 
+const pill=document.getElementById('pill'); 
+const msg=document.getElementById('msg'); 
+const poolZone=document.getElementById('poolZone'); 
+const answerZone=document.getElementById('answerZone'); 
+const solutionWrap=document.getElementById('solutionWrap'); 
+function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;} 
+function setStatus(type,text){pill.className='pill'+(type?(' '+type):'');pill.textContent=type==='ok'?'正解':type==='ng'?'不正解':type==='warn'?'途中':'未判定';msg.textContent=text;} 
+function typesetMath(){ if(window.MathJax && MathJax.typesetPromise){return MathJax.typesetPromise([promptEl,poolEl,answerEl,solutionWrap]).catch(()=>{});} return Promise.resolve(); } 
+function createCardEl(card){ 
+ const div=document.createElement('div'); 
+ div.className='cardItem'+(card.kind==='distractor'?' distractor':''); 
+ div.draggable=true; div.dataset.cardId=card.id; div.dataset.zone=card.zone; 
+ const badge=document.createElement('div'); badge.className='badge'; badge.textContent=card.label; 
+ const text=document.createElement('div'); text.className='cardText'; text.textContent=card.text; 
+ div.appendChild(badge); div.appendChild(text); 
+ div.addEventListener('dragstart',(e)=>{e.dataTransfer.setData('text/plain',JSON.stringify({id:card.id,from:card.zone}));e.dataTransfer.effectAllowed='move';}); 
+ div.addEventListener('click',()=>moveCard(card.id, card.zone==='pool'?'answer':'pool')); 
+ return div; 
+} 
+function render(){ 
+ poolEl.innerHTML=''; answerEl.innerHTML=''; 
+ poolCards.forEach(c=>poolEl.appendChild(createCardEl(c))); 
+ answerCards.forEach(c=>answerEl.appendChild(createCardEl(c))); 
+ return typesetMath(); 
+} 
+function moveCard(id,toZone){ 
+ let card=null; 
+ const take=(arr)=>{const idx=arr.findIndex(x=>x.id===id); if(idx>=0){card=arr[idx];arr.splice(idx,1);return true;} return false;}; 
+ take(poolCards)
+ take(answerCards); if(!card) return; 
+ card.zone=toZone; (toZone==='pool'?poolCards:answerCards).push(card); 
+ clearMarking(); setStatus('', '移動しました。並べ終えたら「判定する」。'); solutionWrap.style.display='none'; 
+ render(); 
+} 
+function clearMarking(){[...document.querySelectorAll('.cardItem')].forEach(el=>{el.classList.remove('invalid');el.classList.remove('valid');});} 
+function markOrderFeedback(result){const els=[...answerEl.querySelectorAll('.cardItem')];const byId=new Map();els.forEach(el=>byId.set(el.dataset.cardId,el));result.orderChecks.forEach(ch=>{const el=byId.get(ch.id); if(!el) return; el.classList.add(ch.ok?'valid':'invalid');});} 
+function buildSolutionBox(){
+ const div=document.createElement('div'); div.className='solution';
+ const ol=document.createElement('ol');
+ currentExpandedSteps.forEach(s=>{const li=document.createElement('li'); li.textContent=s.text; ol.appendChild(li);});
+ div.appendChild(ol); return div;
+}
+function evaluate(){
+ const stepIds=new Set(currentExpandedSteps.map(s=>s.id));
+ const stepMap=new Map(currentExpandedSteps.map(s=>[s.id,s]));
+ const ans=answerCards.map(c=>c.id);
+ const seen=new Set(); const dup=[]; for(const id of ans){ if(seen.has(id)) dup.push(id); seen.add(id); }
+ const extras=ans.filter(id=>!stepIds.has(id));
+ const missing=[...stepIds].filter(id=>!ans.includes(id));
+ const orderChecks=[]; const placed=new Set(); let firstBad=null;
+
+ for(let idx=0; idx<ans.length; idx++){
+   const id = ans[idx];
+   if(!stepIds.has(id)){
+     orderChecks.push({id,ok:false,missingReq:[]});
+     if(!firstBad) firstBad={id,reason:'不要カード（正答に含まれない）を入れています。'};
+     continue;
+   }
+   const step = stepMap.get(id);
+   const req = (step.requires||[]);
+   const missReq = req.filter(r=>!placed.has(r));
+   let ok = (missReq.length===0);
+   if(ok && step.immediateAfter){
+     const prev = (idx>0) ? ans[idx-1] : null;
+     if(prev !== step.immediateAfter){
+       ok = false;
+       if(!firstBad) firstBad={id,reason:`連続条件：このカードの直前は ${step.immediateAfter} にしてください。`};
+     }
+   }
+   orderChecks.push({id,ok,missingReq:missReq});
+   if(!ok && !firstBad && missReq.length>0) firstBad={id,reason:`このカードの前に必要：${missReq.join(', ')}`};
+   placed.add(id);
+ }
+
+ const correctSet=extras.length===0 && missing.length===0 && dup.length===0;
+ const correctOrder=correctSet && orderChecks.filter(x=>stepIds.has(x.id)).every(x=>x.ok);
+ const total=currentExpandedSteps.length;
+ const okCount=orderChecks.filter(x=>stepIds.has(x.id)&&x.ok).length;
+ const progress=total?Math.round((okCount/total)*100):0;
+ return {correctSet,correctOrder,missing,extras,dup,firstBad,progress,orderChecks};
+}
+function enableDrop(zoneEl,toZone){ 
+ zoneEl.addEventListener('dragover',(e)=>{e.preventDefault();zoneEl.classList.add('dropHover');e.dataTransfer.dropEffect='move';}); 
+ zoneEl.addEventListener('dragleave',()=>zoneEl.classList.remove('dropHover')); 
+ zoneEl.addEventListener('drop',(e)=>{e.preventDefault();zoneEl.classList.remove('dropHover');try{const p=JSON.parse(e.dataTransfer.getData('text/plain'));moveCard(p.id,toZone);}catch(_){}}); 
+} 
+function loadProblem(problemId){
+ current=PROBLEMS.find(p=>p.id===problemId)||PROBLEMS[0];
+ promptEl.textContent=current.prompt;
+
+ currentExpandedSteps = expandSteps(current.steps);
+
+ const cards=[];
+ currentExpandedSteps.forEach(s=>cards.push({
+   id:s.id,
+   kind:'step',
+   label:s.label,
+   text:s.text,
+   requires:s.requires||[],
+   zone:'pool'
+ }));
+
+ poolCards=shuffle(cards); answerCards=[];
+ solutionWrap.style.display='none'; solutionWrap.innerHTML=''; clearMarking();
+ setStatus('', 'カードを並べて「判定する」を押してください。');
+ render();
+}
+function populateSelect(){ 
+ sel.innerHTML=''; 
+ PROBLEMS.forEach(p=>{const opt=document.createElement('option');opt.value=p.id;opt.textContent=p.title;sel.appendChild(opt);}); 
+} 
+sel.addEventListener('change',()=>loadProblem(sel.value)); 
+resetBtn.addEventListener('click',()=>loadProblem(sel.value)); 
+answerBtn.addEventListener('click',()=>{ 
+ clearMarking(); 
+ setStatus('warn','解答（おすすめの並び）を表示しました。自力で並べてから「判定する」で確認できます。'); 
+ solutionWrap.style.display='block'; 
+ solutionWrap.innerHTML=''; 
+ solutionWrap.appendChild(buildSolutionBox()); 
+ typesetMath(); 
+}); 
+checkBtn.addEventListener('click',()=>{ 
+ clearMarking(); 
+ const r=evaluate(); 
+ if(r.correctOrder){ 
+ setStatus('ok','完璧！'); 
+ solutionWrap.style.display='block'; solutionWrap.innerHTML=''; 
+ solutionWrap.appendChild(buildSolutionBox()); 
+ typesetMath(); 
+ } else if(r.correctSet){ 
+ setStatus('warn',`カードはそろっています。順序を調整（進捗 ${r.progress}%）。`); 
+ if(r.firstBad) msg.textContent=`順序ヒント：${r.firstBad.reason}`; 
+ solutionWrap.style.display='none'; 
+ } else { 
+ if(r.extras.length>0) setStatus('ng',`誤カードが混ざっています（${r.extras.length}枚）。`); 
+ else if(r.missing.length>0) setStatus('ng',`正解カードが足りません（${r.missing.length}枚）。`); 
+ else setStatus('ng','まだ整っていません。'); 
+ solutionWrap.style.display='none'; 
+ } 
+}); 
+enableDrop(poolZone,'pool'); 
+enableDrop(answerZone,'answer'); 
+populateSelect(); 
+sel.value='P1'; 
+loadProblem('P1'); 
+</script> 
+</body> 
+</html>
