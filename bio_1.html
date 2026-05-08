@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>生物基礎：ミクロメーター（並べ替え学習）Parsons風MVP / MathJax（20問）</title>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
   <style>
     :root{--bg:#0b1020;--text:#e9ecff;--muted:#aab2dd;--accent:#7c5cff;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444;}
     *{box-sizing:border-box}
@@ -55,229 +56,359 @@
     .solution li{margin:6px 0;line-height:1.6;color:#eef1ff}
     .footer{max-width:1200px;margin:0 auto;padding:0 18px 22px;color:var(--muted);font-size:12px;line-height:1.6}
     .mjx-container{margin:0 .08em}
-  
 
-/* 固定：常に左上に表示される『入口へ戻る』ボタン */
-.fixedBack{
-  position:fixed;
-  top: calc(12px + env(safe-area-inset-top));
-  left: calc(12px + env(safe-area-inset-left));
-  z-index: 9999;
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 12px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.16);
-  background: rgba(0,0,0,.45);
-  color: var(--text);
-  text-decoration:none;
-  font-weight:800;
-  font-size:13px;
-  letter-spacing:.02em;
-  backdrop-filter: blur(10px) saturate(1.2);
-  -webkit-backdrop-filter: blur(10px) saturate(1.2);
-  box-shadow: 0 10px 24px rgba(0,0,0,.35);
-  transition:.15s transform,.15s background,.15s border-color;
-}
-.fixedBack:hover{
-  transform: translateY(-1px);
-  background: rgba(0,0,0,.55);
-  border-color: rgba(255,255,255,.26);
-}
-.fixedBack:active{
-  transform: translateY(0);
-}
-@media (prefers-reduced-motion: reduce){
-  .fixedBack{ transition:none; }
-  .fixedBack:hover{ transform:none; }
-}
+    /* 固定：常に左上に表示される『入口へ戻る』ボタン */
+    .fixedBack{
+      position:fixed;
+      top: calc(12px + env(safe-area-inset-top));
+      left: calc(12px + env(safe-area-inset-left));
+      z-index: 9999;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.45);
+      color: var(--text);
+      text-decoration:none;
+      font-weight:800;
+      font-size:13px;
+      letter-spacing:.02em;
+      backdrop-filter: blur(10px) saturate(1.2);
+      -webkit-backdrop-filter: blur(10px) saturate(1.2);
+      box-shadow: 0 10px 24px rgba(0,0,0,.35);
+      transition:.15s transform,.15s background,.15s border-color;
+    }
+    .fixedBack:hover{ transform: translateY(-1px); background: rgba(0,0,0,.55); border-color: rgba(255,255,255,.26); }
+    .fixedBack:active{ transform: translateY(0); }
+    @media (prefers-reduced-motion: reduce){
+      .fixedBack{ transition:none; }
+      .fixedBack:hover{ transform:none; }
+    }
 
-</style>
+    /* ✅ 正解時のみ出す「次の問題へ」ボタン */
+    #nextWrap{display:flex; align-items:center}
+    a.nextBtn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:12px;
+      border:1px solid rgba(124,92,255,.8);
+      background:linear-gradient(135deg,rgba(124,92,255,.95),rgba(124,92,255,.55));
+      color:#e9ecff;
+      padding:10px 12px;
+      font-size:13px;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    a.nextBtn:hover{transform:translateY(-1px)}
+
+    /* ✅ ガイドカードは薄く強調（ラベルは S1 のまま） */
+    .cardItem.guide{
+      border-color: rgba(124,92,255,.45);
+      background: linear-gradient(180deg,rgba(124,92,255,.14),rgba(255,255,255,.03));
+    }
+    .cardItem.guide .badge{
+      background: rgba(124,92,255,.28);
+      border-color: rgba(124,92,255,.55);
+      color:#efeaff;
+    }
+  </style>
 </head>
+
 <body>
-<a class="fixedBack" href="index.html" aria-label="入口（index.html）へ戻る">← 入口へ戻る</a>
+  <a class="fixedBack" href="index.html" aria-label="入口（index.html）へ戻る">← 入口へ戻る</a>
 
-<header>
-  <h1>生物基礎：ミクロメーター（並べ替え学習）</h1>
-  <div class="sub">
-ミクロメーターは「本尺（スリーブ）＋回転目盛（シンブル）」で読む。最小目盛は通常 \(0.01\,\mathrm{mm}\)。読み取り＝本尺（mm, 0.5mm含む）＋（回転目盛×0.01mm）＋（零点誤差補正）。
-</div>
-</header>
-
-<main>
-  <section class="panel">
-    <h2>問題</h2>
-    <div class="body">
-      <div class="row" style="margin-bottom:10px"><label for="problemSelect">問題を選択</label></div>
-      <select id="problemSelect"></select>
-      <div style="height:10px"></div>
-      <div class="prompt" id="prompt"></div>
-      <div style="height:12px"></div>
-      <div class="row">
- <button class="primary" id="checkBtn">判定する</button>
-<button class="ghost" id="answerBtn">解答</button>
- <button class="ghost" id="resetBtn">リセット</button>
- </div>
+  <header>
+    <h1>生物基礎：ミクロメーター（並べ替え学習）</h1>
+    <div class="sub">
+      ミクロメーターは「本尺（スリーブ）＋回転目盛（シンブル）」で読む。最小目盛は通常 \(0.01\,\mathrm{mm}\)。
+      読み取り＝本尺（mm, 0.5mm含む）＋（回転目盛×0.01mm）＋（零点誤差補正）。
     </div>
-  </section>
+  </header>
 
-  <section class="panel">
-    <h2>並べ替え</h2>
-    <div class="board">
-      <div class="zone" id="poolZone">
-        <div class="zoneHeader"><div class="zoneTitle">カード（シャッフル）</div><div class="zoneHint">ドラッグ / クリックで移動</div></div>
-        <div id="pool"></div>
+  <main>
+    <section class="panel">
+      <h2>問題</h2>
+      <div class="body">
+        <div class="row" style="margin-bottom:10px"><label for="problemSelect">問題を選択</label></div>
+        <select id="problemSelect"></select>
+        <div style="height:10px"></div>
+        <div class="prompt" id="prompt"></div>
+        <div style="height:12px"></div>
+        <div class="row">
+          <button class="primary" id="checkBtn">判定する</button>
+          <button class="ghost" id="answerBtn">解答</button>
+          <button class="ghost" id="resetBtn">リセット</button>
+        </div>
       </div>
-      <div class="zone" id="answerZone">
-        <div class="zoneHeader"><div class="zoneTitle">解答エリア</div><div class="zoneHint">上から順に評価</div></div>
-        <div id="answer"></div>
+    </section>
+
+    <section class="panel">
+      <h2>並べ替え</h2>
+      <div class="board">
+        <div class="zone" id="poolZone">
+          <div class="zoneHeader">
+            <div class="zoneTitle">カード（シャッフル）</div>
+            <div class="zoneHint">ドラッグ / クリックで移動</div>
+          </div>
+          <div id="pool"></div>
+        </div>
+        <div class="zone" id="answerZone">
+          <div class="zoneHeader">
+            <div class="zoneTitle">解答エリア</div>
+            <div class="zoneHint">上から順に評価</div>
+          </div>
+          <div id="answer"></div>
+        </div>
       </div>
+
+      <div class="status">
+        <div class="pill" id="pill">未判定</div>
+        <div class="msg" id="msg">カードを並べて「判定する」を押してください。</div>
+        <div id="nextWrap"></div>
+      </div>
+
+      <div class="body"><div id="solutionWrap" style="display:none"></div></div>
+    </section>
+  </main>
+
+  <div class="footer">
+    <div>
+      表記：本尺読み \(S\,\mathrm{mm}\)、回転目盛 \(T\)（0〜49）、最小目盛 \(0.01\,\mathrm{mm}\)。
+      観測値 \(L=S+0.01T\)。零点誤差が + のとき真値＝観測値−誤差、− のとき真値＝観測値＋誤差。
     </div>
+  </div>
 
-    <div class="status">
-      <div class="pill" id="pill">未判定</div>
-      <div class="msg" id="msg">カードを並べて「判定する」を押してください。</div>
-    </div>
-
-    <div class="body"><div id="solutionWrap" style="display:none"></div></div>
-  </section>
-</main>
-
-<div class="footer">
- <div>表記：本尺読み \(S\,\mathrm{mm}\)、回転目盛 \(T\)（0〜49）、最小目盛 \(0.01\,\mathrm{mm}\)。観測値 \(L=S+0.01T\)。零点誤差が + のとき真値＝観測値−誤差、− のとき真値＝観測値＋|誤差|。</div>
-</div>
 <script>
-// 20問（ミクロメーター：読み取り・単位換算・零点誤差）
+/* =========================
+   問題データ（ここは元のままでOK）
+   ※冗長ステップは loadProblem で自動整理する
+   ========================= */
 const PROBLEMS = [
-{ id:"P1", title:"P1 読み取り：0.5mmあり", prompt:"ミクロメーターで、スリーブ（本尺）が \\(7.5\\,\\mathrm{mm}\\) まで見えており、シンブル（回転目盛）が 23 を指している。観測値を求めよ（最小目盛 \\(0.01\\,\\mathrm{mm}\\)）。",
- steps:[
-  {id:"s1", text:"最小目盛：1目盛 \\(=0.01\\,\\mathrm{mm}\\)", requires:[]},
-  {id:"s2", text:"回転目盛の長さ：\\(0.01\\times23=0.23\\,\\mathrm{mm}\\)", requires:["s1"]},
-  {id:"s3", text:"観測値：\\(7.5+0.23=7.73\\,\\mathrm{mm}\\)", requires:["s2"]}
- ]},
-{ id:"P2", title:"P2 読み取り：整数mm", prompt:"本尺が \\(12.0\\,\\mathrm{mm}\\)、回転目盛が 7。観測値を求めよ。",
- steps:[
-  {id:"s1", text:"回転目盛：\\(0.01\\times7=0.07\\,\\mathrm{mm}\\)", requires:[]},
-  {id:"s2", text:"観測値：\\(12.0+0.07=12.07\\,\\mathrm{mm}\\)", requires:["s1"]},
-  {id:"s3", text:"単位まで書く：\\(12.07\\,\\mathrm{mm}\\)", requires:["s2"]}
- ]},
-{ id:"P3", title:"P3 読み取り：0.5mmなし", prompt:"本尺が \\(4.0\\,\\mathrm{mm}\\)、回転目盛が 38。観測値を求めよ。",
- steps:[
-  {id:"s1", text:"回転目盛：\\(0.01\\times38=0.38\\,\\mathrm{mm}\\)", requires:[]},
-  {id:"s2", text:"観測値：\\(4.0+0.38=4.38\\,\\mathrm{mm}\\)", requires:["s1"]},
-  {id:"s3", text:"答：\\(4.38\\,\\mathrm{mm}\\)", requires:["s2"]}
- ]},
-{ id:"P4", title:"P4 読み取り：本尺13.5mm", prompt:"本尺が \\(13.5\\,\\mathrm{mm}\\)、回転目盛が 2。観測値を求めよ。",
- steps:[
-  {id:"s1", text:"回転目盛：\\(0.01\\times2=0.02\\,\\mathrm{mm}\\)", requires:[]},
-  {id:"s2", text:"観測値：\\(13.5+0.02=13.52\\,\\mathrm{mm}\\)", requires:["s1"]},
-  {id:"s3", text:"答：\\(13.52\\,\\mathrm{mm}\\)", requires:["s2"]}
- ]},
-{ id:"P5", title:"P5 読み取り：最大付近", prompt:"本尺が \\(24.0\\,\\mathrm{mm}\\)、回転目盛が 49。観測値を求めよ。",
- steps:[
-  {id:"s1", text:"回転目盛：\\(0.01\\times49=0.49\\,\\mathrm{mm}\\)", requires:[]},
-  {id:"s2", text:"観測値：\\(24.0+0.49=24.49\\,\\mathrm{mm}\\)", requires:["s1"]},
-  {id:"s3", text:"答：\\(24.49\\,\\mathrm{mm}\\)", requires:["s2"]}
- ]},
-{ id:"P6", title:"P6 単位換算：mm→cm", prompt:"P1の観測値 \\(7.73\\,\\mathrm{mm}\\) を \\(\\mathrm{cm}\\) で表せ。",
- steps:[
-  {id:"s1", text:"換算：\\(1\\,\\mathrm{cm}=10\\,\\mathrm{mm}\\)", requires:[]},
-  {id:"s2", text:"計算：\\(7.73\\,\\mathrm{mm}=0.773\\,\\mathrm{cm}\\)", requires:["s1"]},
-  {id:"s3", text:"答：\\(0.773\\,\\mathrm{cm}\\)", requires:["s2"]}
- ]},
-{ id:"P7", title:"P7 単位換算：mm→μm", prompt:"観測値が \\(0.84\\,\\mathrm{mm}\\) のとき、 \\(\\mu\\mathrm{m}\\) で表せ。",
- steps:[
-  {id:"s1", text:"換算：\\(1\\,\\mathrm{mm}=1000\\,\\mu\\mathrm{m}\\)", requires:[]},
-  {id:"s2", text:"計算：\\(0.84\\times1000=840\\,\\mu\\mathrm{m}\\)", requires:["s1"]},
-  {id:"s3", text:"答：\\(840\\,\\mu\\mathrm{m}\\)", requires:["s2"]}
- ]},
-{ id:"P8", title:"P8 零点誤差（＋）：補正", prompt:"ミクロメーターを閉じたとき \\(0.03\\,\\mathrm{mm}\\) を示した（＋の零点誤差）。ある物体の観測値が \\(5.62\\,\\mathrm{mm}\\) だった。真の長さを求めよ。",
- steps:[
-  {id:"s1", text:"＋誤差の補正：真値＝観測値−誤差", requires:[]},
-  {id:"s2", text:"計算：\\(5.62-0.03=5.59\\,\\mathrm{mm}\\)", requires:["s1"]},
-  {id:"s3", text:"答：\\(5.59\\,\\mathrm{mm}\\)", requires:["s2"]}
- ]},
-{ id:"P9", title:"P9 零点誤差（−）：補正", prompt:"閉じたとき \\(-0.02\\,\\mathrm{mm}\\) を示した（−の零点誤差）。観測値が \\(10.18\\,\\mathrm{mm}\\) の真値を求めよ。",
- steps:[
-  {id:"s1", text:"−誤差の補正：真値＝観測値＋|誤差|", requires:[]},
-  {id:"s2", text:"計算：\\(10.18+0.02=10.20\\,\\mathrm{mm}\\)", requires:["s1"]},
-  {id:"s3", text:"答：\\(10.20\\,\\mathrm{mm}\\)", requires:["s2"]}
- ]},
-{ id:"P10", title:"P10 読み取り→補正（＋）", prompt:"本尺が \\(8.0\\,\\mathrm{mm}\\)、回転目盛が 41。零点誤差が +0.04 mm。真値を求めよ。",
- steps:[
-  {id:"s1", text:"観測値：\\(8.0+0.01\\times41=8.41\\,\\mathrm{mm}\\)", requires:[]},
-  {id:"s2", text:"＋誤差補正：\\(8.41-0.04=8.37\\,\\mathrm{mm}\\)", requires:["s1"]},
-  {id:"s3", text:"答：\\(8.37\\,\\mathrm{mm}\\)", requires:["s2"]}
- ]},
-{ id:"P11", title:"P11 読み取り→補正（−）", prompt:"本尺が \\(16.5\\,\\mathrm{mm}\\)、回転目盛が 9。零点誤差が −0.03 mm。真値を求めよ。",
- steps:[
-  {id:"s1", text:"観測値：\\(16.5+0.09=16.59\\,\\mathrm{mm}\\)", requires:[]},
-  {id:"s2", text:"−誤差補正：\\(16.59+0.03=16.62\\,\\mathrm{mm}\\)", requires:["s1"]},
-  {id:"s3", text:"答：\\(16.62\\,\\mathrm{mm}\\)", requires:["s2"]}
- ]},
-{ id:"P12", title:"P12 逆算：回転目盛を求める", prompt:"観測値が \\(6.28\\,\\mathrm{mm}\\)、本尺が \\(6.0\\,\\mathrm{mm}\\) まで見えている。回転目盛 \\(T\\) を求めよ。",
- steps:[
-  {id:"s1", text:"回転分：\\(6.28-6.0=0.28\\,\\mathrm{mm}\\)", requires:[]},
-  {id:"s2", text:"\\(0.28=0.01T\\) より \\(T=28\\)", requires:["s1"]},
-  {id:"s3", text:"答：回転目盛は 28", requires:["s2"]}
- ]},
-{ id:"P13", title:"P13 逆算：本尺0.5の判定", prompt:"観測値が \\(9.76\\,\\mathrm{mm}\\)、回転目盛が 26。見えている本尺 \\(S\\) は \\(9.5\\,\\mathrm{mm}\\) か \\(9.0\\,\\mathrm{mm}\\) か。",
- steps:[
-  {id:"s1", text:"回転分：\\(0.01\\times26=0.26\\,\\mathrm{mm}\\)", requires:[]},
-  {id:"s2", text:"本尺：\\(S=9.76-0.26=9.50\\,\\mathrm{mm}\\)", requires:["s1"]},
-  {id:"s3", text:"結論：本尺は \\(9.5\\,\\mathrm{mm}\\)", requires:["s2"]}
- ]},
-{ id:"P14", title:"P14 最小目盛：50等分", prompt:"シンブルが1回転で \\(0.50\\,\\mathrm{mm}\\) 進み、目盛が 50 等分されている。最小目盛を求めよ。",
- steps:[
-  {id:"s1", text:"最小目盛＝1回転の進み÷分割数", requires:[]},
-  {id:"s2", text:"計算：\\(0.50\\div50=0.01\\,\\mathrm{mm}\\)", requires:["s1"]},
-  {id:"s3", text:"答：\\(0.01\\,\\mathrm{mm}\\)", requires:["s2"]}
- ]},
-{ id:"P15", title:"P15 丸め：0.01mm単位", prompt:"観測値が \\(3.245\\,\\mathrm{mm}\\) と計算された。ミクロメーターの最小目盛が \\(0.01\\,\\mathrm{mm}\\) のとき、適切に丸めて答えよ。",
- steps:[
-  {id:"s1", text:"最小目盛が0.01mm→小数第2位まで", requires:[]},
-  {id:"s2", text:"\\(3.245\\) は \\(3.25\\,\\mathrm{mm}\\) に四捨五入", requires:["s1"]},
-  {id:"s3", text:"答：\\(3.25\\,\\mathrm{mm}\\)", requires:["s2"]}
- ]},
-{ id:"P16", title:"P16 読み取り：本尺0.5＋回転0", prompt:"本尺が \\(2.5\\,\\mathrm{mm}\\)、回転目盛が 0。観測値を求めよ。",
- steps:[
-  {id:"s1", text:"回転分：\\(0.01\\times0=0.00\\,\\mathrm{mm}\\)", requires:[]},
-  {id:"s2", text:"観測値：\\(2.5+0.00=2.50\\,\\mathrm{mm}\\)", requires:["s1"]},
-  {id:"s3", text:"答：\\(2.50\\,\\mathrm{mm}\\)", requires:["s2"]}
- ]},
-{ id:"P17", title:"P17 読み取り：境界注意", prompt:"本尺が \\(9.0\\,\\mathrm{mm}\\) までで、0.5mm線は見えていない。回転目盛が 49。観測値を求めよ。",
- steps:[
-  {id:"s1", text:"本尺は \\(9.0\\,\\mathrm{mm}\\)（0.5は加えない）", requires:[]},
-  {id:"s2", text:"回転分：\\(0.01\\times49=0.49\\,\\mathrm{mm}\\)", requires:["s1"]},
-  {id:"s3", text:"観測値：\\(9.0+0.49=9.49\\,\\mathrm{mm}\\)", requires:["s2"]}
- ]},
-{ id:"P18", title:"P18 差：2つの測定値の差", prompt:"2回の観測値がそれぞれ \\(12.34\\,\\mathrm{mm}\\) と \\(12.08\\,\\mathrm{mm}\\)。差（大きい−小さい）を求めよ。",
- steps:[
-  {id:"s1", text:"差をとる：\\(12.34-12.08\\)", requires:[]},
-  {id:"s2", text:"計算：\\(0.26\\,\\mathrm{mm}\\)", requires:["s1"]},
-  {id:"s3", text:"答：\\(0.26\\,\\mathrm{mm}\\)", requires:["s2"]}
- ]},
-{ id:"P19", title:"P19 平均：3回測定の平均", prompt:"同じものを3回測り、\\(5.61,\\ 5.63,\\ 5.62\\,\\mathrm{mm}\\) だった。平均値を求めよ。",
- steps:[
-  {id:"s1", text:"平均：\\(\\frac{5.61+5.63+5.62}{3}\\)", requires:[]},
-  {id:"s2", text:"和は \\(16.86\\) → \\(16.86\\div3=5.62\\,\\mathrm{mm}\\)", requires:["s1"]},
-  {id:"s3", text:"答：\\(5.62\\,\\mathrm{mm}\\)", requires:["s2"]}
- ]},
-{ id:"P20", title:"P20 補正の逆：零点誤差を求める", prompt:"ある物体の真値が \\(8.20\\,\\mathrm{mm}\\) と分かっている。ミクロメーターの観測値は \\(8.23\\,\\mathrm{mm}\\)。零点誤差（＋か−かも含めて）を求めよ。",
- steps:[
-  {id:"s1", text:"関係：真値＝観測値−誤差（＋誤差の場合）", requires:[]},
-  {id:"s2", text:"誤差＝観測値−真値：\\(8.23-8.20=0.03\\,\\mathrm{mm}\\)", requires:["s1"]},
-  {id:"s3", text:"観測値の方が大きい→＋の零点誤差 \\( +0.03\\,\\mathrm{mm}\\)", requires:["s2"]}
- ]}
+  { id:"P1", title:"P1 読み取り：0.5mmあり", prompt:"ミクロメーターで、スリーブ（本尺）が \\(7.5\\,\\mathrm{mm}\\) まで見えており、シンブル（回転目盛）が 23 を指している。観測値を求めよ（最小目盛 \\(0.01\\,\\mathrm{mm}\\)）。",
+    steps:[
+      {id:"s1", text:"最小目盛：1目盛 \\(=0.01\\,\\mathrm{mm}\\)", requires:[]},
+      {id:"s2", text:"回転目盛の長さ：\\(0.01\\times23=0.23\\,\\mathrm{mm}\\)", requires:["s1"]},
+      {id:"s3", text:"観測値：\\(7.5+0.23=7.73\\,\\mathrm{mm}\\)", requires:["s2"]}
+    ]},
+  { id:"P2", title:"P2 読み取り：整数mm", prompt:"本尺が \\(12.0\\,\\mathrm{mm}\\)、回転目盛が 7。観測値を求めよ。",
+    steps:[
+      {id:"s1", text:"回転目盛：\\(0.01\\times7=0.07\\,\\mathrm{mm}\\)", requires:[]},
+      {id:"s2", text:"観測値：\\(12.0+0.07=12.07\\,\\mathrm{mm}\\)", requires:["s1"]},
+      {id:"s3", text:"単位まで書くこと：\\(12.07\\,\\mathrm{mm}\\)", requires:["s2"]}
+    ]},
+  { id:"P3", title:"P3 読み取り：0.5mmなし", prompt:"本尺が \\(4.0\\,\\mathrm{mm}\\)、回転目盛が 38。観測値を求めよ。",
+    steps:[
+      {id:"s1", text:"回転目盛：\\(0.01\\times38=0.38\\,\\mathrm{mm}\\)", requires:[]},
+      {id:"s2", text:"観測値：\\(4.0+0.38=4.38\\,\\mathrm{mm}\\)", requires:["s1"]},
+      {id:"s3", text:"答：\\(4.38\\,\\mathrm{mm}\\)", requires:["s2"]}
+    ]},
+  { id:"P4", title:"P4 読み取り：本尺13.5mm", prompt:"本尺が \\(13.5\\,\\mathrm{mm}\\)、回転目盛が 2。観測値を求めよ。",
+    steps:[
+      {id:"s1", text:"回転目盛：\\(0.01\\times2=0.02\\,\\mathrm{mm}\\)", requires:[]},
+      {id:"s2", text:"観測値：\\(13.5+0.02=13.52\\,\\mathrm{mm}\\)", requires:["s1"]},
+      {id:"s3", text:"答：\\(13.52\\,\\mathrm{mm}\\)", requires:["s2"]}
+    ]},
+  { id:"P5", title:"P5 読み取り：最大付近", prompt:"本尺が \\(24.0\\,\\mathrm{mm}\\)、回転目盛が 49。観測値を求めよ。",
+    steps:[
+      {id:"s1", text:"回転目盛：\\(0.01\\times49=0.49\\,\\mathrm{mm}\\)", requires:[]},
+      {id:"s2", text:"観測値：\\(24.0+0.49=24.49\\,\\mathrm{mm}\\)", requires:["s1"]},
+      {id:"s3", text:"答：\\(24.49\\,\\mathrm{mm}\\)", requires:["s2"]}
+    ]},
+  { id:"P6", title:"P6 単位換算：mm→cm", prompt:"P1の観測値 \\(7.73\\,\\mathrm{mm}\\) を \\(\\mathrm{cm}\\) で表せ。",
+    steps:[
+      {id:"s1", text:"換算：\\(1\\,\\mathrm{cm}=10\\,\\mathrm{mm}\\)", requires:[]},
+      {id:"s2", text:"計算：\\(7.73\\,\\mathrm{mm}=0.773\\,\\mathrm{cm}\\)", requires:["s1"]},
+      {id:"s3", text:"答：\\(0.773\\,\\mathrm{cm}\\)", requires:["s2"]}
+    ]},
+  { id:"P7", title:"P7 単位換算：mm→μm", prompt:"観測値が \\(0.84\\,\\mathrm{mm}\\) のとき、 \\(\\mu\\mathrm{m}\\) で表せ。",
+    steps:[
+      {id:"s1", text:"換算：\\(1\\,\\mathrm{mm}=1000\\,\\mu\\mathrm{m}\\)", requires:[]},
+      {id:"s2", text:"計算：\\(0.84\\times1000=840\\,\\mu\\mathrm{m}\\)", requires:["s1"]},
+      {id:"s3", text:"答：\\(840\\,\\mu\\mathrm{m}\\)", requires:["s2"]}
+    ]},
+  { id:"P8", title:"P8 零点誤差（＋）：補正", prompt:"ミクロメーターを閉じたとき \\(0.03\\,\\mathrm{mm}\\) を示した（＋の零点誤差）。ある物体の観測値が \\(5.62\\,\\mathrm{mm}\\) だった。真の長さを求めよ。",
+    steps:[
+      {id:"s1", text:"＋誤差の補正：真値＝観測値−誤差", requires:[]},
+      {id:"s2", text:"計算：\\(5.62-0.03=5.59\\,\\mathrm{mm}\\)", requires:["s1"]},
+      {id:"s3", text:"答：\\(5.59\\,\\mathrm{mm}\\)", requires:["s2"]}
+    ]},
+  { id:"P9", title:"P9 零点誤差（−）：補正", prompt:"閉じたとき \\(-0.02\\,\\mathrm{mm}\\) を示した（−の零点誤差）。観測値が \\(10.18\\,\\mathrm{mm}\\) の真値を求めよ。",
+    steps:[
+      {id:"s1", text:"−誤差の補正：真値＝観測値＋誤差", requires:[]},
+      {id:"s2", text:"計算：\\(10.18+0.02=10.20\\,\\mathrm{mm}\\)", requires:["s1"]},
+      {id:"s3", text:"答：\\(10.20\\,\\mathrm{mm}\\)", requires:["s2"]}
+    ]},
+  { id:"P10", title:"P10 読み取り→補正（＋）", prompt:"本尺が \\(8.0\\,\\mathrm{mm}\\)、回転目盛が 41。零点誤差が +0.04 mm。真値を求めよ。",
+    steps:[
+      {id:"s1", text:"観測値：\\(8.0+0.01\\times41=8.41\\,\\mathrm{mm}\\)", requires:[]},
+      {id:"s2", text:"＋誤差補正：\\(8.41-0.04=8.37\\,\\mathrm{mm}\\)", requires:["s1"]},
+      {id:"s3", text:"答：\\(8.37\\,\\mathrm{mm}\\)", requires:["s2"]}
+    ]},
+  { id:"P11", title:"P11 読み取り→補正（−）", prompt:"本尺が \\(16.5\\,\\mathrm{mm}\\)、回転目盛が 9。零点誤差が −0.03 mm。真値を求めよ。",
+    steps:[
+      {id:"s1", text:"観測値：\\(16.5+0.09=16.59\\,\\mathrm{mm}\\)", requires:[]},
+      {id:"s2", text:"−誤差補正：\\(16.59+0.03=16.62\\,\\mathrm{mm}\\)", requires:["s1"]},
+      {id:"s3", text:"答：\\(16.62\\,\\mathrm{mm}\\)", requires:["s2"]}
+    ]},
+  { id:"P12", title:"P12 逆算：回転目盛を求める", prompt:"観測値が \\(6.28\\,\\mathrm{mm}\\)、本尺が \\(6.0\\,\\mathrm{mm}\\) まで見えている。回転目盛 \\(T\\) を求めよ。",
+    steps:[
+      {id:"s1", text:"回転分：\\(6.28-6.0=0.28\\,\\mathrm{mm}\\)", requires:[]},
+      {id:"s2", text:"\\(0.28=0.01T\\) より \\(T=28\\)", requires:["s1"]},
+      {id:"s3", text:"答：回転目盛は 28", requires:["s2"]}
+    ]},
+  { id:"P13", title:"P13 逆算：本尺0.5の判定", prompt:"観測値が \\(9.76\\,\\mathrm{mm}\\)、回転目盛が 26。見えている本尺 \\(S\\) は \\(9.5\\,\\mathrm{mm}\\) か \\(9.0\\,\\mathrm{mm}\\) か。",
+    steps:[
+      {id:"s1", text:"回転分：\\(0.01\\times26=0.26\\,\\mathrm{mm}\\)", requires:[]},
+      {id:"s2", text:"本尺：\\(S=9.76-0.26=9.50\\,\\mathrm{mm}\\)", requires:["s1"]},
+      {id:"s3", text:"結論：本尺は \\(9.5\\,\\mathrm{mm}\\)", requires:["s2"]}
+    ]},
+  { id:"P14", title:"P14 最小目盛：50等分", prompt:"シンブルが1回転で \\(0.50\\,\\mathrm{mm}\\) 進み、目盛が 50 等分されている。最小目盛を求めよ。",
+    steps:[
+      {id:"s1", text:"最小目盛＝1回転の進み÷分割数", requires:[]},
+      {id:"s2", text:"計算：\\(0.50\\div50=0.01\\,\\mathrm{mm}\\)", requires:["s1"]},
+      {id:"s3", text:"答：\\(0.01\\,\\mathrm{mm}\\)", requires:["s2"]}
+    ]},
+  { id:"P15", title:"P15 丸め：0.01mm単位", prompt:"観測値が \\(3.245\\,\\mathrm{mm}\\) と計算された。ミクロメーターの最小目盛が \\(0.01\\,\\mathrm{mm}\\) のとき、適切に丸めて答えよ。",
+    steps:[
+      {id:"s1", text:"最小目盛が0.01mm→小数第2位まで", requires:[]},
+      {id:"s2", text:"\\(3.245\\) は \\(3.25\\,\\mathrm{mm}\\) に四捨五入", requires:["s1"]},
+      {id:"s3", text:"答：\\(3.25\\,\\mathrm{mm}\\)", requires:["s2"]}
+    ]},
+  { id:"P16", title:"P16 読み取り：本尺0.5＋回転0", prompt:"本尺が \\(2.5\\,\\mathrm{mm}\\)、回転目盛が 0。観測値を求めよ。",
+    steps:[
+      {id:"s1", text:"回転分：\\(0.01\\times0=0.00\\,\\mathrm{mm}\\)", requires:[]},
+      {id:"s2", text:"観測値：\\(2.5+0.00=2.50\\,\\mathrm{mm}\\)", requires:["s1"]},
+      {id:"s3", text:"答：\\(2.50\\,\\mathrm{mm}\\)", requires:["s2"]}
+    ]},
+  { id:"P17", title:"P17 読み取り：境界注意", prompt:"本尺が \\(9.0\\,\\mathrm{mm}\\) までで、0.5mm線は見えていない。回転目盛が 49。観測値を求めよ。",
+    steps:[
+      {id:"s1", text:"本尺は \\(9.0\\,\\mathrm{mm}\\)（0.5は加えない）", requires:[]},
+      {id:"s2", text:"回転分：\\(0.01\\times49=0.49\\,\\mathrm{mm}\\)", requires:["s1"]},
+      {id:"s3", text:"観測値：\\(9.0+0.49=9.49\\,\\mathrm{mm}\\)", requires:["s2"]}
+    ]},
+  { id:"P18", title:"P18 差：2つの測定値の差", prompt:"2回の観測値がそれぞれ \\(12.34\\,\\mathrm{mm}\\) と \\(12.08\\,\\mathrm{mm}\\)。差（大きい−小さい）を求めよ。",
+    steps:[
+      {id:"s1", text:"差をとる：\\(12.34-12.08\\)", requires:[]},
+      {id:"s2", text:"計算：\\(0.26\\,\\mathrm{mm}\\)", requires:["s1"]},
+      {id:"s3", text:"答：\\(0.26\\,\\mathrm{mm}\\)", requires:["s2"]}
+    ]},
+  { id:"P19", title:"P19 平均：3回測定の平均", prompt:"同じものを3回測り、\\(5.61,\\ 5.63,\\ 5.62\\,\\mathrm{mm}\\) だった。平均値を求めよ。",
+    steps:[
+      {id:"s1", text:"平均：\\(\\frac{5.61+5.63+5.62}{3}\\)", requires:[]},
+      {id:"s2", text:"和は \\(16.86\\) → \\(16.86\\div3=5.62\\,\\mathrm{mm}\\)", requires:["s1"]},
+      {id:"s3", text:"答：\\(5.62\\,\\mathrm{mm}\\)", requires:["s2"]}
+    ]},
+  { id:"P20", title:"P20 補正の逆：零点誤差を求める", prompt:"ある物体の真値が \\(8.20\\,\\mathrm{mm}\\) と分かっている。ミクロメーターの観測値は \\(8.23\\,\\mathrm{mm}\\)。零点誤差（＋か−かも含めて）を求めよ。",
+    steps:[
+      {id:"s1", text:"関係：真値＝観測値−誤差（＋誤差の場合）", requires:[]},
+      {id:"s2", text:"誤差＝観測値−真値：\\(8.23-8.20=0.03\\,\\mathrm{mm}\\)", requires:["s1"]},
+      {id:"s3", text:"観測値の方が大きい→＋の零点誤差 \\(+0.03\\,\\mathrm{mm}\\)", requires:["s2"]}
+    ]}
 ];
 
-// --- 追加：正答カードを細分化（S1a/S1b…）し、連続性も判定する ---
+/* =========================
+   ガイド：S1 として先頭へ自動挿入
+   ========================= */
+const DEFAULT_GUIDE = "本尺S（mm, 0.5mm含む）＋回転目盛T×0.01mm。零点誤差は（＋なら引く、−なら足す）。";
+const GUIDE_TEMPLATES = [
+  { match: /読み取り/, text: "本尺S（0.5mm線の有無に注意）＋0.01T。単位は mm。" },
+  { match: /単位換算/, text: "換算：1cm=10mm、1mm=1000μm。桁を間違えない。" },
+  { match: /零点誤差|補正/, text: "補正：＋誤差→真値=観測値−誤差、−誤差→真値=観測値＋誤差。" },
+  { match: /逆算/, text: "観測値L=S+0.01T。未知（S or T）を引き算で逆算。" },
+  { match: /丸め/, text: "最小目盛0.01mmなら小数第2位まで。四捨五入の桁に注意。" },
+  { match: /差|平均/, text: "差は引く。平均は合計÷回数。単位は mm のまま。" },
+];
+function pickGuide(problem){
+  const t = problem.title || "";
+  const found = GUIDE_TEMPLATES.find(x => x.match.test(t));
+  return found ? found.text : DEFAULT_GUIDE;
+}
+
+/* =========================
+   ✅ 冗長ステップ削除（全体をすっきり）
+   - 「答」「単位まで書く」「結論」系で
+   - 直前と同じ内容（数値/式）を繰り返すだけなら落とす
+   - 他ステップに参照されるものは落とさない（安全）
+   ========================= */
+function extractMathBlocks(text){
+  const s = String(text||"");
+  const blocks = [];
+  const re = /\\\((.+?)\\\)/g;
+  let m;
+  while((m = re.exec(s)) !== null){
+    blocks.push(m[1].trim());
+  }
+  return blocks;
+}
+function extractNumbers(text){
+  const s = String(text||"");
+  return (s.match(/[-+]?\d+(?:\.\d+)?/g) || []);
+}
+function isRedundantTailStep(stepText){
+  const t = String(stepText||"").trim();
+  return /^(答|解答|単位まで書く|単位まで書くこと|結論)\s*[:：]/.test(t);
+}
+function simplifySteps(steps){
+  const arr = (steps || []).slice();
+  if(arr.length <= 1) return arr;
+
+  // 参照されているステップは削除しない
+  const referenced = new Set();
+  for(const s of arr){
+    for(const r of (s.requires||[])) referenced.add(r);
+  }
+
+  const keep = [];
+  for(let i=0;i<arr.length;i++){
+    const s = arr[i];
+
+    // 候補：末尾系＆参照されていない
+    if(!referenced.has(s.id) && isRedundantTailStep(s.text) && i>0){
+      const prev = arr[i-1];
+
+      // 1) 数式ブロックが完全一致なら削除
+      const m1 = extractMathBlocks(s.text);
+      const m0 = extractMathBlocks(prev.text);
+      const sameMath = (m1.length>0 && m0.length>0 && m1.join("||") === m0.join("||"));
+
+      // 2) 数値がすべて直前に含まれているなら削除（例：12.07 の再掲）
+      const n1 = extractNumbers(s.text);
+      const n0 = extractNumbers(prev.text);
+      const allNumsContained = (n1.length>0 && n1.every(x => n0.includes(x)));
+
+      // 3) 文字列（「：」以降）が直前テキストに含まれるなら削除
+      const after = String(s.text).split(/[:：]/).slice(1).join(':').trim();
+      const contained = after && String(prev.text).includes(after);
+
+      if(sameMath || allNumsContained || contained){
+        // 削除（= keep しない）
+        continue;
+      }
+    }
+
+    keep.push(s);
+  }
+
+  return keep;
+}
+
+/* =========================
+   「：」分割＋連続条件判定
+   ※終端系は分割しない（くどさ抑制）
+   ========================= */
 function splitOneStepText(stepText){
-  const t = String(stepText || '').trim();
+  const t = String(stepText||'').trim();
   const idx = t.indexOf('：');
   if(idx>0){
     const head = t.slice(0, idx).trim();
+
+    // 分割したくない見出し
+    const NO_SPLIT_HEADS = new Set(["ガイド","答","解答","単位まで書く","単位まで書くこと","結論"]);
+    if(NO_SPLIT_HEADS.has(head)) return [t];
+
     const body = t.slice(idx+1).trim();
     let a = head;
     if(!/を求める$/.test(a)) a = a + 'を求める';
@@ -286,12 +417,12 @@ function splitOneStepText(stepText){
   }
   return [t];
 }
-
 function expandSteps(originalSteps){
   const meta=[];
   const lastOf=new Map();
   const letters='abcdefghijklmnopqrstuvwxyz';
   let stepNo=1;
+
   for(const s of originalSteps){
     const parts = splitOneStepText(s.text);
     const ids = parts.map((_,i)=> parts.length===1 ? s.id : `${s.id}${letters[i]}`);
@@ -300,6 +431,7 @@ function expandSteps(originalSteps){
     lastOf.set(s.id, ids[ids.length-1]);
     stepNo++;
   }
+
   const expanded=[];
   for(const m of meta){
     const {orig, parts, ids, labels} = m;
@@ -308,13 +440,15 @@ function expandSteps(originalSteps){
       const immediateAfter = (i>0) ? ids[i-1] : null;
       const baseReq = (orig.requires||[]).map(r => lastOf.get(r) || r);
       const req = immediateAfter ? Array.from(new Set([...baseReq, immediateAfter])) : baseReq;
-      expanded.push({id, label: labels[i], text: parts[i], requires: req, immediateAfter});
+      expanded.push({id, label: labels[i], text: parts[i], requires: req, immediateAfter, origId: orig.id});
     }
   }
   return expanded;
 }
 
-// --- アプリ共通 ---
+/* =========================
+   アプリ共通
+   ========================= */
 let current=null, currentExpandedSteps=[], poolCards=[], answerCards=[];
 const sel=document.getElementById('problemSelect');
 const promptEl=document.getElementById('prompt');
@@ -328,26 +462,67 @@ const msg=document.getElementById('msg');
 const poolZone=document.getElementById('poolZone');
 const answerZone=document.getElementById('answerZone');
 const solutionWrap=document.getElementById('solutionWrap');
+const nextWrap=document.getElementById('nextWrap');
+
 function escapeHTML(s){
   return String(s)
     .replace(/&/g,'&amp;')
     .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;');
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
 }
-
-
 function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function setStatus(type,text){pill.className='pill'+(type?(' '+type):'');pill.textContent=type==='ok'?'正解':type==='ng'?'不正解':type==='warn'?'途中':'未判定';msg.textContent=text;}
 function typesetMath(){ if(window.MathJax && MathJax.typesetPromise){return MathJax.typesetPromise([promptEl,poolEl,answerEl,solutionWrap]).catch(()=>{});} return Promise.resolve(); }
 
+function getNextProblemId(){
+  const idx = PROBLEMS.findIndex(p => p.id === current.id);
+  if(idx < 0 || idx === PROBLEMS.length - 1) return null;
+  return PROBLEMS[idx + 1].id;
+}
+function showNextButton(){
+  nextWrap.innerHTML = '';
+  const nextId = getNextProblemId();
+  if(!nextId) return;
+  const a = document.createElement('a');
+  a.href = `?p=${encodeURIComponent(nextId)}`;
+  a.className = 'nextBtn';
+  a.textContent = '次の問題へ';
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    sel.value = nextId;
+    loadProblem(nextId);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  nextWrap.appendChild(a);
+}
+function hideNextButton(){ nextWrap.innerHTML=''; }
+
 function createCardEl(card){
   const div=document.createElement('div');
-  div.className='cardItem'+(card.kind==='distractor'?' distractor':'');
+  const isGuide = (card.origId === "g0");
+  div.className='cardItem'
+    + (card.kind==='distractor'?' distractor':'')
+    + (isGuide ? ' guide' : '');
+
   div.draggable=true; div.dataset.cardId=card.id; div.dataset.zone=card.zone;
-  const badge=document.createElement('div'); badge.className='badge'; badge.textContent=card.label;
-  const text=document.createElement('div'); text.className='cardText'; text.textContent=card.text;
+
+  const badge=document.createElement('div');
+  badge.className='badge';
+  // ✅ ガイドも S1 表示（特別に G にしない）
+  badge.textContent = card.label;
+
+  const text=document.createElement('div');
+  text.className='cardText';
+  text.textContent=card.text;
+
   div.appendChild(badge); div.appendChild(text);
-  div.addEventListener('dragstart',(e)=>{e.dataTransfer.setData('text/plain',JSON.stringify({id:card.id,from:card.zone}));e.dataTransfer.effectAllowed='move';});
+
+  div.addEventListener('dragstart',(e)=>{
+    e.dataTransfer.setData('text/plain',JSON.stringify({id:card.id,from:card.zone}));
+    e.dataTransfer.effectAllowed='move';
+  });
   div.addEventListener('click',()=>moveCard(card.id, card.zone==='pool'?'answer':'pool'));
   return div;
 }
@@ -358,133 +533,211 @@ function render(){
   answerCards.forEach(c=>answerEl.appendChild(createCardEl(c)));
   return typesetMath();
 }
-
+function clearMarking(){
+  [...document.querySelectorAll('.cardItem')].forEach(el=>{
+    el.classList.remove('invalid');
+    el.classList.remove('valid');
+  });
+}
 function moveCard(id,toZone){
   let card=null;
-  const take=(arr)=>{const idx=arr.findIndex(x=>x.id===id); if(idx>=0){card=arr[idx];arr.splice(idx,1);return true;} return false;};
-  take(poolCards)||take(answerCards); if(!card) return;
-  card.zone=toZone; (toZone==='pool'?poolCards:answerCards).push(card);
-  clearMarking(); setStatus('', '移動しました。並べ終えたら「判定する」。'); solutionWrap.style.display='none';
+  const take=(arr)=>{
+    const idx=arr.findIndex(x=>x.id===id);
+    if(idx>=0){card=arr[idx];arr.splice(idx,1);return true;}
+    return false;
+  };
+  take(poolCards); take(answerCards);
+  if(!card) return;
+
+  card.zone=toZone;
+  (toZone==='pool'?poolCards:answerCards).push(card);
+
+  clearMarking();
+  hideNextButton();
+  setStatus('', '移動しました。並べ終えたら「判定する」。');
+  solutionWrap.style.display='none';
   render();
 }
-
-function clearMarking(){[...document.querySelectorAll('.cardItem')].forEach(el=>{el.classList.remove('invalid');el.classList.remove('valid');});}
-function markOrderFeedback(result){const els=[...answerEl.querySelectorAll('.cardItem')];const byId=new Map();els.forEach(el=>byId.set(el.dataset.cardId,el));result.orderChecks.forEach(ch=>{const el=byId.get(ch.id); if(!el) return; el.classList.add(ch.ok?'valid':'invalid');});}
-
 function buildSolutionBox(){
- const div=document.createElement('div'); div.className='solution';
- const ol=document.createElement('ol');
- currentExpandedSteps.forEach(s=>{const li=document.createElement('li'); li.textContent=s.text; ol.appendChild(li);});
- div.appendChild(ol); return div;
+  const div=document.createElement('div'); div.className='solution';
+  const ol=document.createElement('ol');
+  currentExpandedSteps.forEach(s=>{
+    const li=document.createElement('li');
+    li.textContent=s.text;
+    ol.appendChild(li);
+  });
+  div.appendChild(ol);
+  return div;
 }
 function evaluate(){
- const stepIds=new Set(currentExpandedSteps.map(s=>s.id));
- const stepMap=new Map(currentExpandedSteps.map(s=>[s.id,s]));
- const ans=answerCards.map(c=>c.id);
- const seen=new Set(); const dup=[]; for(const id of ans){ if(seen.has(id)) dup.push(id); seen.add(id); }
- const extras=ans.filter(id=>!stepIds.has(id));
- const missing=[...stepIds].filter(id=>!ans.includes(id));
- const orderChecks=[]; const placed=new Set(); let firstBad=null;
+  const stepIds=new Set(currentExpandedSteps.map(s=>s.id));
+  const stepMap=new Map(currentExpandedSteps.map(s=>[s.id,s]));
+  const ans=answerCards.map(c=>c.id);
 
- for(let idx=0; idx<ans.length; idx++){
-   const id = ans[idx];
-   if(!stepIds.has(id)){
-     orderChecks.push({id,ok:false,missingReq:[]});
-     if(!firstBad) firstBad={id,reason:'不要カード（正答に含まれない）を入れています。'};
-     continue;
-   }
-   const step = stepMap.get(id);
-   const req = (step.requires||[]);
-   const missReq = req.filter(r=>!placed.has(r));
-   let ok = (missReq.length===0);
-   if(ok && step.immediateAfter){
-     const prev = (idx>0) ? ans[idx-1] : null;
-     if(prev !== step.immediateAfter){
-       ok = false;
-       if(!firstBad) firstBad={id,reason:`連続条件：このカードの直前は ${step.immediateAfter} にしてください。`};
-     }
-   }
-   orderChecks.push({id,ok,missingReq:missReq});
-   if(!ok && !firstBad && missReq.length>0) firstBad={id,reason:`このカードの前に必要：${missReq.join(', ')}`};
-   placed.add(id);
- }
+  const seen=new Set(); const dup=[];
+  for(const id of ans){ if(seen.has(id)) dup.push(id); seen.add(id); }
 
- const correctSet=extras.length===0 && missing.length===0 && dup.length===0;
- const correctOrder=correctSet && orderChecks.filter(x=>stepIds.has(x.id)).every(x=>x.ok);
- const total=currentExpandedSteps.length;
- const okCount=orderChecks.filter(x=>stepIds.has(x.id)&&x.ok).length;
- const progress=total?Math.round((okCount/total)*100):0;
- return {correctSet,correctOrder,missing,extras,dup,firstBad,progress,orderChecks};
+  const extras=ans.filter(id=>!stepIds.has(id));
+  const missing=[...stepIds].filter(id=>!ans.includes(id));
+
+  const orderChecks=[]; const placed=new Set(); let firstBad=null;
+
+  for(let idx=0; idx<ans.length; idx++){
+    const id = ans[idx];
+
+    if(!stepIds.has(id)){
+      orderChecks.push({id,ok:false,missingReq:[]});
+      if(!firstBad) firstBad={id,reason:'不要カード（正答に含まれない）を入れています。'};
+      continue;
+    }
+
+    const step = stepMap.get(id);
+    const req = (step.requires||[]);
+    const missReq = req.filter(r=>!placed.has(r));
+    let ok = (missReq.length===0);
+
+    if(ok && step.immediateAfter){
+      const prev = (idx>0) ? ans[idx-1] : null;
+      if(prev !== step.immediateAfter){
+        ok = false;
+        if(!firstBad) firstBad={id,reason:`連続条件：このカードの直前は ${step.immediateAfter} にしてください。`};
+      }
+    }
+
+    orderChecks.push({id,ok,missingReq:missReq});
+    if(!ok && !firstBad && missReq.length>0) firstBad={id,reason:`このカードの前に必要：${missReq.join(', ')}`};
+
+    placed.add(id);
+  }
+
+  const correctSet = extras.length===0 && missing.length===0 && dup.length===0;
+  const correctOrder = correctSet && orderChecks.filter(x=>stepIds.has(x.id)).every(x=>x.ok);
+
+  const total=currentExpandedSteps.length;
+  const okCount=orderChecks.filter(x=>stepIds.has(x.id)&&x.ok).length;
+  const progress=total?Math.round((okCount/total)*100):0;
+
+  return {correctSet,correctOrder,missing,extras,dup,firstBad,progress,orderChecks};
 }
 function enableDrop(zoneEl,toZone){
-  zoneEl.addEventListener('dragover',(e)=>{e.preventDefault();zoneEl.classList.add('dropHover');e.dataTransfer.dropEffect='move';});
+  zoneEl.addEventListener('dragover',(e)=>{
+    e.preventDefault();
+    zoneEl.classList.add('dropHover');
+    e.dataTransfer.dropEffect='move';
+  });
   zoneEl.addEventListener('dragleave',()=>zoneEl.classList.remove('dropHover'));
-  zoneEl.addEventListener('drop',(e)=>{e.preventDefault();zoneEl.classList.remove('dropHover');try{const p=JSON.parse(e.dataTransfer.getData('text/plain'));moveCard(p.id,toZone);}catch(_){}});
+  zoneEl.addEventListener('drop',(e)=>{
+    e.preventDefault();
+    zoneEl.classList.remove('dropHover');
+    try{
+      const p=JSON.parse(e.dataTransfer.getData('text/plain'));
+      moveCard(p.id,toZone);
+    }catch(_){}
+  });
 }
 
 function loadProblem(problemId){
- current=PROBLEMS.find(p=>p.id===problemId)||PROBLEMS[0];
- promptEl.innerHTML = escapeHTML(current.prompt).replaceAll('\r\n','\n').replaceAll('\n','<br>');
+  current = PROBLEMS.find(p=>p.id===problemId) || PROBLEMS[0];
+  sel.value = current.id;
 
- currentExpandedSteps = expandSteps(current.steps);
+  promptEl.innerHTML = escapeHTML(current.prompt).replaceAll('\r\n','\n').replaceAll('\n','<br>');
 
- const cards=[];
- currentExpandedSteps.forEach(s=>cards.push({
-   id:s.id,
-   kind:'step',
-   label:s.label,
-   text:s.text,
-   requires:s.requires||[],
-   zone:'pool'
- }));
+  // ✅ 1) 冗長ステップを自動整理
+  const trimmed = simplifySteps(current.steps || []);
 
- poolCards=shuffle(cards); answerCards=[];
- solutionWrap.style.display='none'; solutionWrap.innerHTML=''; clearMarking();
- setStatus('', 'カードを並べて「判定する」を押してください。');
- render();
+  // ✅ 2) ガイドを先頭へ（＝S1になる）
+  const guideStep = { id:"g0", text:`ガイド：${pickGuide(current)}`, requires:[] };
+  const stepsWithGuide = [guideStep, ...trimmed];
+
+  // ✅ 3) 分割展開
+  currentExpandedSteps = expandSteps(stepsWithGuide);
+
+  // カード生成
+  const cards=[];
+  currentExpandedSteps.forEach(s=>{
+    cards.push({
+      id:s.id,
+      origId: s.origId, // expandSteps で入れている
+      kind:'step',
+      label:s.label,
+      text:s.text,
+      requires:s.requires||[],
+      zone:'pool'
+    });
+  });
+
+  poolCards=shuffle(cards);
+  answerCards=[];
+
+  solutionWrap.style.display='none';
+  solutionWrap.innerHTML='';
+  clearMarking();
+  hideNextButton();
+  setStatus('', 'カードを並べて「判定する」を押してください。');
+  render();
 }
+
 function populateSelect(){
   sel.innerHTML='';
-  PROBLEMS.forEach(p=>{const opt=document.createElement('option');opt.value=p.id;opt.textContent=p.title;sel.appendChild(opt);});
+  PROBLEMS.forEach(p=>{
+    const opt=document.createElement('option');
+    opt.value=p.id;
+    opt.textContent=p.title;
+    sel.appendChild(opt);
+  });
+}
+function getParamP(){
+  try{ return new URL(window.location.href).searchParams.get('p'); }
+  catch(_){ return null; }
 }
 
 sel.addEventListener('change',()=>loadProblem(sel.value));
 resetBtn.addEventListener('click',()=>loadProblem(sel.value));
+
 answerBtn.addEventListener('click',()=>{
- clearMarking();
- // 学習用：おすすめの並び（解答）を表示する（カードは自動配置しない）
- setStatus('warn','解答（おすすめの並び）を表示しました。自力で並べてから「判定する」で確認できます。');
- solutionWrap.style.display='block';
- solutionWrap.innerHTML='';
- solutionWrap.appendChild(buildSolutionBox());
- typesetMath();
+  clearMarking();
+  hideNextButton();
+  setStatus('warn','解答（おすすめの並び）を表示しました。自力で並べてから「判定する」で確認できます。');
+  solutionWrap.style.display='block';
+  solutionWrap.innerHTML='';
+  solutionWrap.appendChild(buildSolutionBox());
+  typesetMath();
 });
+
 checkBtn.addEventListener('click',()=>{
   clearMarking();
   const r=evaluate();
+
   if(r.correctOrder){
     setStatus('ok','完璧！');
-    solutionWrap.style.display='block'; solutionWrap.innerHTML='';
+    showNextButton();
+    solutionWrap.style.display='block';
+    solutionWrap.innerHTML='';
     solutionWrap.appendChild(buildSolutionBox());
     typesetMath();
   } else if(r.correctSet){
     setStatus('warn',`カードはそろっています。順序を調整（進捗 ${r.progress}%）。`);
+    hideNextButton();
     if(r.firstBad) msg.textContent=`順序ヒント：${r.firstBad.reason}`;
     solutionWrap.style.display='none';
   } else {
+    hideNextButton();
     if(r.extras.length>0) setStatus('ng',`誤カードが混ざっています（${r.extras.length}枚）。`);
     else if(r.missing.length>0) setStatus('ng',`正解カードが足りません（${r.missing.length}枚）。`);
     else setStatus('ng','まだ整っていません。');
     solutionWrap.style.display='none';
   }
+
+  const target = pill.closest('.status') || pill;
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
 });
 
 enableDrop(poolZone,'pool');
 enableDrop(answerZone,'answer');
 
 populateSelect();
-sel.value='P1';
-loadProblem('P1');
+loadProblem(getParamP() || 'P1');
 </script>
 </body>
 </html>
