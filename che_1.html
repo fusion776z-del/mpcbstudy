@@ -1,11 +1,12 @@
 <!doctype html>
 <html lang="ja">
 <head>
- <meta charset="utf-8" />
- <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
- <meta name="viewport" content="width=device-width,initial-scale=1" />
- <title>化学基礎：モル計算（並べ替え学習）Parsons風MVP / MathJax（20問）</title>
- <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>化学基礎：モル計算（並べ替え学習）Parsons風MVP / MathJax（20問）</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
   <style>
     :root{--bg:#0b1020;--text:#e9ecff;--muted:#aab2dd;--accent:#7c5cff;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444;}
     *{box-sizing:border-box}
@@ -56,243 +57,338 @@
     .solution li{margin:6px 0;line-height:1.6;color:#eef1ff}
     .footer{max-width:1200px;margin:0 auto;padding:0 18px 22px;color:var(--muted);font-size:12px;line-height:1.6}
     .mjx-container{margin:0 .08em}
-  
 
-/* 固定：常に左上に表示される『入口へ戻る』ボタン */
-.fixedBack{
-  position:fixed;
-  top: calc(12px + env(safe-area-inset-top));
-  left: calc(12px + env(safe-area-inset-left));
-  z-index: 9999;
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 12px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.16);
-  background: rgba(0,0,0,.45);
-  color: var(--text);
-  text-decoration:none;
-  font-weight:800;
-  font-size:13px;
-  letter-spacing:.02em;
-  backdrop-filter: blur(10px) saturate(1.2);
-  -webkit-backdrop-filter: blur(10px) saturate(1.2);
-  box-shadow: 0 10px 24px rgba(0,0,0,.35);
-  transition:.15s transform,.15s background,.15s border-color;
-}
-.fixedBack:hover{
-  transform: translateY(-1px);
-  background: rgba(0,0,0,.55);
-  border-color: rgba(255,255,255,.26);
-}
-.fixedBack:active{
-  transform: translateY(0);
-}
-@media (prefers-reduced-motion: reduce){
-  .fixedBack{ transition:none; }
-  .fixedBack:hover{ transform:none; }
-}
+    /* 固定：常に左上に表示される『入口へ戻る』ボタン */
+    .fixedBack{
+      position:fixed;
+      top: calc(12px + env(safe-area-inset-top));
+      left: calc(12px + env(safe-area-inset-left));
+      z-index: 9999;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.45);
+      color: var(--text);
+      text-decoration:none;
+      font-weight:800;
+      font-size:13px;
+      letter-spacing:.02em;
+      backdrop-filter: blur(10px) saturate(1.2);
+      -webkit-backdrop-filter: blur(10px) saturate(1.2);
+      box-shadow: 0 10px 24px rgba(0,0,0,.35);
+      transition:.15s transform,.15s background,.15s border-color;
+    }
+    .fixedBack:hover{
+      transform: translateY(-1px);
+      background: rgba(0,0,0,.55);
+      border-color: rgba(255,255,255,.26);
+    }
+    .fixedBack:active{ transform: translateY(0); }
+    @media (prefers-reduced-motion: reduce){
+      .fixedBack{ transition:none; }
+      .fixedBack:hover{ transform:none; }
+    }
 
-</style>
+    /* ✅ 追加：正解時だけ出す「次の問題へ」ボタン（math_1.html と同系） */
+    #nextWrap{display:flex; align-items:center}
+    a.nextBtn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:12px;
+      border:1px solid rgba(124,92,255,.8);
+      background:linear-gradient(135deg,rgba(124,92,255,.95),rgba(124,92,255,.55));
+      color:#e9ecff;
+      padding:10px 12px;
+      font-size:13px;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    a.nextBtn:hover{transform:translateY(-1px)}
+  </style>
 </head>
+
 <body>
-<a class="fixedBack" href="index.html" aria-label="入口（index.html）へ戻る">← 入口へ戻る</a>
+  <a class="fixedBack" href="index.html" aria-label="入口（index.html）へ戻る">← 入口へ戻る</a>
 
-<header>
-  <h1>化学基礎：モル計算（並べ替え学習）</h1>
-  <div class="sub">
-すべての計算はmolへ通ず。\(n=\frac{m}{M}\)、\(N=nN_A\)、溶液は\(c=\frac{n}{V}\)。単位（g, mol, L）をそろえて、最後に答えの単位まで書け。
-</div>
-</header>
-
-<main>
-  <section class="panel">
-    <h2>問題</h2>
-    <div class="body">
-      <div class="row" style="margin-bottom:10px"><label for="problemSelect">問題を選択</label></div>
-      <select id="problemSelect"></select>
-      <div style="height:10px"></div>
-      <div class="prompt" id="prompt"></div>
-      <div style="height:12px"></div>
-      <div class="row">
- <button class="primary" id="checkBtn">判定する</button>
-<button class="ghost" id="answerBtn">解答</button>
- <button class="ghost" id="resetBtn">リセット</button>
- </div>
+  <header>
+    <h1>化学基礎：モル計算（並べ替え学習）</h1>
+    <div class="sub">
+      すべての計算はmolへ通ず。\(n=\frac{m}{M}\)、\(N=nN_A\)、溶液は\(c=\frac{n}{V}\)。
+      単位（g, mol, L）をそろえて、最後に答えの単位まで書け。
     </div>
-  </section>
+  </header>
 
-  <section class="panel">
-    <h2>並べ替え</h2>
-    <div class="board">
-      <div class="zone" id="poolZone">
-        <div class="zoneHeader"><div class="zoneTitle">カード（シャッフル）</div><div class="zoneHint">ドラッグ / クリックで移動</div></div>
-        <div id="pool"></div>
+  <main>
+    <section class="panel">
+      <h2>問題</h2>
+      <div class="body">
+        <div class="row" style="margin-bottom:10px"><label for="problemSelect">問題を選択</label></div>
+        <select id="problemSelect"></select>
+        <div style="height:10px"></div>
+        <div class="prompt" id="prompt"></div>
+        <div style="height:12px"></div>
+        <div class="row">
+          <button class="primary" id="checkBtn">判定する</button>
+          <button class="ghost" id="answerBtn">解答</button>
+          <button class="ghost" id="resetBtn">リセット</button>
+        </div>
       </div>
-      <div class="zone" id="answerZone">
-        <div class="zoneHeader"><div class="zoneTitle">解答エリア</div><div class="zoneHint">上から順に評価</div></div>
-        <div id="answer"></div>
+    </section>
+
+    <section class="panel">
+      <h2>並べ替え</h2>
+      <div class="board">
+        <div class="zone" id="poolZone">
+          <div class="zoneHeader">
+            <div class="zoneTitle">カード（シャッフル）</div>
+            <div class="zoneHint">ドラッグ / クリックで移動</div>
+          </div>
+          <div id="pool"></div>
+        </div>
+
+        <div class="zone" id="answerZone">
+          <div class="zoneHeader">
+            <div class="zoneTitle">解答エリア</div>
+            <div class="zoneHint">上から順に評価</div>
+          </div>
+          <div id="answer"></div>
+        </div>
       </div>
+
+      <div class="status">
+        <div class="pill" id="pill">未判定</div>
+        <div class="msg" id="msg">カードを並べて「判定する」を押してください。</div>
+        <!-- ✅ 追加：正解時にここへ「次の問題へ」ボタンを出す -->
+        <div id="nextWrap"></div>
+      </div>
+
+      <div class="body">
+        <div id="solutionWrap" style="display:none"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="footer">
+    <div>
+      表記：物質量 \(n\,\mathrm{(mol)}\)、モル質量 \(M\,\mathrm{(g/mol)}\)、質量 \(m\,\mathrm{(g)}\)、
+      アボガドロ定数 \(N_A=6.0\times10^{23}\,\mathrm{mol^{-1}}\)、
+      標準状態のモル体積 \(22.4\,\mathrm{L/mol}\)、モル濃度 \(c\,\mathrm{(mol/L)}\)。
     </div>
+  </div>
 
-    <div class="status">
-      <div class="pill" id="pill">未判定</div>
-      <div class="msg" id="msg">カードを並べて「判定する」を押してください。</div>
-    </div>
-
-    <div class="body"><div id="solutionWrap" style="display:none"></div></div>
-  </section>
-</main>
-
-<div class="footer">
- <div>表記：物質量 \(n\,\mathrm{(mol)}\)、モル質量 \(M\,\mathrm{(g/mol)}\)、質量 \(m\,\mathrm{(g)}\)、アボガドロ定数 \(N_A=6.0\times10^{23}\,\mathrm{mol^{-1}}\)、標準状態のモル体積 \(22.4\,\mathrm{L/mol}\)、モル濃度 \(c\,\mathrm{(mol/L)}\)。</div>
-</div>
 <script>
-// 20問（モル計算：質量⇄mol⇄粒子数／気体／溶液／反応量）
+/* =========================================================
+   20問（モル計算：質量⇄mol⇄粒子数／気体／溶液／反応量）
+   ========================================================= */
 const PROBLEMS = [
-{ id:"P1", title:"P1 基本：質量→mol", prompt:"炭素 C を 12 g 用意した。物質量は何 mol か。\n（C のモル質量は 12 g/mol）",
- steps:[
-  {id:"g0", text:"ガイド：質量 m とモル質量 M が与えられているので、物質量 n は n=m/M を使って求める。", requires:[]},
- {id:"s1", text:"式：n=m/M", requires:[]},
-  {id:"s2", text:"代入：n=12/12=1 mol", requires:["s1"]},
-  {id:"s3", text:"答：1 mol", requires:["s2"]}
- ]},
-{ id:"P2", title:"P2 基本：mol→質量", prompt:"水 H₂O が 0.50 mol ある。質量 m を求めよ。\n（H₂O のモル質量は 18 g/mol）",
- steps:[
-  {id:"g0", text:"ガイド：物質量 n とモル質量 M が与えられているので、質量 m は m=nM を使って求める。", requires:[]},
- {id:"s1", text:"式：m=nM", requires:[]},
-  {id:"s2", text:"代入：m=0.50×18=9.0 g", requires:["s1"]},
-  {id:"s3", text:"答：9.0 g", requires:["s2"]}
- ]},
-{ id:"P3", title:"P3 粒子数：mol→分子数", prompt:"酸素分子 O₂ が 0.20 mol ある。分子数 N を求めよ。\n（N_A=6.0×10²³mathrm{mol⁻¹}）",
- steps:[
-  {id:"g0", text:"ガイド：物質量 n から粒子数 N を出すときは、N=nN_A（アボガドロ定数）を使う。", requires:[]},
- {id:"s1", text:"式：N=nN_A", requires:[]},
-  {id:"s2", text:"代入：N=0.20×6.0×10²³=1.2×10²³ 個", requires:["s1"]},
-  {id:"s3", text:"答：1.2×10²³ 個", requires:["s2"]}
- ]},
-{ id:"P4", title:"P4 粒子数：個数→mol", prompt:"ナトリウム原子が 3.0×10²³ 個ある。物質量 n を求めよ。\n（N_A=6.0×10²³mathrm{mol⁻¹}）",
- steps:[
-  {id:"g0", text:"ガイド：粒子数 N から物質量 n を出すときは、n=N/N_A を使う。", requires:[]},
- {id:"s1", text:"式：n=N/N_A", requires:[]},
-  {id:"s2", text:"代入：n=3.0×10²³/6.0×10²³=0.50 mol", requires:["s1"]},
-  {id:"s3", text:"答：0.50 mol", requires:["s2"]}
- ]},
-{ id:"P5", title:"P5 モル質量：化学式から", prompt:"硫酸 H₂SO₄ のモル質量 M を求めよ。\n（H=1,\\ S=32,\\ O=16）",
- steps:[
-  {id:"g0", text:"ガイド：化学式の各原子量を足し合わせて、モル質量 M（g/mol）を求める。", requires:[]},
- {id:"s1", text:"合計：M=2×1+1×32+4×16", requires:[]},
-  {id:"s2", text:"計算：M=2+32+64=98 g/mol", requires:["s1"]},
-  {id:"s3", text:"答：98 g/mol", requires:["s2"]}
- ]},
-{ id:"P6", title:"P6 質量→mol：NaCl", prompt:"食塩 NaCl を 11.7 g 量り取った。物質量を求めよ。\n（Na=23,\\ Cl=35.5）",
- steps:[
-  {id:"g0", text:"ガイド：まず化学式からモル質量 M を求め、次に n=m/M で物質量を求める。", requires:[]},
- {id:"s1", text:"モル質量：M=23+35.5=58.5 g/mol", requires:[]},
-  {id:"s2", text:"式：n=m/M=11.7/58.5", requires:["s1"]},
-  {id:"s3", text:"計算：n=0.20 mol", requires:["s2"]}
- ]},
-{ id:"P7", title:"P7 気体：mol→体積（標準状態）", prompt:"標準状態で二酸化炭素 CO₂ が 0.50 mol ある。体積 V を求めよ。\n（1 mol=22.4 L）",
- steps:[
-  {id:"g0", text:"ガイド：標準状態の気体は 1 mol = 22.4 L を使う。n が分かれば V=22.4 n。", requires:[]},
- {id:"s1", text:"関係：V=22.4nL", requires:[]},
-  {id:"s2", text:"代入：V=22.4×0.50=11.2 L", requires:["s1"]},
-  {id:"s3", text:"答：11.2 L", requires:["s2"]}
- ]},
-{ id:"P8", title:"P8 気体：体積→mol（標準状態）", prompt:"標準状態で窒素 N₂ が 5.60 L ある。物質量を求めよ。\n（1 mol=22.4 L）",
- steps:[
-  {id:"g0", text:"ガイド：標準状態の気体は 1 mol = 22.4 L を使う。V が分かれば n=V/22.4。", requires:[]},
- {id:"s1", text:"式：n=V/22.4", requires:[]},
-  {id:"s2", text:"代入：n=5.60/22.4=0.250 mol", requires:["s1"]},
-  {id:"s3", text:"答：0.250 mol", requires:["s2"]}
- ]},
-{ id:"P9", title:"P9 溶液：モル濃度", prompt:"(NaOH を 0.20 mol 溶かして溶液を 0.50 L にした。モル濃度 c を求めよ。",
- steps:[
-  {id:"g0", text:"ガイド：モル濃度 c は c=n/V（V は L）。n と V が与えられているので c=n/V。", requires:[]},
- {id:"s1", text:"定義：c=n/V", requires:[]},
-  {id:"s2", text:"代入：c=0.20/0.50=0.40 mol/L", requires:["s1"]},
-  {id:"s3", text:"答：0.40 mol/L", requires:["s2"]}
- ]},
-{ id:"P10", title:"P10 溶液：濃度と体積→mol", prompt:"0.50 mol/L の塩酸を 200 mL 取った。含まれる HCl の物質量を求めよ。",
- steps:[
-  {id:"g0", text:"ガイド：モル濃度 c と体積 V（L）が与えられたら、溶質の物質量は n=cV。まず mL→L に直す。", requires:[]},
- {id:"s1", text:"単位換算：200 mL=0.200 L", requires:[]},
-  {id:"s2", text:"式：n=cV", requires:["s1"]},
-  {id:"s3", text:"代入：n=0.50×0.200=0.100 mol", requires:["s2"]}
- ]},
-{ id:"P11", title:"P11 希釈：mol保存", prompt:"2.0 mol/L の NaCl 水溶液を 50 mL 取り、水を加えて 200 mL にした。希釈後のモル濃度を求めよ。",
- steps:[
-  {id:"g0", text:"ガイド：希釈では溶質の物質量が変わらないので c1V1=c2V2 を使う（体積は L）。", requires:[]},
- {id:"s1", text:"溶質のmolは保存：c₁V₁=c₂V₂", requires:[]},
-  {id:"s2", text:"体積をLへ：V₁=0.050 L,\\ V₂=0.200 L", requires:["s1"]},
-  {id:"s3", text:"計算：c₂=2.0×0.050/0.200=0.50 mol/L", requires:["s2"]}
- ]},
-{ id:"P12", title:"P12 溶液作成：必要質量", prompt:"0.30 mol/L の硫酸ナトリウム Na₂SO₄ 水溶液を 0.40 L 作る。必要な溶質の質量を求めよ。\n（Na=23 S=32 O=16）",
- steps:[
-  {id:"g0", text:"ガイド：溶液作成は、まず n=cV で必要な物質量を出し、次に m=nM で必要質量を出す。", requires:[]},
- {id:"s1", text:"物質量：n=cV=0.30×0.40=0.12 mol", requires:[]},
-  {id:"s2", text:"モル質量：M=2×23+32+4×16=142 g/mol", requires:["s1"]},
-  {id:"s3", text:"質量：m=nM=0.12×142=17.0 g", requires:["s2"]}
- ]},
-{ id:"P13", title:"P13 混合：同じ溶質の濃度", prompt:"0.20 mol/L の KCl 100 mL と、0.50 mol/L の KCl 200 mL を混ぜた。混合後のモル濃度を求めよ。",
- steps:[
-  {id:"g0", text:"ガイド：混合はそれぞれ n=cV を求めて足し、全体積で割って c=n/V を出す（体積は L）。", requires:[]},
- {id:"s1", text:"各mol：n₁=0.20×0.100=0.020, n₂=0.50×0.200=0.100", requires:[]},
-  {id:"s2", text:"全mol：n=0.020+0.100=0.120 mol", requires:["s1"]},
-  {id:"s3", text:"全体積：V=0.100+0.200=0.300 L → c=0.120/0.300=0.40 mol/L", requires:["s2"]}
- ]},
-{ id:"P14", title:"P14 質量%：求める", prompt:"食塩 5.0 g を水 95.0 g に溶かした。質量パーセント濃度を求めよ。",
- steps:[
-  {id:"g0", text:"ガイド：質量％は 溶質/溶液×100。溶液質量＝溶質＋溶媒 を先に求める。", requires:[]},
- {id:"s1", text:"溶液の質量：m_{sol}=5.0+95.0=100.0 g", requires:[]},
-  {id:"s2", text:"質量%：w=5.0/100.0×100=5.0\\%", requires:["s1"]},
-  {id:"s3", text:"答：5.0\\%", requires:["s2"]}
- ]},
-{ id:"P15", title:"P15 質量%：溶質質量", prompt:"(10.0\\% の砂糖水 250 g に含まれる砂糖の質量を求めよ。",
- steps:[
-  {id:"g0", text:"ガイド：質量％ w から溶質質量を出すには、m_solute=(w/100)×m_solution を使う。", requires:[]},
- {id:"s1", text:"定義：w=frac{m_{solute}}{m_{solution}}×100", requires:[]},
-  {id:"s2", text:"変形：m_{solute}=w/100m_{solution}", requires:["s1"]},
-  {id:"s3", text:"代入：m_{solute}=0.10×250=25.0 g", requires:["s2"]}
- ]},
-{ id:"P16", title:"P16 反応量：H2生成", prompt:"亜鉛 Zn 6.5 g を過剰の塩酸と反応させる。Zn+2HCl→ ZnCl₂+H₂ のとき、発生する H₂ の物質量を求めよ。\n（Zn=65）",
- steps:[
-  {id:"g0", text:"ガイド：反応量は「まずモルに直す→反応式の係数比で対応→必要な物質量」を出す。", requires:[]},
- {id:"s1", text:"Znのmol：n(Zn)=6.5/65=0.10 mol", requires:[]},
-  {id:"s2", text:"係数比：Zn:H₂=1:1", requires:["s1"]},
-  {id:"s3", text:"よってn(H₂)=0.10 mol", requires:["s2"]}
- ]},
-{ id:"P17", title:"P17 反応量：必要O2", prompt:"メタン CH₄ 0.50 mol を完全燃焼させる。(CH₄+2O₂→ CO₂+2H₂O より必要な O₂ の物質量を求めよ。",
- steps:[
-  {id:"g0", text:"ガイド：反応量は係数比で決まる。与えられた CH₄ の物質量に係数比（1:2）を掛ける。", requires:[]},
- {id:"s1", text:"係数比：CH₄:O₂=1:2", requires:[]},
-  {id:"s2", text:"計算：n(O₂)=2×0.50=1.0 mol", requires:["s1"]},
-  {id:"s3", text:"答：1.0 mol", requires:["s2"]}
- ]},
-{ id:"P18", title:"P18 結晶水：水の質量", prompt:"硫酸銅(II)五水和物 CuSO₄・5H₂O 25.0 g に含まれる結晶水 H₂O の質量を求めよ。\n（Cu=64 S=32 O=16 H=1）",
- steps:[
-  {id:"g0", text:"ガイド：結晶水は 1 式量に含まれる水の個数に注目。まず全体をモルにし、水のモル→質量へ。", requires:[]},
- {id:"s1", text:"モル質量：M=(64+32+4×16)+5×18=160+90=250 g/mol", requires:[]},
-  {id:"s2", text:"物質量：n=25.0/250=0.100 mol", requires:["s1"]},
-  {id:"s3", text:"水は5倍：n(H₂O)=0.500 mol → m=0.500×18=9.0 g", requires:["s2"]}
- ]},
-{ id:"P19", title:"P19 原子数：O原子の個数", prompt:"炭酸カルシウム CaCO₃ が 0.10 mol ある。含まれる酸素原子の個数を求めよ。\n（N_A=6.0×10²³mathrm{mol⁻¹}）",
- steps:[
-  {id:"g0", text:"ガイド：原子数は「1 式量あたりの原子個数×物質量」で原子のモルを出し、N=nN_A で個数へ。", requires:[]},
- {id:"s1", text:"1式量にOは3個 → O原子のmol：n(O)=3×0.10=0.30 mol", requires:[]},
-  {id:"s2", text:"個数：N=0.30×6.0×10²³=1.8×10²³ 個", requires:["s1"]},
-  {id:"s3", text:"答：1.8×10²³ 個", requires:["s2"]}
- ]},
-{ id:"P20", title:"P20 気体：生成体積（分解反応）", prompt:"炭酸カルシウム CaCO₃ 10.0 g を加熱分解する。CaCO₃→ CaO+CO₂ のとき発生する CO₂ の標準状態での体積を求めよ。\n（Ca=40 C=12 O=16、1 mol=22.4 L）",
- steps:[
-  {id:"g0", text:"ガイド：分解反応は「モルに直す→係数比→標準状態なら 22.4 L/mol」で体積へ。", requires:[]},
- {id:"s1", text:"モル質量：M=40+12+3×16=100 g/mol", requires:[]},
-  {id:"s2", text:"物質量：n(CaCO₃)=10.0/100=0.100 mol", requires:["s1"]},
-  {id:"s3", text:"係数比1:1 → n(CO₂)=0.100 mol → V=22.4×0.100=2.24 L", requires:["s2"]}
- ]}
+  { id:"P1", title:"P1 基本：質量→mol",
+    prompt:"炭素 C を 12 g 用意した。物質量は何 mol か。\n（C のモル質量は 12 g/mol）",
+    steps:[
+      {id:"g0", text:"ガイド：質量 m とモル質量 M が与えられているので、物質量 n は n=m/M を使って求める。", requires:[]},
+      {id:"s1", text:"式：n=m/M", requires:[]},
+      {id:"s2", text:"代入：n=12/12=1 mol", requires:["s1"]},
+      {id:"s3", text:"答：1 mol", requires:["s2"]}
+    ]
+  },
+
+  { id:"P2", title:"P2 基本：mol→質量",
+    prompt:"水 H₂O が 0.50 mol ある。質量 m を求めよ。\n（H₂O のモル質量は 18 g/mol）",
+    steps:[
+      {id:"g0", text:"ガイド：物質量 n とモル質量 M が与えられているので、質量 m は m=nM を使って求める。", requires:[]},
+      {id:"s1", text:"式：m=nM", requires:[]},
+      {id:"s2", text:"代入：m=0.50×18=9.0 g", requires:["s1"]},
+      {id:"s3", text:"答：9.0 g", requires:["s2"]}
+    ]
+  },
+
+  { id:"P3", title:"P3 粒子数：mol→分子数",
+    prompt:"酸素分子 O₂ が 0.20 mol ある。分子数 N を求めよ。\n（\(N_A=6.0\\times10^{23}\\,\\mathrm{mol^{-1}}\)）",
+    steps:[
+      {id:"g0", text:"ガイド：物質量 n から粒子数 N を出すときは、N=nN_A（アボガドロ定数）を使う。", requires:[]},
+      {id:"s1", text:"式：N=nN_A", requires:[]},
+      {id:"s2", text:"代入：N=0.20×6.0×10²³=1.2×10²³ 個", requires:["s1"]},
+      {id:"s3", text:"答：1.2×10²³ 個", requires:["s2"]}
+    ]
+  },
+
+  { id:"P4", title:"P4 粒子数：個数→mol",
+    prompt:"ナトリウム原子が 3.0×10²³ 個ある。物質量 n を求めよ。\n（\(N_A=6.0\\times10^{23}\\,\\mathrm{mol^{-1}}\)）",
+    steps:[
+      {id:"g0", text:"ガイド：粒子数 N から物質量 n を出すときは、n=N/N_A を使う。", requires:[]},
+      {id:"s1", text:"式：n=N/N_A", requires:[]},
+      {id:"s2", text:"代入：n=3.0×10²³/6.0×10²³=0.50 mol", requires:["s1"]},
+      {id:"s3", text:"答：0.50 mol", requires:["s2"]}
+    ]
+  },
+
+  { id:"P5", title:"P5 モル質量：化学式から",
+    prompt:"硫酸 H₂SO₄ のモル質量 M を求めよ。\n（H=1,\\ S=32,\\ O=16）",
+    steps:[
+      {id:"g0", text:"ガイド：化学式の各原子量を足し合わせて、モル質量 M（g/mol）を求める。", requires:[]},
+      {id:"s1", text:"合計：M=2×1+1×32+4×16", requires:[]},
+      {id:"s2", text:"計算：M=2+32+64=98 g/mol", requires:["s1"]},
+      {id:"s3", text:"答：98 g/mol", requires:["s2"]}
+    ]
+  },
+
+  { id:"P6", title:"P6 質量→mol：NaCl",
+    prompt:"食塩 NaCl を 11.7 g 量り取った。物質量を求めよ。\n（Na=23,\\ Cl=35.5）",
+    steps:[
+      {id:"g0", text:"ガイド：まず化学式からモル質量 M を求め、次に n=m/M で物質量を求める。", requires:[]},
+      {id:"s1", text:"モル質量：M=23+35.5=58.5 g/mol", requires:[]},
+      {id:"s2", text:"式：n=m/M=11.7/58.5", requires:["s1"]},
+      {id:"s3", text:"計算：n=0.20 mol", requires:["s2"]}
+    ]
+  },
+
+  { id:"P7", title:"P7 気体：mol→体積（標準状態）",
+    prompt:"標準状態で二酸化炭素 CO₂ が 0.50 mol ある。体積 V を求めよ。\n（1 mol=22.4 L）",
+    steps:[
+      {id:"g0", text:"ガイド：標準状態の気体は 1 mol = 22.4 L を使う。n が分かれば V=22.4 n。", requires:[]},
+      {id:"s1", text:"関係：V=22.4n L", requires:[]},
+      {id:"s2", text:"代入：V=22.4×0.50=11.2 L", requires:["s1"]},
+      {id:"s3", text:"答：11.2 L", requires:["s2"]}
+    ]
+  },
+
+  { id:"P8", title:"P8 気体：体積→mol（標準状態）",
+    prompt:"標準状態で窒素 N₂ が 5.60 L ある。物質量を求めよ。\n（1 mol=22.4 L）",
+    steps:[
+      {id:"g0", text:"ガイド：標準状態の気体は 1 mol = 22.4 L を使う。V が分かれば n=V/22.4。", requires:[]},
+      {id:"s1", text:"式：n=V/22.4", requires:[]},
+      {id:"s2", text:"代入：n=5.60/22.4=0.250 mol", requires:["s1"]},
+      {id:"s3", text:"答：0.250 mol", requires:["s2"]}
+    ]
+  },
+
+  { id:"P9", title:"P9 溶液：モル濃度",
+    prompt:"NaOH を 0.20 mol 溶かして溶液を 0.50 L にした。モル濃度 c を求めよ。",
+    steps:[
+      {id:"g0", text:"ガイド：モル濃度 c は c=n/V（V は L）。n と V が与えられているので c=n/V。", requires:[]},
+      {id:"s1", text:"定義：c=n/V", requires:[]},
+      {id:"s2", text:"代入：c=0.20/0.50=0.40 mol/L", requires:["s1"]},
+      {id:"s3", text:"答：0.40 mol/L", requires:["s2"]}
+    ]
+  },
+
+  { id:"P10", title:"P10 溶液：濃度と体積→mol",
+    prompt:"0.50 mol/L の塩酸を 200 mL 取った。含まれる HCl の物質量を求めよ。",
+    steps:[
+      {id:"g0", text:"ガイド：モル濃度 c と体積 V（L）が与えられたら、溶質の物質量は n=cV。まず mL→L に直す。", requires:[]},
+      {id:"s1", text:"単位換算：200 mL=0.200 L", requires:[]},
+      {id:"s2", text:"式：n=cV", requires:["s1"]},
+      {id:"s3", text:"代入：n=0.50×0.200=0.100 mol", requires:["s2"]}
+    ]
+  },
+
+  { id:"P11", title:"P11 希釈：mol保存",
+    prompt:"2.0 mol/L の NaCl 水溶液を 50 mL 取り、水を加えて 200 mL にした。希釈後のモル濃度を求めよ。",
+    steps:[
+      {id:"g0", text:"ガイド：希釈では溶質の物質量が変わらないので c₁V₁=c₂V₂ を使う（体積は L）。", requires:[]},
+      {id:"s1", text:"溶質のmolは保存：c₁V₁=c₂V₂", requires:[]},
+      {id:"s2", text:"体積をLへ：V₁=0.050 L, V₂=0.200 L", requires:["s1"]},
+      {id:"s3", text:"計算：c₂=2.0×0.050/0.200=0.50 mol/L", requires:["s2"]}
+    ]
+  },
+
+  { id:"P12", title:"P12 溶液作成：必要質量",
+    prompt:"0.30 mol/L の硫酸ナトリウム Na₂SO₄ 水溶液を 0.40 L 作る。必要な溶質の質量を求めよ。\n（Na=23 S=32 O=16）",
+    steps:[
+      {id:"g0", text:"ガイド：溶液作成は、まず n=cV で必要な物質量を出し、次に m=nM で必要質量を出す。", requires:[]},
+      {id:"s1", text:"物質量：n=cV=0.30×0.40=0.12 mol", requires:[]},
+      {id:"s2", text:"モル質量：M=2×23+32+4×16=142 g/mol", requires:["s1"]},
+      {id:"s3", text:"質量：m=nM=0.12×142=17.0 g", requires:["s2"]}
+    ]
+  },
+
+  { id:"P13", title:"P13 混合：同じ溶質の濃度",
+    prompt:"0.20 mol/L の KCl 100 mL と、0.50 mol/L の KCl 200 mL を混ぜた。混合後のモル濃度を求めよ。",
+    steps:[
+      {id:"g0", text:"ガイド：混合はそれぞれ n=cV を求めて足し、全体積で割って c=n/V を出す（体積は L）。", requires:[]},
+      {id:"s1", text:"各mol：n₁=0.20×0.100=0.020, n₂=0.50×0.200=0.100", requires:[]},
+      {id:"s2", text:"全mol：n=0.020+0.100=0.120 mol", requires:["s1"]},
+      {id:"s3", text:"全体積：V=0.100+0.200=0.300 L → c=0.120/0.300=0.40 mol/L", requires:["s2"]}
+    ]
+  },
+
+  { id:"P14", title:"P14 質量%：求める",
+    prompt:"食塩 5.0 g を水 95.0 g に溶かした。質量パーセント濃度を求めよ。",
+    steps:[
+      {id:"g0", text:"ガイド：質量％は 溶質/溶液×100。溶液質量＝溶質＋溶媒 を先に求める。", requires:[]},
+      {id:"s1", text:"溶液の質量：m_{sol}=5.0+95.0=100.0 g", requires:[]},
+      {id:"s2", text:"質量%：w=5.0/100.0×100=5.0%", requires:["s1"]},
+      {id:"s3", text:"答：5.0%", requires:["s2"]}
+    ]
+  },
+
+  { id:"P15", title:"P15 質量%：溶質質量",
+    prompt:"10.0% の砂糖水 250 g に含まれる砂糖の質量を求めよ。",
+    steps:[
+      {id:"g0", text:"ガイド：質量％ w から溶質質量を出すには、m_solute=(w/100)×m_solution を使う。", requires:[]},
+      {id:"s1", text:"定義：w=\\(\\frac{m_{solute}}{m_{solution}}\\)×100", requires:[]},
+      {id:"s2", text:"変形：m_{solute}=(w/100)×m_{solution}", requires:["s1"]},
+      {id:"s3", text:"代入：m_{solute}=0.10×250=25.0 g", requires:["s2"]}
+    ]
+  },
+
+  { id:"P16", title:"P16 反応量：H₂生成",
+    prompt:"亜鉛 Zn 6.5 g を過剰の塩酸と反応させる。Zn+2HCl→ ZnCl₂+H₂ のとき、発生する H₂ の物質量を求めよ。\n（Zn=65）",
+    steps:[
+      {id:"g0", text:"ガイド：反応量は「まずモルに直す→反応式の係数比で対応→必要な物質量」を出す。", requires:[]},
+      {id:"s1", text:"Znのmol：n(Zn)=6.5/65=0.10 mol", requires:[]},
+      {id:"s2", text:"係数比：Zn:H₂=1:1", requires:["s1"]},
+      {id:"s3", text:"よって n(H₂)=0.10 mol", requires:["s2"]}
+    ]
+  },
+
+  { id:"P17", title:"P17 反応量：必要O₂",
+    prompt:"メタン CH₄ 0.50 mol を完全燃焼させる。CH₄+2O₂→ CO₂+2H₂O より必要な O₂ の物質量を求めよ。",
+    steps:[
+      {id:"g0", text:"ガイド：反応量は係数比で決まる。与えられた CH₄ の物質量に係数比（1:2）を掛ける。", requires:[]},
+      {id:"s1", text:"係数比：CH₄:O₂=1:2", requires:[]},
+      {id:"s2", text:"計算：n(O₂)=2×0.50=1.0 mol", requires:["s1"]},
+      {id:"s3", text:"答：1.0 mol", requires:["s2"]}
+    ]
+  },
+
+  { id:"P18", title:"P18 結晶水：水の質量",
+    prompt:"硫酸銅(II)五水和物 CuSO₄・5H₂O 25.0 g に含まれる結晶水 H₂O の質量を求めよ。\n（Cu=64 S=32 O=16 H=1）",
+    steps:[
+      {id:"g0", text:"ガイド：結晶水は 1 式量に含まれる水の個数に注目。まず全体をモルにし、水のモル→質量へ。", requires:[]},
+      {id:"s1", text:"モル質量：M=(64+32+4×16)+5×18=160+90=250 g/mol", requires:[]},
+      {id:"s2", text:"物質量：n=25.0/250=0.100 mol", requires:["s1"]},
+      {id:"s3", text:"水は5倍：n(H₂O)=0.500 mol → m=0.500×18=9.0 g", requires:["s2"]}
+    ]
+  },
+
+  { id:"P19", title:"P19 原子数：O原子の個数",
+    prompt:"炭酸カルシウム CaCO₃ が 0.10 mol ある。含まれる酸素原子の個数を求めよ。\n（\(N_A=6.0\\times10^{23}\\,\\mathrm{mol^{-1}}\)）",
+    steps:[
+      {id:"g0", text:"ガイド：原子数は「1 式量あたりの原子個数×物質量」で原子のモルを出し、N=nN_A で個数へ。", requires:[]},
+      {id:"s1", text:"1式量にOは3個 → O原子のmol：n(O)=3×0.10=0.30 mol", requires:[]},
+      {id:"s2", text:"個数：N=0.30×6.0×10²³=1.8×10²³ 個", requires:["s1"]},
+      {id:"s3", text:"答：1.8×10²³ 個", requires:["s2"]}
+    ]
+  },
+
+  { id:"P20", title:"P20 気体：生成体積（分解反応）",
+    prompt:"炭酸カルシウム CaCO₃ 10.0 g を加熱分解する。CaCO₃→ CaO+CO₂ のとき発生する CO₂ の標準状態での体積を求めよ。\n（Ca=40 C=12 O=16、1 mol=22.4 L）",
+    steps:[
+      {id:"g0", text:"ガイド：分解反応は「モルに直す→係数比→標準状態なら 22.4 L/mol」で体積へ。", requires:[]},
+      {id:"s1", text:"モル質量：M=40+12+3×16=100 g/mol", requires:[]},
+      {id:"s2", text:"物質量：n(CaCO₃)=10.0/100=0.100 mol", requires:["s1"]},
+      {id:"s3", text:"係数比1:1 → n(CO₂)=0.100 mol → V=22.4×0.100=2.24 L", requires:["s2"]}
+    ]
+  }
 ];
-// --- アプリ共通 ---
+
+/* =======================
+   --- アプリ共通 ---
+   ======================= */
 let current=null, poolCards=[], answerCards=[];
 const sel=document.getElementById('problemSelect');
 const promptEl=document.getElementById('prompt');
@@ -306,17 +402,62 @@ const msg=document.getElementById('msg');
 const poolZone=document.getElementById('poolZone');
 const answerZone=document.getElementById('answerZone');
 const solutionWrap=document.getElementById('solutionWrap');
+const nextWrap=document.getElementById('nextWrap'); // ✅ 追加
+
 function escapeHTML(s){
   return String(s)
     .replace(/&/g,'&amp;')
     .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;');
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
 }
 
+function shuffle(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function setStatus(type,text){
+  pill.className='pill'+(type?(' '+type):'');
+  pill.textContent=type==='ok'?'正解':type==='ng'?'不正解':type==='warn'?'途中':'未判定';
+  msg.textContent=text;
+}
+function typesetMath(){
+  if(window.MathJax && MathJax.typesetPromise){
+    return MathJax.typesetPromise([promptEl,poolEl,answerEl,solutionWrap]).catch(()=>{});
+  }
+  return Promise.resolve();
+}
 
-function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function setStatus(type,text){pill.className='pill'+(type?(' '+type):'');pill.textContent=type==='ok'?'正解':type==='ng'?'不正解':type==='warn'?'途中':'未判定';msg.textContent=text;}
-function typesetMath(){ if(window.MathJax && MathJax.typesetPromise){return MathJax.typesetPromise([promptEl,poolEl,answerEl,solutionWrap]).catch(()=>{});} return Promise.resolve(); }
+/* ✅ 追加：次の問題へ（math_1.html と同じ考え方） */
+function getNextProblemId(){
+  const idx = PROBLEMS.findIndex(p => p.id === current.id);
+  if(idx < 0 || idx === PROBLEMS.length - 1) return null;
+  return PROBLEMS[idx + 1].id;
+}
+function showNextButton(){
+  nextWrap.innerHTML = '';
+  const nextId = getNextProblemId();
+  if(!nextId) return;
+  const a = document.createElement('a');
+  a.href = `?p=${encodeURIComponent(nextId)}`;
+  a.className = 'nextBtn';
+  a.textContent = '次の問題へ';
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    sel.value = nextId;
+    loadProblem(nextId);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  nextWrap.appendChild(a);
+}
+function hideNextButton(){
+  nextWrap.innerHTML = '';
+}
 
 function createCardEl(card){
   const div=document.createElement('div');
@@ -325,7 +466,10 @@ function createCardEl(card){
   const badge=document.createElement('div'); badge.className='badge'; badge.textContent=card.label;
   const text=document.createElement('div'); text.className='cardText'; text.textContent=card.text;
   div.appendChild(badge); div.appendChild(text);
-  div.addEventListener('dragstart',(e)=>{e.dataTransfer.setData('text/plain',JSON.stringify({id:card.id,from:card.zone}));e.dataTransfer.effectAllowed='move';});
+  div.addEventListener('dragstart',(e)=>{
+    e.dataTransfer.setData('text/plain',JSON.stringify({id:card.id,from:card.zone}));
+    e.dataTransfer.effectAllowed='move';
+  });
   div.addEventListener('click',()=>moveCard(card.id, card.zone==='pool'?'answer':'pool'));
   return div;
 }
@@ -339,31 +483,64 @@ function render(){
 
 function moveCard(id,toZone){
   let card=null;
-  const take=(arr)=>{const idx=arr.findIndex(x=>x.id===id); if(idx>=0){card=arr[idx];arr.splice(idx,1);return true;} return false;};
-  take(poolCards)||take(answerCards); if(!card) return;
-  card.zone=toZone; (toZone==='pool'?poolCards:answerCards).push(card);
-  clearMarking(); setStatus('', '移動しました。並べ終えたら「判定する」。'); solutionWrap.style.display='none';
+  const take=(arr)=>{
+    const idx=arr.findIndex(x=>x.id===id);
+    if(idx>=0){card=arr[idx];arr.splice(idx,1);return true;}
+    return false;
+  };
+  take(poolCards)||take(answerCards);
+  if(!card) return;
+  card.zone=toZone;
+  (toZone==='pool'?poolCards:answerCards).push(card);
+  clearMarking();
+  hideNextButton(); // ✅ 追加：操作したら一旦消す
+  setStatus('', '移動しました。並べ終えたら「判定する」。');
+  solutionWrap.style.display='none';
   render();
 }
 
-function clearMarking(){[...document.querySelectorAll('.cardItem')].forEach(el=>{el.classList.remove('invalid');el.classList.remove('valid');});}
-function markOrderFeedback(result){const els=[...answerEl.querySelectorAll('.cardItem')];const byId=new Map();els.forEach(el=>byId.set(el.dataset.cardId,el));result.orderChecks.forEach(ch=>{const el=byId.get(ch.id); if(!el) return; el.classList.add(ch.ok?'valid':'invalid');});}
+function clearMarking(){
+  [...document.querySelectorAll('.cardItem')].forEach(el=>{
+    el.classList.remove('invalid');
+    el.classList.remove('valid');
+  });
+}
+function markOrderFeedback(result){
+  const els=[...answerEl.querySelectorAll('.cardItem')];
+  const byId=new Map();
+  els.forEach(el=>byId.set(el.dataset.cardId,el));
+  result.orderChecks.forEach(ch=>{
+    const el=byId.get(ch.id);
+    if(!el) return;
+    el.classList.add(ch.ok?'valid':'invalid');
+  });
+}
 
 function buildSolutionBox(){
-  const div=document.createElement('div'); div.className='solution';
+  const div=document.createElement('div');
+  div.className='solution';
   div.innerHTML='<div style="color:#aab2dd;font-size:12px">参考：おすすめの並び（依存関係を満たせば別の並びでもOK）</div>';
   const ol=document.createElement('ol');
-  current.steps.forEach(s=>{const li=document.createElement('li'); li.textContent=s.text; ol.appendChild(li);});
-  div.appendChild(ol); return div;
+  current.steps.forEach(s=>{
+    const li=document.createElement('li');
+    li.textContent=s.text;
+    ol.appendChild(li);
+  });
+  div.appendChild(ol);
+  return div;
 }
 
 function evaluate(){
   const stepIds=new Set(current.steps.map(s=>s.id));
   const stepMap=new Map(current.steps.map(s=>[s.id,s]));
   const ans=answerCards.map(c=>c.id);
-  const seen=new Set(); const dup=[]; for(const id of ans){ if(seen.has(id)) dup.push(id); seen.add(id); }
+
+  const seen=new Set(); const dup=[];
+  for(const id of ans){ if(seen.has(id)) dup.push(id); seen.add(id); }
+
   const extras=ans.filter(id=>!stepIds.has(id));
   const missing=[...stepIds].filter(id=>!ans.includes(id));
+
   const orderChecks=[]; const placed=new Set(); let firstBad=null;
   for(const id of ans){
     if(!stepIds.has(id)){
@@ -378,73 +555,121 @@ function evaluate(){
     if(!ok && !firstBad) firstBad={id,reason:`このカードの前に必要：${missReq.join(', ')}`};
     placed.add(id);
   }
+
   const correctSet=extras.length===0 && missing.length===0 && dup.length===0;
   const correctOrder=correctSet && orderChecks.filter(x=>stepIds.has(x.id)).every(x=>x.ok);
+
   const total=current.steps.length;
   const okCount=orderChecks.filter(x=>stepIds.has(x.id)&&x.ok).length;
   const progress=total?Math.round((okCount/total)*100):0;
+
   return {correctSet,correctOrder,missing,extras,dup,firstBad,progress,orderChecks};
 }
 
 function enableDrop(zoneEl,toZone){
-  zoneEl.addEventListener('dragover',(e)=>{e.preventDefault();zoneEl.classList.add('dropHover');e.dataTransfer.dropEffect='move';});
+  zoneEl.addEventListener('dragover',(e)=>{
+    e.preventDefault();
+    zoneEl.classList.add('dropHover');
+    e.dataTransfer.dropEffect='move';
+  });
   zoneEl.addEventListener('dragleave',()=>zoneEl.classList.remove('dropHover'));
-  zoneEl.addEventListener('drop',(e)=>{e.preventDefault();zoneEl.classList.remove('dropHover');try{const p=JSON.parse(e.dataTransfer.getData('text/plain'));moveCard(p.id,toZone);}catch(_){}});
+  zoneEl.addEventListener('drop',(e)=>{
+    e.preventDefault();
+    zoneEl.classList.remove('dropHover');
+    try{
+      const p=JSON.parse(e.dataTransfer.getData('text/plain'));
+      moveCard(p.id,toZone);
+    }catch(_){}
+  });
 }
 
 function loadProblem(problemId){
   current=PROBLEMS.find(p=>p.id===problemId)||PROBLEMS[0];
+  sel.value = current.id;
   promptEl.innerHTML = escapeHTML(current.prompt).replace(/\n/g,'<br>');
   const cards=[]; let n=1;
-  current.steps.forEach(s=>cards.push({id:s.id,kind:'step',label:`S${n++}`,text:s.text,requires:s.requires||[],zone:'pool'}));
-poolCards=shuffle(cards); answerCards=[];
-  solutionWrap.style.display='none'; solutionWrap.innerHTML=''; clearMarking();
+  current.steps.forEach(s=>{
+    cards.push({id:s.id,kind:'step',label:`S${n++}`,text:s.text,requires:s.requires||[],zone:'pool'});
+  });
+  poolCards=shuffle(cards);
+  answerCards=[];
+  solutionWrap.style.display='none';
+  solutionWrap.innerHTML='';
+  clearMarking();
+  hideNextButton(); // ✅ 追加：問題切替でボタンは消す
   setStatus('', 'カードを並べて「判定する」を押してください。');
   render();
 }
 
 function populateSelect(){
   sel.innerHTML='';
-  PROBLEMS.forEach(p=>{const opt=document.createElement('option');opt.value=p.id;opt.textContent=p.title;sel.appendChild(opt);});
+  PROBLEMS.forEach(p=>{
+    const opt=document.createElement('option');
+    opt.value=p.id;
+    opt.textContent=p.title;
+    sel.appendChild(opt);
+  });
+}
+
+/* ✅ 追加：URLの ?p=P10 のような指定があればそこから開始（任意） */
+function getParamP(){
+  try{
+    const u = new URL(window.location.href);
+    return u.searchParams.get('p');
+  }catch(_){
+    return null;
+  }
 }
 
 sel.addEventListener('change',()=>loadProblem(sel.value));
 resetBtn.addEventListener('click',()=>loadProblem(sel.value));
+
 answerBtn.addEventListener('click',()=>{
- clearMarking();
- // 学習用：おすすめの並び（解答）を表示する（カードは自動配置しない）
- setStatus('warn','解答（おすすめの並び）を表示しました。自力で並べてから「判定する」で確認できます。');
- solutionWrap.style.display='block';
- solutionWrap.innerHTML='';
- solutionWrap.appendChild(buildSolutionBox());
- typesetMath();
+  clearMarking();
+  hideNextButton(); // ✅ 解答表示中は出さない
+  setStatus('warn','解答（おすすめの並び）を表示しました。自力で並べてから「判定する」で確認できます。');
+  solutionWrap.style.display='block';
+  solutionWrap.innerHTML='';
+  solutionWrap.appendChild(buildSolutionBox());
+  typesetMath();
 });
+
 checkBtn.addEventListener('click',()=>{
   clearMarking();
   const r=evaluate();
+
   if(r.correctOrder){
     setStatus('ok','完璧！');
-    solutionWrap.style.display='block'; solutionWrap.innerHTML='';
+    showNextButton(); // ✅ 正解時に表示
+    solutionWrap.style.display='block';
+    solutionWrap.innerHTML='';
     solutionWrap.appendChild(buildSolutionBox());
     typesetMath();
-  } else if(r.correctSet){
+  }else if(r.correctSet){
     setStatus('warn',`カードはそろっています。順序を調整（進捗 ${r.progress}%）。`);
+    hideNextButton(); // ✅ 途中は非表示
     if(r.firstBad) msg.textContent=`順序ヒント：${r.firstBad.reason}`;
     solutionWrap.style.display='none';
-  } else {
+  }else{
+    hideNextButton(); // ✅ 不正解は非表示
     if(r.extras.length>0) setStatus('ng',`誤カードが混ざっています（${r.extras.length}枚）。`);
     else if(r.missing.length>0) setStatus('ng',`正解カードが足りません（${r.missing.length}枚）。`);
     else setStatus('ng','まだ整っていません。');
     solutionWrap.style.display='none';
   }
+
+  // 判定結果へスクロール（math版と同様に、見やすさのため）
+  const target = pill.closest('.status') || pill;
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
 });
 
 enableDrop(poolZone,'pool');
 enableDrop(answerZone,'answer');
 
 populateSelect();
-sel.value='P1';
-loadProblem('P1');
+const startId = getParamP() || 'P1';
+loadProblem(startId);
 </script>
 </body>
 </html>
