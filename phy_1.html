@@ -174,12 +174,32 @@
 <script>
 // 20問（相対速度：1次元＋2次元ベクトル）
 const PROBLEMS = [
-  { id:"P1", title:"P1 基本：同方向の相対速度", prompt:"同一直線上を東向きに、A列車は\\(20\\,\\mathrm{m/s}\\)、B列車は\\(12\\,\\mathrm{m/s}\\)で走る。Bから見たAの相対速度を求めよ。",
-    steps:[
-      {id:"s1", text:"定義：相対速度 \\(v_{A/B}=v_A-v_B\\)", requires:[]},
-      {id:"s2", text:"代入：\\(v_{A/B}=20-12=8\\,\\mathrm{m/s}\\)", requires:["s1"]},
-      {id:"s3", text:"正なので東向き：『東向き\\(8\\,\\mathrm{m/s}\\)』", requires:["s2"]}
-    ]},
+ 
+{ id:"P1", title:"P1 基本：同方向の相対速度",
+  prompt:"同一直線上を東向きに、A列車は\\(20\\,\\mathrm{m/s}\\)、B列車は\\(12\\,\\mathrm{m/s}\\)で走る。Bから見たAの相対速度を求めよ。",
+  
+steps:[
+  // S1：aは消して、b（S1b）だけ残す
+  {id:"s1", text:"導入：AとBを符号化する。", requires:[]},
+
+  // S2：a（S2a）を残したいので "(残す)" を付ける
+  //     a側は「符号化する。」、b側が本文（S2b）
+  {id:"s2", text:"符号化(残す)：東向きを正とするとAは+20、Bは+12。", requires:["s1"]},
+
+  // 以降は a を消して b（S#b）のみ残す
+  {id:"s3", text:"視点：問題はBから見たAなので、Bを止めて考える。", requires:["s2"]},
+  {id:"s4", text:"操作：Bを止めるには-12を加えて0にする。", requires:["s3"]},
+  {id:"s5", text:"適用：同じ変化（-12）をAにも加える。", requires:["s4"]},
+  {id:"s6", text:"式：よって相対速度は\\(v_{A/B}=(+20)+(-12)\\)。", requires:["s5"]},
+
+  // ★引き算表記にしない（あなたの希望）
+  {id:"s7", text:"計算：\\((+20)+(-12)=+8\\,\\mathrm{m/s}\\)。", requires:["s6"]},
+
+  {id:"s8", text:"向き：符号が正なので東向き。", requires:["s7"]}
+]
+
+},
+
   { id:"P2", title:"P2 反対方向：すれ違いの相対速度", prompt:"東向きを正とする。A列車は東へ\\(15\\,\\mathrm{m/s}\\)、B列車は西へ\\(10\\,\\mathrm{m/s}\\)で走る。Aから見たBの相対速度を求めよ。",
     steps:[
       {id:"s1", text:"符号化：\\(v_A=+15\\)、Bは西向きなので\\(v_B=-10\\)", requires:[]},
@@ -300,16 +320,42 @@ const PROBLEMS = [
 ];
 
 // --- 追加：正答カードを細分化（S1a/S1b…）し、連続性も判定する ---
+
+// --- 追加：正答カードを細分化（S1a/S1b…）し、連続性も判定する ---
+
+// 見出し語の言い換え（B案）
+const HEAD_REWRITE = {
+  '代入': '式に代入する',
+  '計算': '計算する',
+  '符号化': '符号化する',
+  '合成': '合成する',
+  '視点': '視点を確認する',
+  '考え方': '考え方を整理する',
+  '操作': '操作する',
+  '適用': '適用する',
+  '向き': '向きを判断する',
+  '導入': '導入する',
+  '式': '式を立てる',
+};
+
 function splitOneStepText(stepText){
-  const t = String(stepText||'').trim();
+  const t = String(stepText || '').trim();
   const idx = t.indexOf('：');
-  if(idx>0){
-    const head = t.slice(0, idx).trim();
-    const body = t.slice(idx+1).trim();
-    let a = head;
-    if(!/を求める$/.test(a)) a = a + 'を求める';
-    if(!/[。．]$/.test(a)) a = a + '。';
-    return [a, body];
+  if(idx > 0){
+    const headRaw = t.slice(0, idx).trim();     // 例： "符号化(残す)"
+    const body    = t.slice(idx + 1).trim();   // b側（本文）
+
+    // ★ "(残す)" が付いている見出しだけ aカードを残す（= 今回は S2a 用）
+    const keepHead = /\(残す\)$/.test(headRaw);
+    const headKey  = headRaw.replace(/\(残す\)$/, '').trim();
+
+    let headShown = HEAD_REWRITE[headKey] ?? headKey;
+
+    // 句点を整える（a側）
+    if(!/[。．]$/.test(headShown)) headShown = headShown + '。';
+
+    // keepHead でなければ a側を捨てる（b側は S#b として残る）
+    return [ keepHead ? headShown : '__DROP__', body ];
   }
   return [t];
 }
@@ -329,13 +375,24 @@ function expandSteps(originalSteps){
   const expanded=[];
   for(const m of meta){
     const {orig, parts, ids, labels} = m;
-    for(let i=0;i<parts.length;i++){
-      const id = ids[i];
-      const immediateAfter = (i>0) ? ids[i-1] : null;
-      const baseReq = (orig.requires||[]).map(r => lastOf.get(r) || r);
-      const req = immediateAfter ? Array.from(new Set([...baseReq, immediateAfter])) : baseReq;
-      expanded.push({id, label: labels[i], text: parts[i], requires: req, immediateAfter});
-    }
+    
+for(let i=0;i<parts.length;i++){
+  const partText = parts[i];
+
+  // ★ 追加：__DROP__ はカード生成しない（a側を消す）
+  if(partText === '__DROP__') continue;
+
+  const id = ids[i];
+
+  // ★ 変更：直前が __DROP__ のときは連続条件を課さない
+  const immediateAfter = (i>0 && parts[i-1] !== '__DROP__') ? ids[i-1] : null;
+
+  const baseReq = (orig.requires || []).map(r => lastOf.get(r) || r);
+  const req = immediateAfter ? Array.from(new Set([...baseReq, immediateAfter])) : baseReq;
+
+  expanded.push({id, label: labels[i], text: parts[i], requires: req, immediateAfter});
+}
+
   }
   return expanded;
 }
