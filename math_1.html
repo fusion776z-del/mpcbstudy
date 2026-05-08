@@ -65,6 +65,21 @@
     .fixedBack:hover{ transform: translateY(-1px); background: rgba(0,0,0,.55); border-color: rgba(255,255,255,.26);}
     .fixedBack:active{ transform: translateY(0);}
     @media (prefers-reduced-motion: reduce){ .fixedBack{ transition:none; } .fixedBack:hover{ transform:none; } }
+#nextWrap{display:flex; align-items:center}
+a.nextBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:12px;
+  border:1px solid rgba(124,92,255,.8);
+  background:linear-gradient(135deg,rgba(124,92,255,.95),rgba(124,92,255,.55));
+  color:#e9ecff;
+  padding:10px 12px;
+  font-size:13px;
+  text-decoration:none;
+  white-space:nowrap;
+}
+a.nextBtn:hover{transform:translateY(-1px)}
   </style>
 </head>
 
@@ -111,6 +126,7 @@
       <div class="status">
         <div class="pill" id="pill">未判定</div>
         <div class="msg" id="msg">カードを並べて「判定する」を押してください。</div>
+        <div id="nextWrap"></div>
       </div>
 
       <div class="body"><div id="solutionWrap" style="display:none"></div></div>
@@ -810,11 +826,43 @@ const msg=document.getElementById('msg');
 const poolZone=document.getElementById('poolZone');
 const answerZone=document.getElementById('answerZone');
 const solutionWrap=document.getElementById('solutionWrap');
+const nextWrap = document.getElementById('nextWrap');
 
 function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function setStatus(type,text){pill.className='pill'+(type?(' '+type):'');pill.textContent=type==='ok'?'正解':type==='ng'?'不正解':type==='warn'?'途中':'未判定';msg.textContent=text;}
 function typesetMath(){ if(window.MathJax && MathJax.typesetPromise){return MathJax.typesetPromise([promptEl,poolEl,answerEl,solutionWrap]).catch(()=>{});} return Promise.resolve(); }
 
+function getNextProblemId(){
+  const idx = PROBLEMS.findIndex(p => p.id === current.id);
+  if(idx < 0 || idx === PROBLEMS.length - 1) return null;
+  return PROBLEMS[idx + 1].id;
+}
+
+function showNextButton(){
+  nextWrap.innerHTML = '';
+  const nextId = getNextProblemId();
+  if(!nextId) return;
+
+  const a = document.createElement('a');
+  a.href = `?p=${encodeURIComponent(nextId)}`; // “リンク付き”にするための href（任意）
+  a.className = 'nextBtn';
+  a.textContent = '次の問題へ';
+
+  // 同一ページ内で次の問題へ進める（リンクをクリックしてもページ遷移させない）
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    sel.value = nextId;
+    loadProblem(nextId);
+    // 先頭へ戻したい場合（任意）
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  nextWrap.appendChild(a);
+}
+
+function hideNextButton(){
+  nextWrap.innerHTML = '';
+}
 function createCardEl(card){
   const div=document.createElement('div');
   div.className='cardItem';
@@ -913,26 +961,41 @@ checkBtn.addEventListener('click',()=>{
   const r=evaluate();
   if(r.correctOrder){
     setStatus('ok','完璧！');
+    showNextButton();
     solutionWrap.style.display='block'; solutionWrap.innerHTML='';
     solutionWrap.appendChild(buildSolutionBox());
     typesetMath();
   } else if(r.correctSet){
     setStatus('warn','カードはそろっています。順序を調整してください。');
+    hideNextButton();
     if(r.firstBad) msg.textContent=`順序ヒント：${r.firstBad.reason}`;
     solutionWrap.style.display='none';
   } else {
+    hideNextButton();
     if(r.extras.length>0) setStatus('ng',`誤カードが混ざっています（${r.extras.length}枚）。`);
     else if(r.missing.length>0) setStatus('ng',`正解カードが足りません（${r.missing.length}枚）。`);
     else setStatus('ng','まだ整っていません。');
     solutionWrap.style.display='none';
   }
+function scrollToJudgeResult(){
+  const target = pill.closest('.status') || pill;
+
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  target.scrollIntoView({
+    behavior: reduce ? 'auto' : 'smooth',
+    block: 'start'
+  });
+}
+scrollToJudgeResult();
 });
+
+
 enableDrop(poolZone,'pool');
 enableDrop(answerZone,'answer');
 
 populateSelect();
-sel.value='P23';
-loadProblem('P23');
+sel.value='P1';
+loadProblem('P1');
 </script>
 </body>
 </html>
