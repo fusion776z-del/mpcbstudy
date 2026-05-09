@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>化学基礎：モル計算（並べ替え学習）Parsons風MVP / MathJax（20問）</title>
+  <title>化学基礎：分離／構成元素／モル計算（並べ替え学習）Parsons風MVP / MathJax（60問）</title>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
   <style>
@@ -92,7 +92,7 @@
       .fixedBack:hover{ transform:none; }
     }
 
-    /* ✅ 追加：正解時だけ出す「次の問題へ」ボタン（math_1.html と同系） */
+    /* 正解時だけ出す「次の問題へ」ボタン */
     #nextWrap{display:flex; align-items:center}
     a.nextBtn{
       display:inline-flex;
@@ -115,10 +115,12 @@
   <a class="fixedBack" href="index.html" aria-label="入口（index.html）へ戻る">← 入口へ戻る</a>
 
   <header>
-    <h1>化学基礎：モル計算（並べ替え学習）</h1>
+    <h1>化学基礎：分離／構成元素／モル計算（並べ替え学習）</h1>
     <div class="sub">
-      すべての計算はmolへ通ず。\(n=\frac{m}{M}\)、\(N=nN_A\)、溶液は\(c=\frac{n}{V}\)。
-      単位（g, mol, L）をそろえて、最後に答えの単位まで書け。
+      「分離」は性質の違い（溶解度・密度・沸点・吸着・磁性など）、
+      「構成元素」は化学式の読み取り、
+      「モル計算」は n=m/M、N=nN<sub>A</sub>、溶液は c=n/V を軸に。
+      単位（g, mol, L）をそろえて最後は答えの単位まで。
     </div>
   </header>
 
@@ -162,7 +164,6 @@
       <div class="status">
         <div class="pill" id="pill">未判定</div>
         <div class="msg" id="msg">カードを並べて「判定する」を押してください。</div>
-        <!-- ✅ 追加：正解時にここへ「次の問題へ」ボタンを出す -->
         <div id="nextWrap"></div>
       </div>
 
@@ -174,18 +175,437 @@
 
   <div class="footer">
     <div>
-      表記：物質量 \(n\,\mathrm{(mol)}\)、モル質量 \(M\,\mathrm{(g/mol)}\)、質量 \(m\,\mathrm{(g)}\)、
-      アボガドロ定数 \(N_A=6.0\times10^{23}\,\mathrm{mol^{-1}}\)、
-      標準状態のモル体積 \(22.4\,\mathrm{L/mol}\)、モル濃度 \(c\,\mathrm{(mol/L)}\)。
+      表記：物質量 n (mol)、モル質量 M (g/mol)、質量 m (g)、アボガドロ定数 N<sub>A</sub>=6.0×10<sup>23</sup> mol<sup>-1</sup>、
+      標準状態のモル体積 22.4 L/mol、モル濃度 c (mol/L)。
     </div>
   </div>
 
 <script>
 /* =========================================================
-   20問（モル計算：質量⇄mol⇄粒子数／気体／溶液／反応量）
-   ========================================================= */
+  60問：
+  ① 物質の分離 20問
+  ② 物質を構成する元素 20問
+  ③ モル計算 20問（元のP1〜P20）
+ ========================================================= */
+
 const PROBLEMS = [
-  { id:"P1", title:"P1 基本：質量→mol",
+
+  /* =======================
+     ① 物質の分離（20問）
+     ======================= */
+
+  { id:"S01", title:"分離01 砂と食塩を分ける",
+    prompt:"砂と食塩の混合物がある。砂と食塩をそれぞれ取り出す操作を、適切な順に説明せよ。",
+    steps:[
+      {id:"g0", text:"ガイド：分離は成分の性質の違い（溶けやすさ・粒の大きさなど）を利用する。", requires:[]},
+      {id:"s1", text:"水を加えて食塩だけを溶かし、砂は溶け残す。", requires:[]},
+      {id:"s2", text:"ろ過して砂（ろ紙上）と食塩水（ろ液）に分ける。", requires:["s1"]},
+      {id:"s3", text:"食塩水を蒸発させて食塩を取り出す（蒸発乾固/結晶化）。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S02", title:"分離02 砂と鉄粉を分ける",
+    prompt:"砂と鉄粉の混合物がある。2つを分ける最も適切な操作を答え、理由も述べよ。",
+    steps:[
+      {id:"g0", text:"ガイド：鉄は磁性をもつが、砂は磁石に引かれない。", requires:[]},
+      {id:"s1", text:"成分の違いとして「磁石に引かれるかどうか」を利用できると判断する。", requires:[]},
+      {id:"s2", text:"磁石を近づけ、鉄粉だけを吸い付けて取り出す。", requires:["s1"]},
+      {id:"s3", text:"答：磁石による分離（磁選）。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S03", title:"分離03 泥水をきれいにする",
+    prompt:"泥水から、固体の泥を除いて透明に近い水を得たい。最も適切な操作を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：水に溶けない固体が混ざる液体は、粒子をこして分けられる。", requires:[]},
+      {id:"s1", text:"泥は水に溶けない固体なので、液体と固体を分ける方法を選ぶ。", requires:[]},
+      {id:"s2", text:"ろ紙を用いてろ過し、泥をろ紙上に残す。", requires:["s1"]},
+      {id:"s3", text:"答：ろ過。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S04", title:"分離04 食塩水から食塩を取り出す",
+    prompt:"食塩水から食塩（固体）を取り出したい。最も適切な操作を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：溶液から溶質を得るには、溶媒を除く（蒸発）操作が基本。", requires:[]},
+      {id:"s1", text:"食塩は水に溶けているので、固体として取り出すには水を減らす必要がある。", requires:[]},
+      {id:"s2", text:"加熱して水を蒸発させ、濃くして結晶を析出させる（蒸発乾固/結晶化）。", requires:["s1"]},
+      {id:"s3", text:"答：蒸発乾固（または結晶化）。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S05", title:"分離05 海水から水だけ得る",
+    prompt:"海水（食塩を含む水）から、食塩ではなく『水』を得たい。最も適切な操作を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：溶液から溶媒（ここでは水）を得るには蒸留を用いる。", requires:[]},
+      {id:"s1", text:"目的物が水（溶媒）なので、蒸発させた水蒸気を冷やして回収する必要がある。", requires:[]},
+      {id:"s2", text:"加熱して水を蒸発→冷却して液体の水として集める。", requires:["s1"]},
+      {id:"s3", text:"答：蒸留。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S06", title:"分離06 水と油を分ける",
+    prompt:"水と食用油を混ぜると2層に分かれた。2つを分ける操作を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：互いに溶け合わない液体は密度差で層になるので分液できる。", requires:[]},
+      {id:"s1", text:"水と油は互いに溶けないため、上層・下層に分かれている。", requires:[]},
+      {id:"s2", text:"分液ロートを用い、下の層からコックで流して分ける。", requires:["s1"]},
+      {id:"s3", text:"答：分液（分液ロート）。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S07", title:"分離07 インクの色素を分ける",
+    prompt:"黒インクに複数の色素が含まれるか確かめ、成分を分けたい。最も適切な方法を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：色素などの混合物は、紙への吸着と溶媒への溶けやすさの差で分離できる。", requires:[]},
+      {id:"s1", text:"色素は溶媒への溶けやすさや紙への吸着の強さが異なる。", requires:[]},
+      {id:"s2", text:"ろ紙にインクを点着し、溶媒で展開して成分を分ける。", requires:["s1"]},
+      {id:"s3", text:"答：ペーパークロマトグラフィー。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S08", title:"分離08 ヨウ素と砂を分ける",
+    prompt:"ヨウ素と砂の混合物がある。両者を分ける最も適切な操作を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：昇華する物質（固体→気体になりやすい）としない物質で分離できる。", requires:[]},
+      {id:"s1", text:"ヨウ素は加熱で昇華しやすいが、砂は昇華しない。", requires:[]},
+      {id:"s2", text:"加熱してヨウ素を気体にし、冷やした面で再び固体として付着させる。", requires:["s1"]},
+      {id:"s3", text:"答：昇華による分離。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S09", title:"分離09 砂利と砂を分ける",
+    prompt:"砂利と砂の混合物がある。最も適切な分離操作を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：粒の大きさが大きく違う固体同士は、ふるいで分けられる。", requires:[]},
+      {id:"s1", text:"砂利と砂は粒の大きさが異なる。", requires:[]},
+      {id:"s2", text:"ふるい（ふるい分け）を用いて粒径で分離する。", requires:["s1"]},
+      {id:"s3", text:"答：ふるい分け。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S10", title:"分離10 エタノールと水を分ける（濃い混合物）",
+    prompt:"エタノールと水が混ざった液体から、できるだけ純粋なエタノールを得たい。適切な方法を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：互いに混ざる液体は沸点の違いを利用して分ける（蒸留、必要なら分留）。", requires:[]},
+      {id:"s1", text:"エタノールと水は互いに混ざるが、沸点が異なる。", requires:[]},
+      {id:"s2", text:"加熱して沸点の低い成分を先に蒸発させ、冷却して回収する（分留が有効）。", requires:["s1"]},
+      {id:"s3", text:"答：蒸留（分留）。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S11", title:"分離11 空気から酸素と窒素を分ける",
+    prompt:"空気中の主成分である酸素と窒素を工業的に分ける代表的な方法を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：気体混合物は液化して沸点差を利用すると分離しやすい。", requires:[]},
+      {id:"s1", text:"酸素と窒素は沸点が異なるため、沸点差を利用できる。", requires:[]},
+      {id:"s2", text:"空気を冷却して液体空気にし、分留で成分を分ける。", requires:["s1"]},
+      {id:"s3", text:"答：液体空気の分留。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S12", title:"分離12 食塩と砂糖を分ける（溶解度差）",
+    prompt:"食塩と砂糖の混合物がある。両方とも水に溶けるが、溶解度の差を利用して分けたい。基本方針を説明せよ。",
+    steps:[
+      {id:"g0", text:"ガイド：溶解度が温度で大きく変わる物質は、温度変化で結晶化させて分けられる。", requires:[]},
+      {id:"s1", text:"両方とも水に溶けるので、単純なろ過だけでは分離できない。", requires:[]},
+      {id:"s2", text:"温度を変えて溶解度差を利用し、先に結晶として析出する成分を取り出す（分別結晶）。", requires:["s1"]},
+      {id:"s3", text:"答：溶解度差を利用した結晶化（分別結晶）。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S13", title:"分離13 水に溶けない粉末を沈めて分ける",
+    prompt:"水に溶けない細かい粉末が水に混ざっている。ろ過より先に、まず上澄みを分けたい。適切な操作を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：固体が沈むのを待って上澄みを分ける操作を沈降・デカンテーションという。", requires:[]},
+      {id:"s1", text:"粉末は水に溶けないので、時間が経つと沈む（沈降）。", requires:[]},
+      {id:"s2", text:"沈んだ後、上澄み液だけをそっと移して分ける。", requires:["s1"]},
+      {id:"s3", text:"答：沈降→上澄みを分ける（デカンテーション）。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S14", title:"分離14 コーヒーかすを除く",
+    prompt:"ドリップ後のコーヒー液から、コーヒーかす（固体）を除きたい。操作名を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：液体中の不溶性固体を除く基本操作はろ過。", requires:[]},
+      {id:"s1", text:"コーヒーかすは液体に溶けない固体である。", requires:[]},
+      {id:"s2", text:"フィルター（ろ紙）で固体をこし取る。", requires:["s1"]},
+      {id:"s3", text:"答：ろ過。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S15", title:"分離15 食塩・砂・水の混合物を分ける",
+    prompt:"食塩・砂・水が混ざった状態から、砂と食塩をそれぞれ得たい。操作の流れを説明せよ。",
+    steps:[
+      {id:"g0", text:"ガイド：多成分は「溶ける/溶けない」で段階的に分ける。", requires:[]},
+      {id:"s1", text:"まず砂は水に溶けないので、ろ過で砂を取り出す。", requires:[]},
+      {id:"s2", text:"ろ液（食塩水）を加熱して水を蒸発させ、食塩を結晶として得る。", requires:["s1"]},
+      {id:"s3", text:"答：ろ過で砂→蒸発（結晶化）で食塩。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S16", title:"分離16 混合物から白い結晶を再びきれいにする",
+    prompt:"不純物を含む白い固体を、水に溶かしてから冷やすときれいな結晶が得られた。操作名を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：温度による溶解度差を利用して結晶をきれいにする操作を再結晶という。", requires:[]},
+      {id:"s1", text:"高温でよく溶け、低温で溶けにくい性質を利用する。", requires:[]},
+      {id:"s2", text:"加熱して溶かす→冷却して目的物だけ結晶として析出させる。", requires:["s1"]},
+      {id:"s3", text:"答：再結晶。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S17", title:"分離17 お茶の成分を溶媒で取り出す",
+    prompt:"茶葉から特定成分を溶媒に溶かして取り出したい。分離操作としての名称を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：ある成分だけを特定の溶媒に溶かして取り出す操作を抽出という。", requires:[]},
+      {id:"s1", text:"目的成分が溶媒に溶けやすい性質を利用する。", requires:[]},
+      {id:"s2", text:"溶媒を加えて目的成分を溶かし出し、固体成分と分ける（必要ならろ過）。", requires:["s1"]},
+      {id:"s3", text:"答：抽出。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S18", title:"分離18 油に溶ける成分を水から取り出す",
+    prompt:"水に溶けている成分を、有機溶媒（油に近い溶媒）に移して取り出したい。分離操作を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：水相と有機相の間で溶けやすさが違うとき、分配を利用する（溶媒抽出）。", requires:[]},
+      {id:"s1", text:"目的成分は水より有機溶媒に溶けやすい（分配係数の差）。", requires:[]},
+      {id:"s2", text:"水溶液と有機溶媒を振り混ぜ、目的成分を有機相へ移す→分液で分ける。", requires:["s1"]},
+      {id:"s3", text:"答：溶媒抽出（抽出＋分液）。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S19", title:"分離19 牛乳から脂肪分を分ける",
+    prompt:"牛乳から脂肪分（クリーム）を効率よく分けたい。代表的な操作を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：密度差が小さい微粒子の分離は遠心分離が有効。", requires:[]},
+      {id:"s1", text:"脂肪分は微粒子として分散しており、自然沈降では分かれにくい。", requires:[]},
+      {id:"s2", text:"遠心力で密度差により層を分け、目的成分を取り出す。", requires:["s1"]},
+      {id:"s3", text:"答：遠心分離。", requires:["s2"]}
+    ]
+  },
+
+  { id:"S20", title:"分離20 砂と小石と鉄粉が混ざった混合物",
+    prompt:"砂・小石・鉄粉の混合物がある。3成分を順に分ける基本方針を説明せよ。",
+    steps:[
+      {id:"g0", text:"ガイド：複数成分は「最も分けやすい性質の差」から順に使う。", requires:[]},
+      {id:"s1", text:"まず粒の大きさの差で小石と砂＋鉄粉を分ける（ふるい分け）。", requires:[]},
+      {id:"s2", text:"次に残った砂＋鉄粉を磁石で分ける（鉄粉だけ回収）。", requires:["s1"]},
+      {id:"s3", text:"答：ふるい分け→磁石による分離。", requires:["s2"]}
+    ]
+  },
+
+
+  /* ============================
+     ② 物質を構成する元素（20問）
+     ============================ */
+
+  { id:"E01", title:"元素01 水 H₂O の構成元素",
+    prompt:"水 H₂O を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：化学式に出てくる元素記号を読み取り、元素名（または記号）で答える。", requires:[]},
+      {id:"s1", text:"H₂O に含まれる元素記号は H と O。", requires:[]},
+      {id:"s2", text:"H は水素、O は酸素。", requires:["s1"]},
+      {id:"s3", text:"答：水素と酸素。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E02", title:"元素02 二酸化炭素 CO₂ の構成元素",
+    prompt:"二酸化炭素 CO₂ を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：下付き数字は原子数で、元素の種類は記号の種類で決まる。", requires:[]},
+      {id:"s1", text:"CO₂ に含まれる元素記号は C と O。", requires:[]},
+      {id:"s2", text:"C は炭素、O は酸素。", requires:["s1"]},
+      {id:"s3", text:"答：炭素と酸素。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E03", title:"元素03 アンモニア NH₃ の構成元素",
+    prompt:"アンモニア NH₃ を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：化学式中の記号の種類を拾う。", requires:[]},
+      {id:"s1", text:"NH₃ に含まれる元素記号は N と H。", requires:[]},
+      {id:"s2", text:"N は窒素、H は水素。", requires:["s1"]},
+      {id:"s3", text:"答：窒素と水素。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E04", title:"元素04 塩化ナトリウム NaCl の構成元素",
+    prompt:"塩化ナトリウム NaCl を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：イオン結晶でも、構成元素は化学式の記号から判断する。", requires:[]},
+      {id:"s1", text:"NaCl に含まれる元素記号は Na と Cl。", requires:[]},
+      {id:"s2", text:"Na はナトリウム、Cl は塩素。", requires:["s1"]},
+      {id:"s3", text:"答：ナトリウムと塩素。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E05", title:"元素05 炭酸カルシウム CaCO₃ の構成元素",
+    prompt:"炭酸カルシウム CaCO₃ を構成する元素を答えよ（何種類かも示せ）。",
+    steps:[
+      {id:"g0", text:"ガイド：化学式中の元素記号の種類を数えると「何種類の元素」も分かる。", requires:[]},
+      {id:"s1", text:"CaCO₃ に含まれる元素記号は Ca、C、O。", requires:[]},
+      {id:"s2", text:"3種類の元素（カルシウム・炭素・酸素）から成る。", requires:["s1"]},
+      {id:"s3", text:"答：カルシウム・炭素・酸素（3種類）。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E06", title:"元素06 硫酸 H₂SO₄ の構成元素",
+    prompt:"硫酸 H₂SO₄ を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：H₂SO₄ のように複数元素がある場合も、記号の種類を拾えばよい。", requires:[]},
+      {id:"s1", text:"H₂SO₄ に含まれる元素記号は H、S、O。", requires:[]},
+      {id:"s2", text:"H=水素、S=硫黄、O=酸素。", requires:["s1"]},
+      {id:"s3", text:"答：水素・硫黄・酸素。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E07", title:"元素07 水酸化カルシウム Ca(OH)₂ の構成元素",
+    prompt:"水酸化カルシウム Ca(OH)₂ を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：カッコがあっても、元素の種類は記号の種類で決まる。", requires:[]},
+      {id:"s1", text:"Ca(OH)₂ に含まれる元素記号は Ca、O、H。", requires:[]},
+      {id:"s2", text:"Ca=カルシウム、O=酸素、H=水素。", requires:["s1"]},
+      {id:"s3", text:"答：カルシウム・酸素・水素。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E08", title:"元素08 硝酸カリウム KNO₃ の構成元素",
+    prompt:"硝酸カリウム KNO₃ を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：酸の名前が付いていても、構成元素は化学式で判断する。", requires:[]},
+      {id:"s1", text:"KNO₃ に含まれる元素記号は K、N、O。", requires:[]},
+      {id:"s2", text:"K=カリウム、N=窒素、O=酸素。", requires:["s1"]},
+      {id:"s3", text:"答：カリウム・窒素・酸素。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E09", title:"元素09 硫酸ナトリウム Na₂SO₄ の構成元素",
+    prompt:"硫酸ナトリウム Na₂SO₄ を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：下付き数字は原子数で、元素の種類は変わらない。", requires:[]},
+      {id:"s1", text:"Na₂SO₄ に含まれる元素記号は Na、S、O。", requires:[]},
+      {id:"s2", text:"Na=ナトリウム、S=硫黄、O=酸素。", requires:["s1"]},
+      {id:"s3", text:"答：ナトリウム・硫黄・酸素。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E10", title:"元素10 メタン CH₄ の構成元素",
+    prompt:"メタン CH₄ を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：炭化水素は炭素と水素の2元素から成る。", requires:[]},
+      {id:"s1", text:"CH₄ に含まれる元素記号は C と H。", requires:[]},
+      {id:"s2", text:"C=炭素、H=水素。", requires:["s1"]},
+      {id:"s3", text:"答：炭素と水素。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E11", title:"元素11 エタン C₂H₆ の構成元素",
+    prompt:"エタン C₂H₆ を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：C と H だけなら構成元素は2種類。", requires:[]},
+      {id:"s1", text:"C₂H₆ に含まれる元素記号は C と H。", requires:[]},
+      {id:"s2", text:"炭素と水素の2元素から成る。", requires:["s1"]},
+      {id:"s3", text:"答：炭素と水素。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E12", title:"元素12 二酸化ケイ素 SiO₂ の構成元素",
+    prompt:"二酸化ケイ素 SiO₂ を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：Si はケイ素（シリコン）を表す元素記号。", requires:[]},
+      {id:"s1", text:"SiO₂ に含まれる元素記号は Si と O。", requires:[]},
+      {id:"s2", text:"Si=ケイ素、O=酸素。", requires:["s1"]},
+      {id:"s3", text:"答：ケイ素と酸素。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E13", title:"元素13 炭酸水素ナトリウム NaHCO₃ の構成元素",
+    prompt:"炭酸水素ナトリウム NaHCO₃ を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：記号の種類が多いときは、1つずつ拾って重複を除く。", requires:[]},
+      {id:"s1", text:"NaHCO₃ に含まれる元素記号は Na、H、C、O。", requires:[]},
+      {id:"s2", text:"4種類の元素（ナトリウム・水素・炭素・酸素）。", requires:["s1"]},
+      {id:"s3", text:"答：Na, H, C, O（4種類）。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E14", title:"元素14 酸化鉄(III) Fe₂O₃ の構成元素",
+    prompt:"酸化鉄(III) Fe₂O₃ を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：金属酸化物は「金属元素＋酸素」。", requires:[]},
+      {id:"s1", text:"Fe₂O₃ に含まれる元素記号は Fe と O。", requires:[]},
+      {id:"s2", text:"Fe=鉄、O=酸素。", requires:["s1"]},
+      {id:"s3", text:"答：鉄と酸素。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E15", title:"元素15 硫化水素 H₂S の構成元素",
+    prompt:"硫化水素 H₂S を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：H₂S は水素と硫黄の化合物。", requires:[]},
+      {id:"s1", text:"H₂S に含まれる元素記号は H と S。", requires:[]},
+      {id:"s2", text:"H=水素、S=硫黄。", requires:["s1"]},
+      {id:"s3", text:"答：水素と硫黄。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E16", title:"元素16 塩素 Cl₂ の構成元素",
+    prompt:"塩素 Cl₂ を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：同じ元素だけからなる物質（単体）でも、構成元素は1種類。", requires:[]},
+      {id:"s1", text:"Cl₂ は Cl（塩素）原子2個からなる分子。", requires:[]},
+      {id:"s2", text:"含まれる元素記号は Cl のみ。", requires:["s1"]},
+      {id:"s3", text:"答：塩素（1種類）。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E17", title:"元素17 酸素 O₂ の構成元素",
+    prompt:"酸素 O₂ を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：O₂ も単体で、構成元素は酸素のみ。", requires:[]},
+      {id:"s1", text:"O₂ は O（酸素）原子2個からなる。", requires:[]},
+      {id:"s2", text:"含まれる元素記号は O のみ。", requires:["s1"]},
+      {id:"s3", text:"答：酸素（1種類）。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E18", title:"元素18 過酸化水素 H₂O₂ の構成元素",
+    prompt:"過酸化水素 H₂O₂ を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：下付き数字が増えても元素の種類は変わらない。", requires:[]},
+      {id:"s1", text:"H₂O₂ に含まれる元素記号は H と O。", requires:[]},
+      {id:"s2", text:"水素と酸素の2元素から成る。", requires:["s1"]},
+      {id:"s3", text:"答：水素と酸素。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E19", title:"元素19 硫酸銅(II)五水和物 CuSO₄・5H₂O の構成元素",
+    prompt:"硫酸銅(II)五水和物 CuSO₄・5H₂O を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：・（ドット）でつながる結晶水も含め、全体に含まれる元素を拾う。", requires:[]},
+      {id:"s1", text:"CuSO₄ から Cu, S, O。5H₂O から H, O。", requires:[]},
+      {id:"s2", text:"重複を除くと Cu, S, O, H の4種類。", requires:["s1"]},
+      {id:"s3", text:"答：銅・硫黄・酸素・水素（4種類）。", requires:["s2"]}
+    ]
+  },
+
+  { id:"E20", title:"元素20 硫酸アルミニウム Al₂(SO₄)₃ の構成元素",
+    prompt:"硫酸アルミニウム Al₂(SO₄)₃ を構成する元素を答えよ。",
+    steps:[
+      {id:"g0", text:"ガイド：カッコがあっても、元素の種類は Al, S, O のように記号で判断する。", requires:[]},
+      {id:"s1", text:"Al₂(SO₄)₃ に含まれる元素記号は Al、S、O。", requires:[]},
+      {id:"s2", text:"Al=アルミニウム、S=硫黄、O=酸素。", requires:["s1"]},
+      {id:"s3", text:"答：アルミニウム・硫黄・酸素。", requires:["s2"]}
+    ]
+  },
+
+
+  /* =======================
+     ③ モル計算（元の20問）
+     ※ id は互換のため P1〜P20 のまま
+     ======================= */
+
+  { id:"P1", title:"モル01 基本：質量→mol",
     prompt:"炭素 C を 12 g 用意した。物質量は何 mol か。\n（C のモル質量は 12 g/mol）",
     steps:[
       {id:"g0", text:"ガイド：質量 m とモル質量 M が与えられているので、物質量 n は n=m/M を使って求める。", requires:[]},
@@ -195,7 +615,7 @@ const PROBLEMS = [
     ]
   },
 
-  { id:"P2", title:"P2 基本：mol→質量",
+  { id:"P2", title:"モル02 基本：mol→質量",
     prompt:"水 H₂O が 0.50 mol ある。質量 m を求めよ。\n（H₂O のモル質量は 18 g/mol）",
     steps:[
       {id:"g0", text:"ガイド：物質量 n とモル質量 M が与えられているので、質量 m は m=nM を使って求める。", requires:[]},
@@ -205,28 +625,28 @@ const PROBLEMS = [
     ]
   },
 
-  { id:"P3", title:"P3 粒子数：mol→分子数",
-    prompt:"酸素分子 O₂ が 0.20 mol ある。分子数 N を求めよ。\n（\(N_A=6.0\\times10^{23}\\,\\mathrm{mol^{-1}}\)）",
+  { id:"P3", title:"モル03 粒子数：mol→分子数",
+    prompt:"酸素分子 O₂ が 0.20 mol ある。分子数 N を求めよ。\n（Nₐ=6.0×10²³ mol⁻¹）",
     steps:[
-      {id:"g0", text:"ガイド：物質量 n から粒子数 N を出すときは、N=nN_A（アボガドロ定数）を使う。", requires:[]},
-      {id:"s1", text:"式：N=nN_A", requires:[]},
+      {id:"g0", text:"ガイド：物質量 n から粒子数 N を出すときは、N=nNₐ（アボガドロ定数）を使う。", requires:[]},
+      {id:"s1", text:"式：N=nNₐ", requires:[]},
       {id:"s2", text:"代入：N=0.20×6.0×10²³=1.2×10²³ 個", requires:["s1"]},
       {id:"s3", text:"答：1.2×10²³ 個", requires:["s2"]}
     ]
   },
 
-  { id:"P4", title:"P4 粒子数：個数→mol",
-    prompt:"ナトリウム原子が 3.0×10²³ 個ある。物質量 n を求めよ。\n（\(N_A=6.0\\times10^{23}\\,\\mathrm{mol^{-1}}\)）",
+  { id:"P4", title:"モル04 粒子数：個数→mol",
+    prompt:"ナトリウム原子が 3.0×10²³ 個ある。物質量 n を求めよ。\n（Nₐ=6.0×10²³ mol⁻¹）",
     steps:[
-      {id:"g0", text:"ガイド：粒子数 N から物質量 n を出すときは、n=N/N_A を使う。", requires:[]},
-      {id:"s1", text:"式：n=N/N_A", requires:[]},
+      {id:"g0", text:"ガイド：粒子数 N から物質量 n を出すときは、n=N/Nₐ を使う。", requires:[]},
+      {id:"s1", text:"式：n=N/Nₐ", requires:[]},
       {id:"s2", text:"代入：n=3.0×10²³/6.0×10²³=0.50 mol", requires:["s1"]},
       {id:"s3", text:"答：0.50 mol", requires:["s2"]}
     ]
   },
 
-  { id:"P5", title:"P5 モル質量：化学式から",
-    prompt:"硫酸 H₂SO₄ のモル質量 M を求めよ。\n（H=1,\\ S=32,\\ O=16）",
+  { id:"P5", title:"モル05 モル質量：化学式から",
+    prompt:"硫酸 H₂SO₄ のモル質量 M を求めよ。\n（H=1, S=32, O=16）",
     steps:[
       {id:"g0", text:"ガイド：化学式の各原子量を足し合わせて、モル質量 M（g/mol）を求める。", requires:[]},
       {id:"s1", text:"合計：M=2×1+1×32+4×16", requires:[]},
@@ -235,8 +655,8 @@ const PROBLEMS = [
     ]
   },
 
-  { id:"P6", title:"P6 質量→mol：NaCl",
-    prompt:"食塩 NaCl を 11.7 g 量り取った。物質量を求めよ。\n（Na=23,\\ Cl=35.5）",
+  { id:"P6", title:"モル06 質量→mol：NaCl",
+    prompt:"食塩 NaCl を 11.7 g 量り取った。物質量を求めよ。\n（Na=23, Cl=35.5）",
     steps:[
       {id:"g0", text:"ガイド：まず化学式からモル質量 M を求め、次に n=m/M で物質量を求める。", requires:[]},
       {id:"s1", text:"モル質量：M=23+35.5=58.5 g/mol", requires:[]},
@@ -245,7 +665,7 @@ const PROBLEMS = [
     ]
   },
 
-  { id:"P7", title:"P7 気体：mol→体積（標準状態）",
+  { id:"P7", title:"モル07 気体：mol→体積（標準状態）",
     prompt:"標準状態で二酸化炭素 CO₂ が 0.50 mol ある。体積 V を求めよ。\n（1 mol=22.4 L）",
     steps:[
       {id:"g0", text:"ガイド：標準状態の気体は 1 mol = 22.4 L を使う。n が分かれば V=22.4 n。", requires:[]},
@@ -255,7 +675,7 @@ const PROBLEMS = [
     ]
   },
 
-  { id:"P8", title:"P8 気体：体積→mol（標準状態）",
+  { id:"P8", title:"モル08 気体：体積→mol（標準状態）",
     prompt:"標準状態で窒素 N₂ が 5.60 L ある。物質量を求めよ。\n（1 mol=22.4 L）",
     steps:[
       {id:"g0", text:"ガイド：標準状態の気体は 1 mol = 22.4 L を使う。V が分かれば n=V/22.4。", requires:[]},
@@ -265,7 +685,7 @@ const PROBLEMS = [
     ]
   },
 
-  { id:"P9", title:"P9 溶液：モル濃度",
+  { id:"P9", title:"モル09 溶液：モル濃度",
     prompt:"NaOH を 0.20 mol 溶かして溶液を 0.50 L にした。モル濃度 c を求めよ。",
     steps:[
       {id:"g0", text:"ガイド：モル濃度 c は c=n/V（V は L）。n と V が与えられているので c=n/V。", requires:[]},
@@ -275,7 +695,7 @@ const PROBLEMS = [
     ]
   },
 
-  { id:"P10", title:"P10 溶液：濃度と体積→mol",
+  { id:"P10", title:"モル10 溶液：濃度と体積→mol",
     prompt:"0.50 mol/L の塩酸を 200 mL 取った。含まれる HCl の物質量を求めよ。",
     steps:[
       {id:"g0", text:"ガイド：モル濃度 c と体積 V（L）が与えられたら、溶質の物質量は n=cV。まず mL→L に直す。", requires:[]},
@@ -285,7 +705,7 @@ const PROBLEMS = [
     ]
   },
 
-  { id:"P11", title:"P11 希釈：mol保存",
+  { id:"P11", title:"モル11 希釈：mol保存",
     prompt:"2.0 mol/L の NaCl 水溶液を 50 mL 取り、水を加えて 200 mL にした。希釈後のモル濃度を求めよ。",
     steps:[
       {id:"g0", text:"ガイド：希釈では溶質の物質量が変わらないので c₁V₁=c₂V₂ を使う（体積は L）。", requires:[]},
@@ -295,7 +715,7 @@ const PROBLEMS = [
     ]
   },
 
-  { id:"P12", title:"P12 溶液作成：必要質量",
+  { id:"P12", title:"モル12 溶液作成：必要質量",
     prompt:"0.30 mol/L の硫酸ナトリウム Na₂SO₄ 水溶液を 0.40 L 作る。必要な溶質の質量を求めよ。\n（Na=23 S=32 O=16）",
     steps:[
       {id:"g0", text:"ガイド：溶液作成は、まず n=cV で必要な物質量を出し、次に m=nM で必要質量を出す。", requires:[]},
@@ -305,7 +725,7 @@ const PROBLEMS = [
     ]
   },
 
-  { id:"P13", title:"P13 混合：同じ溶質の濃度",
+  { id:"P13", title:"モル13 混合：同じ溶質の濃度",
     prompt:"0.20 mol/L の KCl 100 mL と、0.50 mol/L の KCl 200 mL を混ぜた。混合後のモル濃度を求めよ。",
     steps:[
       {id:"g0", text:"ガイド：混合はそれぞれ n=cV を求めて足し、全体積で割って c=n/V を出す（体積は L）。", requires:[]},
@@ -315,27 +735,27 @@ const PROBLEMS = [
     ]
   },
 
-  { id:"P14", title:"P14 質量%：求める",
+  { id:"P14", title:"モル14 質量%：求める",
     prompt:"食塩 5.0 g を水 95.0 g に溶かした。質量パーセント濃度を求めよ。",
     steps:[
       {id:"g0", text:"ガイド：質量％は 溶質/溶液×100。溶液質量＝溶質＋溶媒 を先に求める。", requires:[]},
-      {id:"s1", text:"溶液の質量：m_{sol}=5.0+95.0=100.0 g", requires:[]},
+      {id:"s1", text:"溶液の質量：m_sol=5.0+95.0=100.0 g", requires:[]},
       {id:"s2", text:"質量%：w=5.0/100.0×100=5.0%", requires:["s1"]},
       {id:"s3", text:"答：5.0%", requires:["s2"]}
     ]
   },
 
-  { id:"P15", title:"P15 質量%：溶質質量",
+  { id:"P15", title:"モル15 質量%：溶質質量",
     prompt:"10.0% の砂糖水 250 g に含まれる砂糖の質量を求めよ。",
     steps:[
       {id:"g0", text:"ガイド：質量％ w から溶質質量を出すには、m_solute=(w/100)×m_solution を使う。", requires:[]},
-      {id:"s1", text:"定義：w=\\(\\frac{m_{solute}}{m_{solution}}\\)×100", requires:[]},
-      {id:"s2", text:"変形：m_{solute}=(w/100)×m_{solution}", requires:["s1"]},
-      {id:"s3", text:"代入：m_{solute}=0.10×250=25.0 g", requires:["s2"]}
+      {id:"s1", text:"定義：w=(m_solute/m_solution)×100", requires:[]},
+      {id:"s2", text:"変形：m_solute=(w/100)×m_solution", requires:["s1"]},
+      {id:"s3", text:"代入：m_solute=0.10×250=25.0 g", requires:["s2"]}
     ]
   },
 
-  { id:"P16", title:"P16 反応量：H₂生成",
+  { id:"P16", title:"モル16 反応量：H₂生成",
     prompt:"亜鉛 Zn 6.5 g を過剰の塩酸と反応させる。Zn+2HCl→ ZnCl₂+H₂ のとき、発生する H₂ の物質量を求めよ。\n（Zn=65）",
     steps:[
       {id:"g0", text:"ガイド：反応量は「まずモルに直す→反応式の係数比で対応→必要な物質量」を出す。", requires:[]},
@@ -345,7 +765,7 @@ const PROBLEMS = [
     ]
   },
 
-  { id:"P17", title:"P17 反応量：必要O₂",
+  { id:"P17", title:"モル17 反応量：必要O₂",
     prompt:"メタン CH₄ 0.50 mol を完全燃焼させる。CH₄+2O₂→ CO₂+2H₂O より必要な O₂ の物質量を求めよ。",
     steps:[
       {id:"g0", text:"ガイド：反応量は係数比で決まる。与えられた CH₄ の物質量に係数比（1:2）を掛ける。", requires:[]},
@@ -355,7 +775,7 @@ const PROBLEMS = [
     ]
   },
 
-  { id:"P18", title:"P18 結晶水：水の質量",
+  { id:"P18", title:"モル18 結晶水：水の質量",
     prompt:"硫酸銅(II)五水和物 CuSO₄・5H₂O 25.0 g に含まれる結晶水 H₂O の質量を求めよ。\n（Cu=64 S=32 O=16 H=1）",
     steps:[
       {id:"g0", text:"ガイド：結晶水は 1 式量に含まれる水の個数に注目。まず全体をモルにし、水のモル→質量へ。", requires:[]},
@@ -365,17 +785,17 @@ const PROBLEMS = [
     ]
   },
 
-  { id:"P19", title:"P19 原子数：O原子の個数",
-    prompt:"炭酸カルシウム CaCO₃ が 0.10 mol ある。含まれる酸素原子の個数を求めよ。\n（\(N_A=6.0\\times10^{23}\\,\\mathrm{mol^{-1}}\)）",
+  { id:"P19", title:"モル19 原子数：O原子の個数",
+    prompt:"炭酸カルシウム CaCO₃ が 0.10 mol ある。含まれる酸素原子の個数を求めよ。\n（Nₐ=6.0×10²³ mol⁻¹）",
     steps:[
-      {id:"g0", text:"ガイド：原子数は「1 式量あたりの原子個数×物質量」で原子のモルを出し、N=nN_A で個数へ。", requires:[]},
+      {id:"g0", text:"ガイド：原子数は「1 式量あたりの原子個数×物質量」で原子のモルを出し、N=nNₐ で個数へ。", requires:[]},
       {id:"s1", text:"1式量にOは3個 → O原子のmol：n(O)=3×0.10=0.30 mol", requires:[]},
       {id:"s2", text:"個数：N=0.30×6.0×10²³=1.8×10²³ 個", requires:["s1"]},
       {id:"s3", text:"答：1.8×10²³ 個", requires:["s2"]}
     ]
   },
 
-  { id:"P20", title:"P20 気体：生成体積（分解反応）",
+  { id:"P20", title:"モル20 気体：生成体積（分解反応）",
     prompt:"炭酸カルシウム CaCO₃ 10.0 g を加熱分解する。CaCO₃→ CaO+CO₂ のとき発生する CO₂ の標準状態での体積を求めよ。\n（Ca=40 C=12 O=16、1 mol=22.4 L）",
     steps:[
       {id:"g0", text:"ガイド：分解反応は「モルに直す→係数比→標準状態なら 22.4 L/mol」で体積へ。", requires:[]},
@@ -384,11 +804,13 @@ const PROBLEMS = [
       {id:"s3", text:"係数比1:1 → n(CO₂)=0.100 mol → V=22.4×0.100=2.24 L", requires:["s2"]}
     ]
   }
+
 ];
+
 
 /* =======================
    --- アプリ共通 ---
-   ======================= */
+ ======================= */
 let current=null, poolCards=[], answerCards=[];
 const sel=document.getElementById('problemSelect');
 const promptEl=document.getElementById('prompt');
@@ -402,7 +824,7 @@ const msg=document.getElementById('msg');
 const poolZone=document.getElementById('poolZone');
 const answerZone=document.getElementById('answerZone');
 const solutionWrap=document.getElementById('solutionWrap');
-const nextWrap=document.getElementById('nextWrap'); // ✅ 追加
+const nextWrap=document.getElementById('nextWrap');
 
 function escapeHTML(s){
   return String(s)
@@ -410,9 +832,8 @@ function escapeHTML(s){
     .replace(/</g,'&lt;')
     .replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;');
+    .replace(/'/g,'&#039;');
 }
-
 function shuffle(arr){
   const a=arr.slice();
   for(let i=a.length-1;i>0;i--){
@@ -433,7 +854,7 @@ function typesetMath(){
   return Promise.resolve();
 }
 
-/* ✅ 追加：次の問題へ（math_1.html と同じ考え方） */
+/* 次の問題へ */
 function getNextProblemId(){
   const idx = PROBLEMS.findIndex(p => p.id === current.id);
   if(idx < 0 || idx === PROBLEMS.length - 1) return null;
@@ -463,9 +884,18 @@ function createCardEl(card){
   const div=document.createElement('div');
   div.className='cardItem'+(card.kind==='distractor'?' distractor':'');
   div.draggable=true; div.dataset.cardId=card.id; div.dataset.zone=card.zone;
-  const badge=document.createElement('div'); badge.className='badge'; badge.textContent=card.label;
-  const text=document.createElement('div'); text.className='cardText'; text.textContent=card.text;
-  div.appendChild(badge); div.appendChild(text);
+
+  const badge=document.createElement('div');
+  badge.className='badge';
+  badge.textContent=card.label;
+
+  const text=document.createElement('div');
+  text.className='cardText';
+  text.textContent=card.text;
+
+  div.appendChild(badge);
+  div.appendChild(text);
+
   div.addEventListener('dragstart',(e)=>{
     e.dataTransfer.setData('text/plain',JSON.stringify({id:card.id,from:card.zone}));
     e.dataTransfer.effectAllowed='move';
@@ -475,7 +905,8 @@ function createCardEl(card){
 }
 
 function render(){
-  poolEl.innerHTML=''; answerEl.innerHTML='';
+  poolEl.innerHTML='';
+  answerEl.innerHTML='';
   poolCards.forEach(c=>poolEl.appendChild(createCardEl(c)));
   answerCards.forEach(c=>answerEl.appendChild(createCardEl(c)));
   return typesetMath();
@@ -488,12 +919,13 @@ function moveCard(id,toZone){
     if(idx>=0){card=arr[idx];arr.splice(idx,1);return true;}
     return false;
   };
-  take(poolCards)||take(answerCards);
+  take(poolCards);
+  take(answerCards);
   if(!card) return;
   card.zone=toZone;
   (toZone==='pool'?poolCards:answerCards).push(card);
   clearMarking();
-  hideNextButton(); // ✅ 追加：操作したら一旦消す
+  hideNextButton();
   setStatus('', '移動しました。並べ終えたら「判定する」。');
   solutionWrap.style.display='none';
   render();
@@ -505,6 +937,7 @@ function clearMarking(){
     el.classList.remove('valid');
   });
 }
+
 function markOrderFeedback(result){
   const els=[...answerEl.querySelectorAll('.cardItem')];
   const byId=new Map();
@@ -584,19 +1017,29 @@ function enableDrop(zoneEl,toZone){
 }
 
 function loadProblem(problemId){
-  current=PROBLEMS.find(p=>p.id===problemId)||PROBLEMS[0];
+  current=PROBLEMS.find(p=>p.id===problemId) || PROBLEMS[0];
   sel.value = current.id;
+
   promptEl.innerHTML = escapeHTML(current.prompt).replace(/\n/g,'<br>');
+
   const cards=[]; let n=1;
   current.steps.forEach(s=>{
-    cards.push({id:s.id,kind:'step',label:`S${n++}`,text:s.text,requires:s.requires||[],zone:'pool'});
+    cards.push({
+      id:s.id,
+      kind:'step',
+      label:`S${n++}`,
+      text:s.text,
+      requires:s.requires||[],
+      zone:'pool'
+    });
   });
+
   poolCards=shuffle(cards);
   answerCards=[];
   solutionWrap.style.display='none';
   solutionWrap.innerHTML='';
   clearMarking();
-  hideNextButton(); // ✅ 追加：問題切替でボタンは消す
+  hideNextButton();
   setStatus('', 'カードを並べて「判定する」を押してください。');
   render();
 }
@@ -611,7 +1054,7 @@ function populateSelect(){
   });
 }
 
-/* ✅ 追加：URLの ?p=P10 のような指定があればそこから開始（任意） */
+/* URLの ?p=... 指定があればそこから開始 */
 function getParamP(){
   try{
     const u = new URL(window.location.href);
@@ -626,7 +1069,7 @@ resetBtn.addEventListener('click',()=>loadProblem(sel.value));
 
 answerBtn.addEventListener('click',()=>{
   clearMarking();
-  hideNextButton(); // ✅ 解答表示中は出さない
+  hideNextButton();
   setStatus('warn','解答（おすすめの並び）を表示しました。自力で並べてから「判定する」で確認できます。');
   solutionWrap.style.display='block';
   solutionWrap.innerHTML='';
@@ -638,27 +1081,29 @@ checkBtn.addEventListener('click',()=>{
   clearMarking();
   const r=evaluate();
 
+  // 色付けフィードバック（任意）
+  markOrderFeedback(r);
+
   if(r.correctOrder){
     setStatus('ok','完璧！');
-    showNextButton(); // ✅ 正解時に表示
+    showNextButton();
     solutionWrap.style.display='block';
     solutionWrap.innerHTML='';
     solutionWrap.appendChild(buildSolutionBox());
     typesetMath();
   }else if(r.correctSet){
     setStatus('warn',`カードはそろっています。順序を調整（進捗 ${r.progress}%）。`);
-    hideNextButton(); // ✅ 途中は非表示
+    hideNextButton();
     if(r.firstBad) msg.textContent=`順序ヒント：${r.firstBad.reason}`;
     solutionWrap.style.display='none';
   }else{
-    hideNextButton(); // ✅ 不正解は非表示
+    hideNextButton();
     if(r.extras.length>0) setStatus('ng',`誤カードが混ざっています（${r.extras.length}枚）。`);
     else if(r.missing.length>0) setStatus('ng',`正解カードが足りません（${r.missing.length}枚）。`);
     else setStatus('ng','まだ整っていません。');
     solutionWrap.style.display='none';
   }
 
-  // 判定結果へスクロール（math版と同様に、見やすさのため）
   const target = pill.closest('.status') || pill;
   const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
@@ -668,8 +1113,9 @@ enableDrop(poolZone,'pool');
 enableDrop(answerZone,'answer');
 
 populateSelect();
-const startId = getParamP() || 'P1';
+const startId = getParamP() || PROBLEMS[0].id;
 loadProblem(startId);
 </script>
+
 </body>
 </html>
