@@ -113,6 +113,92 @@
       border-color: rgba(124,92,255,.55);
       color:#efeaff;
     }
+
+/* =========================
+ 図解UI
+========================= */
+.diagramTitle{
+ font-size:12px;
+ color:var(--muted);
+ margin-bottom:10px;
+ letter-spacing:.03em;
+}
+
+.flowSvg{
+ width:100%;
+ min-width:520px;
+ height:auto;
+}
+
+.flowNode{
+ fill:rgba(124,92,255,.18);
+ stroke:rgba(124,92,255,.7);
+ stroke-width:2;
+}
+
+.flowText{
+ fill:#eef1ff;
+ font-size:13px;
+ font-family:system-ui,sans-serif;
+}
+
+#flowchartWrap{
+ margin-top:18px;
+}
+
+.flowchart{
+ display:flex;
+ flex-direction:column;
+ gap:10px;
+}
+
+.flowStep{
+ padding:14px;
+ border-radius:14px;
+
+ background:
+ linear-gradient(
+  180deg,
+  rgba(124,92,255,.18),
+  rgba(255,255,255,.03)
+ );
+
+ border:1px solid rgba(124,92,255,.35);
+
+ animation:flowPop .25s ease;
+}
+
+.flowArrow{
+ text-align:center;
+ font-size:24px;
+ color:#cfc7ff;
+}
+
+@keyframes flowPop{
+
+ from{
+  transform:translateY(6px);
+  opacity:0;
+ }
+
+ to{
+  transform:translateY(0);
+  opacity:1;
+ }
+
+}
+
+.diagram{
+ margin:0 0 14px;
+ padding:14px;
+ border-radius:16px;
+ background:rgba(255,255,255,.04);
+ border:1px solid rgba(255,255,255,.08);
+ overflow:auto;
+}
+
+
+
   </style>
 </head>
 
@@ -134,7 +220,16 @@
         <div class="row" style="margin-bottom:10px"><label for="problemSelect">問題を選択</label></div>
         <select id="problemSelect"></select>
         <div style="height:10px"></div>
-        <div class="prompt" id="prompt"></div>
+        
+<div id="diagramWrap"
+     class="diagram"
+     style="display:none">
+</div>
+
+<div class="prompt"
+     id="prompt">
+</div>
+
         <div style="height:12px"></div>
         <div class="row">
           <button class="primary" id="checkBtn">判定する</button>
@@ -169,7 +264,17 @@
         <div id="nextWrap"></div>
       </div>
 
-      <div class="body"><div id="solutionWrap" style="display:none"></div></div>
+      
+<div class="body">
+
+<div id="flowchartWrap"></div>
+
+<div id="solutionWrap"
+     style="display:none">
+</div>
+
+</div>
+
     </section>
   </main>
 
@@ -735,6 +840,716 @@ const PROBLEMS = [
 ];
 
 /* =========================
+ 図データ：絵解説版
+========================= */
+
+const DIAGRAMS = {
+
+"P24": `
+
+<div class="diagramTitle">
+浸透：水が半透膜を通って高濃度側へ移動する
+</div>
+
+<svg class="flowSvg" viewBox="0 0 900 340">
+
+<defs>
+<marker id="arrowWater" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#7dd3fc"></polygon>
+</marker>
+</defs>
+
+<rect x="60" y="70" width="330" height="210" rx="24"
+fill="rgba(125,211,252,.08)" stroke="rgba(125,211,252,.5)" stroke-width="3"></rect>
+
+<rect x="510" y="70" width="330" height="210" rx="24"
+fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.55)" stroke-width="3"></rect>
+
+<line x1="450" y1="45" x2="450" y2="300"
+stroke="rgba(255,255,255,.85)" stroke-width="8" stroke-dasharray="12 12"></line>
+
+<text class="flowText" x="450" y="325" text-anchor="middle">半透膜：水は通すが、溶質は通しにくい</text>
+
+<text class="flowText" x="225" y="48" text-anchor="middle">低濃度側</text>
+<text class="flowText" x="675" y="48" text-anchor="middle">高濃度側</text>
+
+<circle cx="135" cy="120" r="12" fill="#7dd3fc"></circle>
+<circle cx="205" cy="180" r="12" fill="#7dd3fc"></circle>
+<circle cx="290" cy="135" r="12" fill="#7dd3fc"></circle>
+<circle cx="320" cy="225" r="12" fill="#7dd3fc"></circle>
+<circle cx="150" cy="240" r="12" fill="#7dd3fc"></circle>
+
+<circle cx="585" cy="105" r="14" fill="#f59e0b"></circle>
+<circle cx="650" cy="145" r="14" fill="#f59e0b"></circle>
+<circle cx="730" cy="110" r="14" fill="#f59e0b"></circle>
+<circle cx="600" cy="220" r="14" fill="#f59e0b"></circle>
+<circle cx="700" cy="245" r="14" fill="#f59e0b"></circle>
+<circle cx="775" cy="190" r="14" fill="#f59e0b"></circle>
+
+<line x1="320" y1="170" x2="570" y2="170"
+stroke="#7dd3fc" stroke-width="5" marker-end="url(#arrowWater)"></line>
+
+<text class="flowText" x="450" y="155" text-anchor="middle">水が移動</text>
+
+<text class="flowText" x="450" y="28" text-anchor="middle">
+水は「溶質濃度が低い側」から「高い側」へ移動する
+</text>
+
+</svg>
+
+`,
+
+"P29": `
+
+<div class="diagramTitle">
+酵素：活性化エネルギーを下げて反応を進みやすくする
+</div>
+
+<svg class="flowSvg" viewBox="0 0 900 340">
+
+<defs>
+<marker id="arrowEnz29" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#cfc7ff"></polygon>
+</marker>
+</defs>
+
+<path d="M90 250 C210 250, 250 80, 390 80 C530 80, 570 250, 810 250"
+fill="none" stroke="rgba(239,68,68,.85)" stroke-width="6" stroke-linecap="round"></path>
+
+<path d="M90 250 C230 250, 310 150, 430 150 C550 150, 610 250, 810 250"
+fill="none" stroke="rgba(34,197,94,.85)" stroke-width="6" stroke-linecap="round"></path>
+
+<text class="flowText" x="450" y="45" text-anchor="middle">酵素なし：越える山が高い</text>
+<text class="flowText" x="450" y="135" text-anchor="middle">酵素あり：活性化エネルギーが低い</text>
+
+<circle cx="140" cy="250" r="34" fill="rgba(124,92,255,.22)" stroke="rgba(124,92,255,.75)" stroke-width="3"></circle>
+<text class="flowText" x="140" y="256" text-anchor="middle">反応前</text>
+
+<circle cx="760" cy="250" r="34" fill="rgba(34,197,94,.22)" stroke="rgba(34,197,94,.75)" stroke-width="3"></circle>
+<text class="flowText" x="760" y="256" text-anchor="middle">生成物</text>
+
+<line x1="300" y1="290" x2="600" y2="290" stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowEnz29)"></line>
+<text class="flowText" x="450" y="320" text-anchor="middle">酵素自身は基本的に反応前後で消費されない</text>
+
+</svg>
+
+`,
+
+"P30": `
+
+<div class="diagramTitle">
+酵素：基質特異性 — 活性部位に合う基質だけが結合しやすい
+</div>
+
+<svg class="flowSvg" viewBox="0 0 900 340">
+
+<defs>
+<marker id="arrowEnz30" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#cfc7ff"></polygon>
+</marker>
+</defs>
+
+<path d="M140 120
+C140 80, 190 60, 240 80
+C290 100, 280 150, 240 160
+C215 168, 205 195, 230 215
+C270 250, 220 295, 160 275
+C95 252, 80 185, 110 145
+C120 132, 130 124, 140 120"
+fill="rgba(124,92,255,.18)" stroke="rgba(124,92,255,.8)" stroke-width="4"></path>
+
+<path d="M210 138
+C230 120, 255 120, 275 140
+C255 160, 230 160, 210 138"
+fill="rgba(11,16,32,.95)" stroke="rgba(255,255,255,.45)" stroke-width="2"></path>
+
+<text class="flowText" x="185" y="55" text-anchor="middle">酵素</text>
+<text class="flowText" x="245" y="112" text-anchor="middle">活性部位</text>
+
+<path d="M395 135 L430 105 L465 135 L450 178 L410 178 Z"
+fill="rgba(34,197,94,.35)" stroke="rgba(34,197,94,.9)" stroke-width="4"></path>
+<text class="flowText" x="430" y="205" text-anchor="middle">基質</text>
+
+<line x1="480" y1="145" x2="570" y2="145" stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowEnz30)"></line>
+
+<path d="M640 120
+C640 80, 690 60, 740 80
+C790 100, 780 150, 740 160
+C715 168, 705 195, 730 215
+C770 250, 720 295, 660 275
+C595 252, 580 185, 610 145
+C620 132, 630 124, 640 120"
+fill="rgba(124,92,255,.18)" stroke="rgba(124,92,255,.8)" stroke-width="4"></path>
+
+<path d="M710 138 L745 108 L780 138 L765 181 L725 181 Z"
+fill="rgba(34,197,94,.35)" stroke="rgba(34,197,94,.9)" stroke-width="4"></path>
+
+<text class="flowText" x="710" y="55" text-anchor="middle">酵素基質複合体</text>
+
+<text class="flowText" x="450" y="305" text-anchor="middle">
+形が合う基質だけが結合しやすい性質を「基質特異性」という
+</text>
+
+</svg>
+
+`,
+
+"P31": `
+
+<div class="diagramTitle">
+酵素：温度が高すぎると変性して活性部位の形が崩れる
+</div>
+
+<svg class="flowSvg" viewBox="0 0 900 340">
+
+<defs>
+<marker id="arrowEnz31" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#f59e0b"></polygon>
+</marker>
+</defs>
+
+<path d="M95 250 C180 90, 285 90, 370 250"
+fill="none" stroke="rgba(34,197,94,.9)" stroke-width="6" stroke-linecap="round"></path>
+
+<path d="M370 250 C480 310, 585 260, 670 110"
+fill="none" stroke="rgba(239,68,68,.9)" stroke-width="6" stroke-linecap="round"></path>
+
+<line x1="90" y1="250" x2="780" y2="250" stroke="rgba(255,255,255,.4)" stroke-width="2"></line>
+<line x1="90" y1="250" x2="90" y2="70" stroke="rgba(255,255,255,.4)" stroke-width="2"></line>
+
+<text class="flowText" x="450" y="305" text-anchor="middle">温度</text>
+<text class="flowText" x="55" y="165" text-anchor="middle" transform="rotate(-90 55 165)">反応速度</text>
+
+<circle cx="260" cy="110" r="30" fill="rgba(34,197,94,.24)" stroke="rgba(34,197,94,.8)" stroke-width="3"></circle>
+<text class="flowText" x="260" y="116" text-anchor="middle">最適</text>
+
+<text class="flowText" x="600" y="85" text-anchor="middle">高温</text>
+<line x1="600" y1="95" x2="600" y2="150" stroke="#f59e0b" stroke-width="4" marker-end="url(#arrowEnz31)"></line>
+
+<path d="M640 170 C675 135, 730 155, 725 205 C720 255, 650 260, 620 220 C600 195, 615 180, 640 170"
+fill="rgba(239,68,68,.18)" stroke="rgba(239,68,68,.8)" stroke-width="4"></path>
+
+<text class="flowText" x="680" y="285" text-anchor="middle">変性：形が崩れる</text>
+
+</svg>
+
+`,
+
+"P32": `
+
+<div class="diagramTitle">
+酵素：pHが変わると立体構造や活性部位の形に影響する
+</div>
+
+<svg class="flowSvg" viewBox="0 0 900 340">
+
+<defs>
+<marker id="arrowEnz32" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#cfc7ff"></polygon>
+</marker>
+</defs>
+
+<rect x="90" y="80" width="190" height="170" rx="28"
+fill="rgba(125,211,252,.10)" stroke="rgba(125,211,252,.65)" stroke-width="3"></rect>
+<text class="flowText" x="185" y="62" text-anchor="middle">酸性側</text>
+<text class="flowText" x="185" y="150" text-anchor="middle">電荷状態が変化</text>
+<text class="flowText" x="185" y="178" text-anchor="middle">形がずれる</text>
+
+<line x1="290" y1="165" x2="355" y2="165" stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowEnz32)"></line>
+
+<rect x="355" y="80" width="190" height="170" rx="28"
+fill="rgba(34,197,94,.12)" stroke="rgba(34,197,94,.75)" stroke-width="3"></rect>
+<text class="flowText" x="450" y="62" text-anchor="middle">最適pH</text>
+<path d="M420 155 C440 130, 470 130, 490 155 C470 180, 440 180, 420 155"
+fill="rgba(11,16,32,.95)" stroke="rgba(255,255,255,.55)" stroke-width="2"></path>
+<text class="flowText" x="450" y="218" text-anchor="middle">活性部位が合う</text>
+
+<line x1="555" y1="165" x2="620" y2="165" stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowEnz32)"></line>
+
+<rect x="620" y="80" width="190" height="170" rx="28"
+fill="rgba(245,158,11,.10)" stroke="rgba(245,158,11,.75)" stroke-width="3"></rect>
+<text class="flowText" x="715" y="62" text-anchor="middle">アルカリ性側</text>
+<text class="flowText" x="715" y="150" text-anchor="middle">電荷状態が変化</text>
+<text class="flowText" x="715" y="178" text-anchor="middle">反応しにくい</text>
+
+<text class="flowText" x="450" y="300" text-anchor="middle">
+酵素ごとに最も働きやすいpHがある
+</text>
+
+</svg>
+
+`,
+
+"P33": `
+
+<div class="diagramTitle">
+競争的阻害：基質に似た阻害物質が活性部位を取り合う
+</div>
+
+<svg class="flowSvg" viewBox="0 0 900 340">
+
+<defs>
+<marker id="arrowEnz33" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#cfc7ff"></polygon>
+</marker>
+</defs>
+
+<path d="M130 115 C165 70, 245 75, 270 130 C300 195, 250 270, 175 260 C105 250, 85 170, 130 115"
+fill="rgba(124,92,255,.18)" stroke="rgba(124,92,255,.8)" stroke-width="4"></path>
+
+<path d="M190 140 C215 118, 245 122, 265 145 C240 168, 215 168, 190 140"
+fill="rgba(11,16,32,.95)" stroke="rgba(255,255,255,.55)" stroke-width="2"></path>
+
+<text class="flowText" x="185" y="60" text-anchor="middle">酵素</text>
+<text class="flowText" x="235" y="115" text-anchor="middle">活性部位</text>
+
+<path d="M390 120 L425 92 L460 120 L445 165 L405 165 Z"
+fill="rgba(34,197,94,.35)" stroke="rgba(34,197,94,.9)" stroke-width="4"></path>
+<text class="flowText" x="425" y="190" text-anchor="middle">基質</text>
+
+<path d="M390 235 L425 207 L460 235 L445 280 L405 280 Z"
+fill="rgba(239,68,68,.35)" stroke="rgba(239,68,68,.9)" stroke-width="4"></path>
+<text class="flowText" x="425" y="305" text-anchor="middle">阻害物質</text>
+
+<line x1="470" y1="138" x2="620" y2="150" stroke="#34d399" stroke-width="4" marker-end="url(#arrowEnz33)"></line>
+<line x1="470" y1="245" x2="620" y2="170" stroke="#ef4444" stroke-width="4" marker-end="url(#arrowEnz33)"></line>
+
+<path d="M650 115 C685 70, 765 75, 790 130 C820 195, 770 270, 695 260 C625 250, 605 170, 650 115"
+fill="rgba(124,92,255,.18)" stroke="rgba(124,92,255,.8)" stroke-width="4"></path>
+
+<path d="M710 140 L745 112 L780 140 L765 185 L725 185 Z"
+fill="rgba(239,68,68,.35)" stroke="rgba(239,68,68,.9)" stroke-width="4"></path>
+
+<text class="flowText" x="720" y="305" text-anchor="middle">阻害物質が先に入ると基質が結合できない</text>
+
+</svg>
+
+`,
+
+"P34": `
+
+<div class="diagramTitle">
+非競争的阻害：活性部位以外に結合して酵素の形を変える
+</div>
+
+<svg class="flowSvg" viewBox="0 0 900 340">
+
+<defs>
+<marker id="arrowEnz34" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#f59e0b"></polygon>
+</marker>
+</defs>
+
+<path d="M135 105 C175 65, 250 70, 285 125 C325 190, 270 275, 185 265 C100 255, 80 165, 135 105"
+fill="rgba(124,92,255,.18)" stroke="rgba(124,92,255,.8)" stroke-width="4"></path>
+
+<path d="M200 132 C225 110, 255 112, 275 138 C250 160, 225 160, 200 132"
+fill="rgba(11,16,32,.95)" stroke="rgba(255,255,255,.55)" stroke-width="2"></path>
+
+<text class="flowText" x="190" y="58" text-anchor="middle">通常の酵素</text>
+<text class="flowText" x="235" y="105" text-anchor="middle">活性部位</text>
+
+<circle cx="410" cy="180" r="28" fill="rgba(239,68,68,.35)" stroke="rgba(239,68,68,.9)" stroke-width="4"></circle>
+<text class="flowText" x="410" y="185" text-anchor="middle">阻害</text>
+
+<line x1="440" y1="180" x2="560" y2="180" stroke="#f59e0b" stroke-width="4" marker-end="url(#arrowEnz34)"></line>
+
+<path d="M630 105 C700 55, 785 100, 775 175 C765 250, 685 285, 620 230 C570 188, 580 135, 630 105"
+fill="rgba(124,92,255,.14)" stroke="rgba(239,68,68,.85)" stroke-width="4"></path>
+
+<path d="M700 135 C720 125, 745 132, 760 155 C735 165, 710 160, 700 135"
+fill="rgba(11,16,32,.95)" stroke="rgba(239,68,68,.75)" stroke-width="2"></path>
+
+<circle cx="620" cy="215" r="22" fill="rgba(239,68,68,.35)" stroke="rgba(239,68,68,.9)" stroke-width="4"></circle>
+
+<text class="flowText" x="700" y="58" text-anchor="middle">形が変わった酵素</text>
+<text class="flowText" x="700" y="305" text-anchor="middle">活性部位が働きにくくなる</text>
+
+</svg>
+
+`,
+
+"P48": `
+
+<div class="diagramTitle">
+ミトコンドリアの構造：内膜が折れ込んでクリステをつくる
+</div>
+
+<svg class="flowSvg" viewBox="0 0 900 360">
+
+<ellipse cx="450" cy="185" rx="340" ry="130"
+fill="rgba(124,92,255,.10)" stroke="rgba(124,92,255,.75)" stroke-width="5"></ellipse>
+
+<ellipse cx="450" cy="185" rx="295" ry="95"
+fill="rgba(11,16,32,.25)" stroke="rgba(191,243,209,.65)" stroke-width="3"></ellipse>
+
+<path d="M210 185
+C260 95, 315 275, 370 185
+C425 95, 480 275, 535 185
+C590 95, 645 275, 710 185"
+fill="none" stroke="rgba(191,243,209,.95)" stroke-width="9" stroke-linecap="round"></path>
+
+<text class="flowText" x="450" y="55" text-anchor="middle">ミトコンドリア</text>
+<text class="flowText" x="450" y="88" text-anchor="middle">二重膜で囲まれる</text>
+
+<text class="flowText" x="450" y="320" text-anchor="middle">
+内膜のひだ＝クリステ。表面積が増え、呼吸の反応を効率よく行える
+</text>
+
+<line x1="660" y1="105" x2="610" y2="145" stroke="#bff3d1" stroke-width="4"></line>
+<text class="flowText" x="710" y="100" text-anchor="middle">内膜</text>
+
+<line x1="230" y1="95" x2="170" y2="75" stroke="#cfc7ff" stroke-width="4"></line>
+<text class="flowText" x="140" y="70" text-anchor="middle">外膜</text>
+
+</svg>
+
+`,
+
+"P49": `
+
+<div class="diagramTitle">
+ミトコンドリア内膜でH+勾配をつくり、ATPを合成する
+</div>
+
+<svg class="flowSvg" viewBox="0 0 900 360">
+
+<defs>
+<marker id="arrowMito49" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#cfc7ff"></polygon>
+</marker>
+</defs>
+
+<ellipse cx="450" cy="190" rx="350" ry="125"
+fill="rgba(124,92,255,.10)" stroke="rgba(124,92,255,.75)" stroke-width="4"></ellipse>
+
+<path d="M170 190
+C230 105, 290 275, 350 190
+C410 105, 470 275, 530 190
+C590 105, 650 275, 730 190"
+fill="none" stroke="rgba(191,243,209,.9)" stroke-width="8" stroke-linecap="round"></path>
+
+<rect class="flowNode" x="250" y="150" width="170" height="58" rx="16"></rect>
+<text class="flowText" x="335" y="175" text-anchor="middle">電子伝達系</text>
+<text class="flowText" x="335" y="195" text-anchor="middle">H+を汲み出す</text>
+
+<circle cx="270" cy="95" r="16" fill="#f59e0b"></circle>
+<text class="flowText" x="270" y="100" text-anchor="middle">H+</text>
+<circle cx="350" cy="85" r="16" fill="#f59e0b"></circle>
+<text class="flowText" x="350" y="90" text-anchor="middle">H+</text>
+<circle cx="430" cy="95" r="16" fill="#f59e0b"></circle>
+<text class="flowText" x="430" y="100" text-anchor="middle">H+</text>
+
+<line x1="335" y1="150" x2="335" y2="108" stroke="#f59e0b" stroke-width="4" marker-end="url(#arrowMito49)"></line>
+
+<rect x="565" y="140" width="95" height="95" rx="20"
+fill="rgba(34,197,94,.18)" stroke="rgba(34,197,94,.85)" stroke-width="3"></rect>
+<text class="flowText" x="612" y="172" text-anchor="middle">ATP</text>
+<text class="flowText" x="612" y="193" text-anchor="middle">合成酵素</text>
+
+<line x1="612" y1="100" x2="612" y2="140" stroke="#f59e0b" stroke-width="4" marker-end="url(#arrowMito49)"></line>
+
+<circle cx="745" cy="190" r="38" fill="rgba(34,197,94,.28)" stroke="rgba(34,197,94,.85)" stroke-width="3"></circle>
+<text class="flowText" x="745" y="196" text-anchor="middle">ATP</text>
+
+<line x1="660" y1="190" x2="705" y2="190" stroke="#bff3d1" stroke-width="4" marker-end="url(#arrowMito49)"></line>
+
+<text class="flowText" x="450" y="320" text-anchor="middle">
+H+がATP合成酵素を通って戻る力でATPがつくられる
+</text>
+
+</svg>
+
+`,
+
+"P50": `
+
+<div class="diagramTitle">
+葉緑体の構造：チラコイド膜が重なってグラナをつくる
+</div>
+
+<svg class="flowSvg" viewBox="0 0 900 360">
+
+<ellipse cx="450" cy="185" rx="340" ry="130"
+fill="rgba(34,197,94,.10)" stroke="rgba(34,197,94,.75)" stroke-width="5"></ellipse>
+
+<ellipse cx="450" cy="185" rx="295" ry="95"
+fill="rgba(11,16,32,.2)" stroke="rgba(191,243,209,.65)" stroke-width="3"></ellipse>
+
+<g>
+<ellipse cx="320" cy="155" rx="85" ry="18" fill="rgba(34,197,94,.35)" stroke="rgba(191,243,209,.8)" stroke-width="3"></ellipse>
+<ellipse cx="320" cy="178" rx="85" ry="18" fill="rgba(34,197,94,.35)" stroke="rgba(191,243,209,.8)" stroke-width="3"></ellipse>
+<ellipse cx="320" cy="201" rx="85" ry="18" fill="rgba(34,197,94,.35)" stroke="rgba(191,243,209,.8)" stroke-width="3"></ellipse>
+</g>
+
+<g>
+<ellipse cx="580" cy="155" rx="85" ry="18" fill="rgba(34,197,94,.35)" stroke="rgba(191,243,209,.8)" stroke-width="3"></ellipse>
+<ellipse cx="580" cy="178" rx="85" ry="18" fill="rgba(34,197,94,.35)" stroke="rgba(191,243,209,.8)" stroke-width="3"></ellipse>
+<ellipse cx="580" cy="201" rx="85" ry="18" fill="rgba(34,197,94,.35)" stroke="rgba(191,243,209,.8)" stroke-width="3"></ellipse>
+</g>
+
+<line x1="405" y1="178" x2="495" y2="178" stroke="rgba(191,243,209,.8)" stroke-width="5"></line>
+
+<text class="flowText" x="450" y="55" text-anchor="middle">葉緑体</text>
+<text class="flowText" x="320" y="250" text-anchor="middle">グラナ</text>
+<text class="flowText" x="580" y="250" text-anchor="middle">チラコイド膜</text>
+
+<text class="flowText" x="450" y="320" text-anchor="middle">
+チラコイド膜上に光反応のしくみがある
+</text>
+
+</svg>
+
+`,
+
+"P51": `
+
+<div class="diagramTitle">
+葉緑体の機能：光反応でATP・NADPH、カルビン回路で糖をつくる
+</div>
+
+<svg class="flowSvg" viewBox="0 0 940 360">
+
+<defs>
+<marker id="arrowChl51" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#bff3d1"></polygon>
+</marker>
+</defs>
+
+<ellipse cx="470" cy="185" rx="350" ry="130"
+fill="rgba(34,197,94,.10)" stroke="rgba(34,197,94,.75)" stroke-width="5"></ellipse>
+
+<rect class="flowNode" x="160" y="135" width="210" height="90" rx="22"></rect>
+<text class="flowText" x="265" y="165" text-anchor="middle">光反応</text>
+<text class="flowText" x="265" y="190" text-anchor="middle">ATP・NADPH</text>
+
+<line x1="370" y1="180" x2="520" y2="180" stroke="#bff3d1" stroke-width="4" marker-end="url(#arrowChl51)"></line>
+
+<rect class="flowNode" x="520" y="135" width="250" height="90" rx="22"></rect>
+<text class="flowText" x="645" y="165" text-anchor="middle">カルビン回路</text>
+<text class="flowText" x="645" y="190" text-anchor="middle">CO2から糖を合成</text>
+
+<text class="flowText" x="180" y="95" text-anchor="middle">光</text>
+<line x1="185" y1="105" x2="230" y2="135" stroke="#facc15" stroke-width="5" marker-end="url(#arrowChl51)"></line>
+
+<text class="flowText" x="780" y="95" text-anchor="middle">糖</text>
+<circle cx="790" cy="125" r="24" fill="rgba(245,158,11,.28)" stroke="rgba(245,158,11,.85)" stroke-width="3"></circle>
+
+<text class="flowText" x="470" y="320" text-anchor="middle">
+光エネルギーを化学エネルギーに変換して有機物をつくる
+</text>
+
+</svg>
+
+`,
+
+"P60": `
+
+<div class="diagramTitle">
+分泌タンパク質の経路：粗面小胞体 → ゴルジ体 → 細胞外
+</div>
+
+<svg class="flowSvg" viewBox="0 0 980 360">
+
+<defs>
+<marker id="arrowSec60" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#cfc7ff"></polygon>
+</marker>
+</defs>
+
+<rect x="80" y="120" width="190" height="100" rx="20"
+fill="rgba(124,92,255,.18)" stroke="rgba(124,92,255,.8)" stroke-width="3"></rect>
+<text class="flowText" x="175" y="155" text-anchor="middle">粗面小胞体</text>
+<text class="flowText" x="175" y="180" text-anchor="middle">リボソームで合成</text>
+
+<circle cx="110" cy="110" r="8" fill="#e9ecff"></circle>
+<circle cx="140" cy="105" r="8" fill="#e9ecff"></circle>
+<circle cx="170" cy="110" r="8" fill="#e9ecff"></circle>
+
+<line x1="270" y1="170" x2="390" y2="170" stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowSec60)"></line>
+
+<circle cx="425" cy="170" r="32" fill="rgba(125,211,252,.2)" stroke="rgba(125,211,252,.8)" stroke-width="3"></circle>
+<text class="flowText" x="425" y="176" text-anchor="middle">小胞</text>
+
+<line x1="460" y1="170" x2="560" y2="170" stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowSec60)"></line>
+
+<path d="M590 120 C660 105, 710 120, 750 150
+M590 160 C665 145, 715 160, 750 190
+M590 200 C660 185, 710 200, 750 230"
+fill="none" stroke="rgba(245,158,11,.85)" stroke-width="8" stroke-linecap="round"></path>
+<text class="flowText" x="670" y="92" text-anchor="middle">ゴルジ体</text>
+<text class="flowText" x="670" y="270" text-anchor="middle">加工・仕分け</text>
+
+<line x1="760" y1="180" x2="850" y2="180" stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowSec60)"></line>
+
+<line x1="875" y1="80" x2="875" y2="280" stroke="rgba(34,197,94,.85)" stroke-width="8"></line>
+<text class="flowText" x="875" y="305" text-anchor="middle">細胞膜</text>
+
+<circle cx="830" cy="180" r="24" fill="rgba(125,211,252,.2)" stroke="rgba(125,211,252,.8)" stroke-width="3"></circle>
+<text class="flowText" x="830" y="186" text-anchor="middle">分泌</text>
+
+<text class="flowText" x="490" y="330" text-anchor="middle">
+タンパク質は小胞に包まれて運ばれ、最後に細胞膜と融合して外へ出る
+</text>
+
+</svg>
+
+`,
+
+"P65": `
+
+<div class="diagramTitle">
+電子伝達系：電子の移動でH+を汲み出し、酸素が最後に電子を受け取る
+</div>
+
+<svg class="flowSvg" viewBox="0 0 980 360">
+
+<defs>
+<marker id="arrowEtc65" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#cfc7ff"></polygon>
+</marker>
+<marker id="arrowH65" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#f59e0b"></polygon>
+</marker>
+</defs>
+
+<line x1="80" y1="210" x2="900" y2="210" stroke="rgba(191,243,209,.75)" stroke-width="8"></line>
+<text class="flowText" x="490" y="245" text-anchor="middle">ミトコンドリア内膜</text>
+
+<rect class="flowNode" x="100" y="140" width="140" height="70" rx="18"></rect>
+<text class="flowText" x="170" y="168" text-anchor="middle">NADH</text>
+<text class="flowText" x="170" y="190" text-anchor="middle">FADH2</text>
+
+<line x1="240" y1="175" x2="350" y2="175" stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowEtc65)"></line>
+
+<rect class="flowNode" x="350" y="140" width="170" height="70" rx="18"></rect>
+<text class="flowText" x="435" y="168" text-anchor="middle">電子伝達体</text>
+<text class="flowText" x="435" y="190" text-anchor="middle">電子を受け渡す</text>
+
+<line x1="520" y1="175" x2="640" y2="175" stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowEtc65)"></line>
+
+<rect class="flowNode" x="640" y="140" width="150" height="70" rx="18"></rect>
+<text class="flowText" x="715" y="168" text-anchor="middle">O2</text>
+<text class="flowText" x="715" y="190" text-anchor="middle">→ H2O</text>
+
+<line x1="435" y1="140" x2="435" y2="80" stroke="#f59e0b" stroke-width="4" marker-end="url(#arrowH65)"></line>
+<line x1="585" y1="210" x2="585" y2="80" stroke="#f59e0b" stroke-width="4" marker-end="url(#arrowH65)"></line>
+
+<circle cx="405" cy="65" r="15" fill="#f59e0b"></circle>
+<text class="flowText" x="405" y="70" text-anchor="middle">H+</text>
+<circle cx="455" cy="55" r="15" fill="#f59e0b"></circle>
+<text class="flowText" x="455" y="60" text-anchor="middle">H+</text>
+<circle cx="565" cy="65" r="15" fill="#f59e0b"></circle>
+<text class="flowText" x="565" y="70" text-anchor="middle">H+</text>
+<circle cx="615" cy="55" r="15" fill="#f59e0b"></circle>
+<text class="flowText" x="615" y="60" text-anchor="middle">H+</text>
+
+<text class="flowText" x="490" y="315" text-anchor="middle">
+電子の移動に伴ってH+が膜の外側へ汲み出される
+</text>
+
+</svg>
+
+`,
+
+"P71": `
+
+<div class="diagramTitle">
+光合成：光反応でエネルギーを受け取り、カルビン回路で糖をつくる
+</div>
+
+<svg class="flowSvg" viewBox="0 0 980 360">
+
+<defs>
+<marker id="arrowPhoto71" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#bff3d1"></polygon>
+</marker>
+</defs>
+
+<ellipse cx="490" cy="185" rx="380" ry="130"
+fill="rgba(34,197,94,.10)" stroke="rgba(34,197,94,.75)" stroke-width="5"></ellipse>
+
+<rect class="flowNode" x="120" y="130" width="220" height="100" rx="24"></rect>
+<text class="flowText" x="230" y="160" text-anchor="middle">光反応</text>
+<text class="flowText" x="230" y="185" text-anchor="middle">ATP・NADPH</text>
+<text class="flowText" x="230" y="210" text-anchor="middle">O2を放出</text>
+
+<line x1="340" y1="180" x2="500" y2="180" stroke="#bff3d1" stroke-width="4" marker-end="url(#arrowPhoto71)"></line>
+
+<rect class="flowNode" x="500" y="130" width="260" height="100" rx="24"></rect>
+<text class="flowText" x="630" y="160" text-anchor="middle">カルビン回路</text>
+<text class="flowText" x="630" y="185" text-anchor="middle">CO2を固定</text>
+<text class="flowText" x="630" y="210" text-anchor="middle">糖を合成</text>
+
+<text class="flowText" x="165" y="82" text-anchor="middle">光</text>
+<line x1="170" y1="95" x2="215" y2="130" stroke="#facc15" stroke-width="5" marker-end="url(#arrowPhoto71)"></line>
+
+<text class="flowText" x="825" y="160" text-anchor="middle">糖</text>
+<circle cx="825" cy="190" r="34" fill="rgba(245,158,11,.30)" stroke="rgba(245,158,11,.85)" stroke-width="3"></circle>
+
+<text class="flowText" x="490" y="320" text-anchor="middle">
+光エネルギーを有機物の化学エネルギーとして蓄える
+</text>
+
+</svg>
+
+`,
+
+"P75": `
+
+<div class="diagramTitle">
+カルビン回路：CO2を固定し、ATP・NADPHを使って糖のもとをつくる
+</div>
+
+<svg class="flowSvg" viewBox="0 0 940 360">
+
+<defs>
+<marker id="arrowCalvin75" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#bff3d1"></polygon>
+</marker>
+</defs>
+
+<circle cx="470" cy="180" r="105"
+fill="rgba(34,197,94,.10)" stroke="rgba(34,197,94,.75)" stroke-width="5"></circle>
+
+<path d="M470 75
+C580 95, 620 205, 540 275
+C455 350, 315 285, 350 160
+C365 105, 405 82, 470 75"
+fill="none" stroke="rgba(191,243,209,.9)" stroke-width="5" marker-end="url(#arrowCalvin75)"></path>
+
+<text class="flowText" x="470" y="170" text-anchor="middle">カルビン回路</text>
+<text class="flowText" x="470" y="195" text-anchor="middle">CO2固定</text>
+
+<rect class="flowNode" x="80" y="130" width="170" height="80" rx="22"></rect>
+<text class="flowText" x="165" y="160" text-anchor="middle">CO2</text>
+<text class="flowText" x="165" y="185" text-anchor="middle">取り込む</text>
+
+<line x1="250" y1="170" x2="350" y2="170" stroke="#bff3d1" stroke-width="4" marker-end="url(#arrowCalvin75)"></line>
+
+<rect class="flowNode" x="650" y="95" width="210" height="80" rx="22"></rect>
+<text class="flowText" x="755" y="125" text-anchor="middle">ATP・NADPH</text>
+<text class="flowText" x="755" y="150" text-anchor="middle">光反応から供給</text>
+
+<line x1="650" y1="145" x2="560" y2="165" stroke="#bff3d1" stroke-width="4" marker-end="url(#arrowCalvin75)"></line>
+
+<rect class="flowNode" x="650" y="225" width="210" height="80" rx="22"></rect>
+<text class="flowText" x="755" y="255" text-anchor="middle">糖のもと</text>
+<text class="flowText" x="755" y="280" text-anchor="middle">有機物へ</text>
+
+<line x1="560" y1="215" x2="650" y2="255" stroke="#bff3d1" stroke-width="4" marker-end="url(#arrowCalvin75)"></line>
+
+<text class="flowText" x="470" y="330" text-anchor="middle">
+光反応の産物を使ってCO2から有機物をつくる
+</text>
+
+</svg>
+
+`
+
+};
+
+/* =========================
    ガイド：S1 として先頭へ自動挿入
    ========================= */
 const DEFAULT_GUIDE = "カードは『前提→理由→結論』の流れになりやすい。用語の定義→しくみ→結果の順で並べる。";
@@ -867,7 +1682,15 @@ function expandSteps(originalSteps){
    ========================= */
 let current=null, currentExpandedSteps=[], poolCards=[], answerCards=[];
 const sel=document.getElementById('problemSelect');
+
 const promptEl=document.getElementById('prompt');
+
+const diagramWrap =
+document.getElementById('diagramWrap');
+
+const flowchartWrap =
+document.getElementById('flowchartWrap');
+
 const poolEl=document.getElementById('pool');
 const answerEl=document.getElementById('answer');
 const checkBtn=document.getElementById('checkBtn');
@@ -883,8 +1706,8 @@ const nextWrap=document.getElementById('nextWrap');
 function escapeHTML(s){
   return String(s)
     .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
+    .replace(/</g,'<;')
+    .replace(/>/g,'>;')
     .replace(/"/g,'&quot;')
     .replace(/'/g,'&#39;');
 }
@@ -1060,12 +1883,77 @@ function enableDrop(zoneEl,toZone){
     }catch(_){}
   });
 }
+/* =========================
+ 図表示
+========================= */
+
+function renderDiagram(problemId){
+
+ const html = DIAGRAMS[problemId];
+
+ if(!html){
+
+  diagramWrap.style.display='none';
+  diagramWrap.innerHTML='';
+
+  return;
+ }
+
+ diagramWrap.style.display='block';
+
+ diagramWrap.innerHTML = html;
+}
+
+/* =========================
+ フローチャート
+========================= */
+
+function renderFlowchart(){
+
+ if(!currentExpandedSteps){
+
+  return;
+ }
+
+ let html =
+ '<div class="diagramTitle">理解フローチャート</div>';
+
+ html += '<div class="flowchart">';
+
+ currentExpandedSteps.forEach((s, idx)=>{
+
+  html += `
+  <div class="flowStep">
+    <strong>${s.label}</strong><br>
+    ${s.text}
+  </div>
+  `;
+
+  if(idx < currentExpandedSteps.length - 1){
+
+   html += `
+   <div class="flowArrow">
+   ↓
+   </div>
+   `;
+  }
+
+ });
+
+ html += '</div>';
+
+ flowchartWrap.innerHTML = html;
+}
 
 function loadProblem(problemId){
   current = PROBLEMS.find(p=>p.id===problemId) || PROBLEMS[0];
   sel.value = current.id;
 
   promptEl.innerHTML = escapeHTML(current.prompt).replaceAll('\r\n','\n').replaceAll('\n','<br>');
+
+renderDiagram(current.id);
+
+flowchartWrap.innerHTML='';
 
   const trimmed = simplifySteps(current.steps || []);
   const guideStep = { id:"g0", text:`ガイド：${pickGuide(current)}`, requires:[] };
@@ -1119,6 +2007,7 @@ answerBtn.addEventListener('click',()=>{
   solutionWrap.style.display='block';
   solutionWrap.innerHTML='';
   solutionWrap.appendChild(buildSolutionBox());
+renderFlowchart();
   typesetMath();
 });
 checkBtn.addEventListener('click',()=>{
@@ -1130,6 +2019,7 @@ checkBtn.addEventListener('click',()=>{
     solutionWrap.style.display='block';
     solutionWrap.innerHTML='';
     solutionWrap.appendChild(buildSolutionBox());
+renderFlowchart();
     typesetMath();
   } else if(r.correctSet){
     setStatus('warn',`カードはそろっています。順序を調整（進捗 ${r.progress}%）。`);
