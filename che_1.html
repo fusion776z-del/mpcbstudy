@@ -108,6 +108,43 @@
       white-space:nowrap;
     }
     a.nextBtn:hover{transform:translateY(-1px)}
+/* =========================
+ 化学基礎：絵解説UI
+========================= */
+
+.diagram{
+ margin:0 0 14px;
+ padding:14px;
+ border-radius:16px;
+ background:rgba(255,255,255,.04);
+ border:1px solid rgba(255,255,255,.08);
+ overflow:auto;
+}
+
+.diagramTitle{
+ font-size:12px;
+ color:var(--muted);
+ margin-bottom:10px;
+ letter-spacing:.03em;
+}
+
+.chemSvg{
+ width:100%;
+ min-width:540px;
+ height:auto;
+}
+
+.chemText{
+ fill:#eef1ff;
+ font-size:13px;
+ font-family:system-ui,sans-serif;
+}
+
+.chemNode{
+ fill:rgba(124,92,255,.18);
+ stroke:rgba(124,92,255,.7);
+ stroke-width:2;
+}
   </style>
 </head>
 
@@ -131,7 +168,10 @@
         <div class="row" style="margin-bottom:10px"><label for="problemSelect">問題を選択</label></div>
         <select id="problemSelect"></select>
         <div style="height:10px"></div>
-        <div class="prompt" id="prompt"></div>
+        
+<div id="diagramWrap" class="diagram" style="display:none"></div>
+<div class="prompt" id="prompt"></div>
+
         <div style="height:12px"></div>
         <div class="row">
           <button class="primary" id="checkBtn">判定する</button>
@@ -807,13 +847,201 @@ const PROBLEMS = [
 
 ];
 
+/* =========================
+ 化学基礎：絵解説データ
+ S = 分離
+ E = 構成元素
+ P = モル計算
+========================= */
 
+const DIAGRAMS = {
+
+"S": `
+
+<div class="diagramTitle">
+分離：性質の違いを利用して混合物を分ける
+</div>
+
+<svg class="chemSvg" viewBox="0 0 960 360">
+
+<defs>
+<marker id="arrowSep" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#cfc7ff"></polygon>
+</marker>
+</defs>
+
+<!-- 混合物 -->
+<rect x="60" y="95" width="170" height="145" rx="22"
+fill="rgba(124,92,255,.12)" stroke="rgba(124,92,255,.75)" stroke-width="3"></rect>
+<text class="chemText" x="145" y="82" text-anchor="middle">混合物</text>
+
+<circle cx="105" cy="135" r="13" fill="#e9ecff"></circle>
+<circle cx="150" cy="135" r="13" fill="#ef4444"></circle>
+<circle cx="190" cy="165" r="13" fill="#f59e0b"></circle>
+<circle cx="115" cy="200" r="13" fill="#7dd3fc"></circle>
+<circle cx="170" cy="210" r="13" fill="#e9ecff"></circle>
+
+<line x1="235" y1="165" x2="330" y2="165"
+stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowSep)"></line>
+
+<!-- 性質の違い -->
+<rect class="chemNode" x="335" y="80" width="260" height="170" rx="24"></rect>
+<text class="chemText" x="465" y="115" text-anchor="middle">利用する性質</text>
+<text class="chemText" x="465" y="145" text-anchor="middle">溶けやすさ</text>
+<text class="chemText" x="465" y="170" text-anchor="middle">粒の大きさ</text>
+<text class="chemText" x="465" y="195" text-anchor="middle">沸点・密度・磁性</text>
+<text class="chemText" x="465" y="220" text-anchor="middle">吸着・昇華しやすさ</text>
+
+<line x1="600" y1="165" x2="690" y2="165"
+stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowSep)"></line>
+
+<!-- 操作 -->
+<rect x="700" y="70" width="200" height="195" rx="24"
+fill="rgba(34,197,94,.12)" stroke="rgba(34,197,94,.75)" stroke-width="3"></rect>
+
+<text class="chemText" x="800" y="105" text-anchor="middle">分離操作</text>
+<text class="chemText" x="800" y="135" text-anchor="middle">ろ過・蒸留</text>
+<text class="chemText" x="800" y="160" text-anchor="middle">分液・再結晶</text>
+<text class="chemText" x="800" y="185" text-anchor="middle">クロマトグラフィー</text>
+<text class="chemText" x="800" y="210" text-anchor="middle">磁選・昇華</text>
+
+<text class="chemText" x="480" y="320" text-anchor="middle">
+ポイント：まず「何の性質が違うか」を見つけ、その性質に合う操作を選ぶ
+</text>
+
+</svg>
+
+`,
+
+"E": `
+
+<div class="diagramTitle">
+構成元素：化学式に出てくる元素記号の種類を読む
+</div>
+
+<svg class="chemSvg" viewBox="0 0 960 340">
+
+<defs>
+<marker id="arrowElem" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#cfc7ff"></polygon>
+</marker>
+</defs>
+
+<rect class="chemNode" x="80" y="90" width="230" height="130" rx="24"></rect>
+<text class="chemText" x="195" y="140" text-anchor="middle" style="font-size:24px">CaCO₃</text>
+<text class="chemText" x="195" y="178" text-anchor="middle">化学式を見る</text>
+
+<line x1="315" y1="155" x2="420" y2="155"
+stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowElem)"></line>
+
+<rect x="430" y="70" width="250" height="170" rx="24"
+fill="rgba(125,211,252,.10)" stroke="rgba(125,211,252,.75)" stroke-width="3"></rect>
+
+<text class="chemText" x="555" y="105" text-anchor="middle">元素記号を抜き出す</text>
+
+<circle cx="500" cy="155" r="30" fill="rgba(34,197,94,.24)" stroke="rgba(34,197,94,.85)" stroke-width="3"></circle>
+<text class="chemText" x="500" y="162" text-anchor="middle">Ca</text>
+
+<circle cx="555" cy="155" r="30" fill="rgba(245,158,11,.24)" stroke="rgba(245,158,11,.85)" stroke-width="3"></circle>
+<text class="chemText" x="555" y="162" text-anchor="middle">C</text>
+
+<circle cx="610" cy="155" r="30" fill="rgba(239,68,68,.24)" stroke="rgba(239,68,68,.85)" stroke-width="3"></circle>
+<text class="chemText" x="610" y="162" text-anchor="middle">O</text>
+
+<text class="chemText" x="555" y="215" text-anchor="middle">下付き数字は原子数、元素の種類は記号の種類</text>
+
+<line x1="685" y1="155" x2="780" y2="155"
+stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowElem)"></line>
+
+<rect class="chemNode" x="790" y="95" width="120" height="120" rx="22"></rect>
+<text class="chemText" x="850" y="137" text-anchor="middle">元素</text>
+<text class="chemText" x="850" y="165" text-anchor="middle">3種類</text>
+<text class="chemText" x="850" y="190" text-anchor="middle">Ca,C,O</text>
+
+<text class="chemText" x="480" y="300" text-anchor="middle">
+ポイント：同じ記号が何個あっても、構成元素としては1種類と数える
+</text>
+
+</svg>
+
+`,
+
+"P": `
+
+<div class="diagramTitle">
+モル計算：g・mol・個数・L・濃度をつなぐ変換マップ
+</div>
+
+<svg class="chemSvg" viewBox="0 0 980 380">
+
+<defs>
+<marker id="arrowMol" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#cfc7ff"></polygon>
+</marker>
+</defs>
+
+<!-- 中心 mol -->
+<circle cx="490" cy="185" r="58"
+fill="rgba(124,92,255,.22)" stroke="rgba(124,92,255,.85)" stroke-width="4"></circle>
+<text class="chemText" x="490" y="180" text-anchor="middle" style="font-size:18px">mol</text>
+<text class="chemText" x="490" y="205" text-anchor="middle">物質量 n</text>
+
+<!-- 質量 -->
+<rect class="chemNode" x="90" y="70" width="190" height="90" rx="22"></rect>
+<text class="chemText" x="185" y="105" text-anchor="middle">質量 m</text>
+<text class="chemText" x="185" y="130" text-anchor="middle">g</text>
+
+<line x1="285" y1="115" x2="425" y2="165"
+stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowMol)"></line>
+<text class="chemText" x="350" y="120" text-anchor="middle">÷ M</text>
+
+<line x1="425" y1="205" x2="285" y2="250"
+stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowMol)"></line>
+<text class="chemText" x="350" y="250" text-anchor="middle">× M</text>
+
+<!-- 粒子数 -->
+<rect class="chemNode" x="700" y="70" width="190" height="90" rx="22"></rect>
+<text class="chemText" x="795" y="105" text-anchor="middle">粒子数 N</text>
+<text class="chemText" x="795" y="130" text-anchor="middle">個</text>
+
+<line x1="555" y1="165" x2="695" y2="115"
+stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowMol)"></line>
+<text class="chemText" x="620" y="120" text-anchor="middle">× NA</text>
+
+<line x1="695" y1="250" x2="555" y2="205"
+stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowMol)"></line>
+<text class="chemText" x="620" y="250" text-anchor="middle">÷ NA</text>
+
+<!-- 気体体積 -->
+<rect x="90" y="240" width="190" height="90" rx="22"
+fill="rgba(34,197,94,.12)" stroke="rgba(34,197,94,.75)" stroke-width="3"></rect>
+<text class="chemText" x="185" y="275" text-anchor="middle">気体体積 V</text>
+<text class="chemText" x="185" y="300" text-anchor="middle">標準状態 L</text>
+
+<text class="chemText" x="310" y="317" text-anchor="middle">22.4 L/mol</text>
+
+<!-- 溶液 -->
+<rect x="700" y="240" width="190" height="90" rx="22"
+fill="rgba(245,158,11,.12)" stroke="rgba(245,158,11,.75)" stroke-width="3"></rect>
+<text class="chemText" x="795" y="275" text-anchor="middle">モル濃度 c</text>
+<text class="chemText" x="795" y="300" text-anchor="middle">c = n / V</text>
+
+<text class="chemText" x="490" y="350" text-anchor="middle">
+ポイント：まずmolに直す。反応量は係数比、溶液は c=n/V、気体は 22.4L/mol
+</text>
+
+</svg>
+
+`
+
+};
 /* =======================
    --- アプリ共通 ---
  ======================= */
 let current=null, poolCards=[], answerCards=[];
 const sel=document.getElementById('problemSelect');
 const promptEl=document.getElementById('prompt');
+const diagramWrap=document.getElementById('diagramWrap');
 const poolEl=document.getElementById('pool');
 const answerEl=document.getElementById('answer');
 const checkBtn=document.getElementById('checkBtn');
@@ -1015,13 +1243,30 @@ function enableDrop(zoneEl,toZone){
     }catch(_){}
   });
 }
+function getDiagramKey(problem){
+ if(!problem || !problem.id) return null;
+ return problem.id.charAt(0);
+}
 
+function renderDiagram(problem){
+ const key = getDiagramKey(problem);
+ const html = key ? DIAGRAMS[key] : null;
+
+ if(!html){
+  diagramWrap.style.display='none';
+  diagramWrap.innerHTML='';
+  return;
+ }
+
+ diagramWrap.style.display='block';
+ diagramWrap.innerHTML=html;
+}
 function loadProblem(problemId){
   current=PROBLEMS.find(p=>p.id===problemId) || PROBLEMS[0];
   sel.value = current.id;
 
   promptEl.innerHTML = escapeHTML(current.prompt).replace(/\n/g,'<br>');
-
+renderDiagram(current);
   const cards=[]; let n=1;
   current.steps.forEach(s=>{
     cards.push({
