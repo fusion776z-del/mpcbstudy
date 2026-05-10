@@ -80,6 +80,43 @@ a.nextBtn{
   white-space:nowrap;
 }
 a.nextBtn:hover{transform:translateY(-1px)}
+/* =========================
+ 確率：絵解説UI
+========================= */
+
+.diagram{
+ margin:0 0 14px;
+ padding:14px;
+ border-radius:16px;
+ background:rgba(255,255,255,.04);
+ border:1px solid rgba(255,255,255,.08);
+ overflow:auto;
+}
+
+.diagramTitle{
+ font-size:12px;
+ color:var(--muted);
+ margin-bottom:10px;
+ letter-spacing:.03em;
+}
+
+.probSvg{
+ width:100%;
+ min-width:520px;
+ height:auto;
+}
+
+.probText{
+ fill:#eef1ff;
+ font-size:13px;
+ font-family:system-ui,sans-serif;
+}
+
+.probNode{
+ fill:rgba(124,92,255,.18);
+ stroke:rgba(124,92,255,.7);
+ stroke-width:2;
+}
   </style>
 </head>
 
@@ -100,7 +137,10 @@ a.nextBtn:hover{transform:translateY(-1px)}
         <div class="row" style="margin-bottom:10px"><label for="problemSelect">問題を選択</label></div>
         <select id="problemSelect"></select>
         <div style="height:10px"></div>
-        <div class="prompt" id="prompt"></div>
+        
+<div id="diagramWrap" class="diagram" style="display:none"></div>
+<div class="prompt" id="prompt"></div>
+
         <div style="height:12px"></div>
         <div class="row">
           <button class="primary" id="checkBtn">判定する</button>
@@ -772,6 +812,286 @@ const PROBLEMS = [
  ]}
 ];
 
+/* =========================
+ 確率：絵解説データ
+========================= */
+
+const DIAGRAMS = {
+
+"DICE": `
+
+<div class="diagramTitle">
+サイコロ：全体6通りのうち、条件を満たす目を数える
+</div>
+
+<svg class="probSvg" viewBox="0 0 900 260">
+
+<rect class="probNode" x="80" y="70" width="90" height="90" rx="18"></rect>
+<rect class="probNode" x="200" y="70" width="90" height="90" rx="18"></rect>
+<rect class="probNode" x="320" y="70" width="90" height="90" rx="18"></rect>
+<rect class="probNode" x="440" y="70" width="90" height="90" rx="18"></rect>
+<rect class="probNode" x="560" y="70" width="90" height="90" rx="18"></rect>
+<rect class="probNode" x="680" y="70" width="90" height="90" rx="18"></rect>
+
+<text class="probText" x="125" y="123" text-anchor="middle">1</text>
+<text class="probText" x="245" y="123" text-anchor="middle">2</text>
+<text class="probText" x="365" y="123" text-anchor="middle">3</text>
+<text class="probText" x="485" y="123" text-anchor="middle">4</text>
+<text class="probText" x="605" y="123" text-anchor="middle">5</text>
+<text class="probText" x="725" y="123" text-anchor="middle">6</text>
+
+<circle cx="365" cy="175" r="8" fill="#22c55e"></circle>
+<circle cx="725" cy="175" r="8" fill="#22c55e"></circle>
+
+<text class="probText" x="450" y="220" text-anchor="middle">
+確率 = 条件を満たす場合の数 ÷ 全体の場合の数
+</text>
+
+</svg>
+
+`,
+
+"COIN": `
+
+<div class="diagramTitle">
+コイン：樹形図で表・裏の並びを数える
+</div>
+
+<svg class="probSvg" viewBox="0 0 900 300">
+
+<defs>
+<marker id="arrowCoin" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+<polygon points="0 0, 10 3, 0 6" fill="#cfc7ff"></polygon>
+</marker>
+</defs>
+
+<circle cx="120" cy="150" r="28" fill="rgba(124,92,255,.22)" stroke="rgba(124,92,255,.8)" stroke-width="3"></circle>
+<text class="probText" x="120" y="156" text-anchor="middle">開始</text>
+
+<line x1="150" y1="140" x2="310" y2="80" stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowCoin)"></line>
+<line x1="150" y1="160" x2="310" y2="220" stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowCoin)"></line>
+
+<circle cx="350" cy="75" r="30" fill="rgba(34,197,94,.22)" stroke="rgba(34,197,94,.8)" stroke-width="3"></circle>
+<text class="probText" x="350" y="81" text-anchor="middle">表</text>
+
+<circle cx="350" cy="225" r="30" fill="rgba(245,158,11,.22)" stroke="rgba(245,158,11,.8)" stroke-width="3"></circle>
+<text class="probText" x="350" y="231" text-anchor="middle">裏</text>
+
+<line x1="385" y1="75" x2="540" y2="55" stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowCoin)"></line>
+<line x1="385" y1="75" x2="540" y2="115" stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowCoin)"></line>
+<line x1="385" y1="225" x2="540" y2="185" stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowCoin)"></line>
+<line x1="385" y1="225" x2="540" y2="245" stroke="#cfc7ff" stroke-width="4" marker-end="url(#arrowCoin)"></line>
+
+<text class="probText" x="600" y="60" text-anchor="middle">表表</text>
+<text class="probText" x="600" y="120" text-anchor="middle">表裏</text>
+<text class="probText" x="600" y="190" text-anchor="middle">裏表</text>
+<text class="probText" x="600" y="250" text-anchor="middle">裏裏</text>
+
+<text class="probText" x="450" y="285" text-anchor="middle">
+反復試行では「どの回で表が出るか」を選ぶ
+</text>
+
+</svg>
+
+`,
+
+"BALL": `
+
+<div class="diagramTitle">
+玉の確率：箱の中身から、取り出し方に合う数え方を選ぶ
+</div>
+
+<svg class="probSvg" viewBox="0 0 900 300">
+
+<rect x="120" y="70" width="300" height="160" rx="26"
+fill="rgba(124,92,255,.10)" stroke="rgba(124,92,255,.75)" stroke-width="4"></rect>
+
+<text class="probText" x="270" y="50" text-anchor="middle">箱</text>
+
+<circle cx="180" cy="120" r="20" fill="#ef4444"></circle>
+<circle cx="240" cy="120" r="20" fill="#ef4444"></circle>
+<circle cx="300" cy="120" r="20" fill="#ef4444"></circle>
+
+<circle cx="180" cy="180" r="20" fill="#e9ecff"></circle>
+<circle cx="240" cy="180" r="20" fill="#e9ecff"></circle>
+<circle cx="300" cy="180" r="20" fill="#e9ecff"></circle>
+<circle cx="360" cy="180" r="20" fill="#e9ecff"></circle>
+
+<text class="probText" x="540" y="115" text-anchor="middle">同時に取り出す</text>
+<text class="probText" x="540" y="145" text-anchor="middle">→ 組合せ C</text>
+
+<text class="probText" x="540" y="195" text-anchor="middle">順に取り出す</text>
+<text class="probText" x="540" y="225" text-anchor="middle">→ 確率を順にかける</text>
+
+<text class="probText" x="450" y="270" text-anchor="middle">
+「戻す」なら毎回同じ割合、「戻さない」なら残り数が変わる
+</text>
+
+</svg>
+
+`,
+
+"COND": `
+
+<div class="diagramTitle">
+条件付き確率：条件Aの中だけに世界を狭めて考える
+</div>
+
+<svg class="probSvg" viewBox="0 0 900 300">
+
+<rect x="110" y="60" width="680" height="190" rx="24"
+fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.35)" stroke-width="3"></rect>
+
+<text class="probText" x="450" y="45" text-anchor="middle">全体 U</text>
+
+<rect x="210" y="95" width="480" height="120" rx="22"
+fill="rgba(124,92,255,.18)" stroke="rgba(124,92,255,.75)" stroke-width="4"></rect>
+
+<text class="probText" x="450" y="125" text-anchor="middle">条件 A</text>
+
+<rect x="370" y="135" width="190" height="55" rx="18"
+fill="rgba(34,197,94,.22)" stroke="rgba(34,197,94,.85)" stroke-width="3"></rect>
+
+<text class="probText" x="465" y="168" text-anchor="middle">A かつ B</text>
+
+<text class="probText" x="450" y="270" text-anchor="middle">
+P(B|A) = Aの中でBも起こる割合
+</text>
+
+</svg>
+
+`,
+
+"LINE": `
+
+<div class="diagramTitle">
+並べ方：隣り合う条件は「かたまり」にして数える
+</div>
+
+<svg class="probSvg" viewBox="0 0 900 280">
+
+<rect class="probNode" x="100" y="80" width="80" height="60" rx="14"></rect>
+<rect class="probNode" x="200" y="80" width="80" height="60" rx="14"></rect>
+<rect class="probNode" x="300" y="80" width="80" height="60" rx="14"></rect>
+<rect class="probNode" x="400" y="80" width="80" height="60" rx="14"></rect>
+<rect class="probNode" x="500" y="80" width="80" height="60" rx="14"></rect>
+<rect class="probNode" x="600" y="80" width="80" height="60" rx="14"></rect>
+
+<text class="probText" x="140" y="116" text-anchor="middle">□</text>
+<text class="probText" x="240" y="116" text-anchor="middle">□</text>
+<text class="probText" x="340" y="116" text-anchor="middle">A</text>
+<text class="probText" x="440" y="116" text-anchor="middle">B</text>
+<text class="probText" x="540" y="116" text-anchor="middle">□</text>
+<text class="probText" x="640" y="116" text-anchor="middle">□</text>
+
+<rect x="310" y="165" width="160" height="65" rx="18"
+fill="rgba(34,197,94,.18)" stroke="rgba(34,197,94,.85)" stroke-width="3"></rect>
+
+<text class="probText" x="390" y="205" text-anchor="middle">[AB] を1つのかたまり</text>
+
+<text class="probText" x="450" y="260" text-anchor="middle">
+AとBが隣り合う → ABを1つにまとめて並べる
+</text>
+
+</svg>
+
+`,
+
+"CIRCLE": `
+
+<div class="diagramTitle">
+円順列：回転を同じと見るので、1人を固定して考える
+</div>
+
+<svg class="probSvg" viewBox="0 0 900 300">
+
+<circle cx="450" cy="150" r="95"
+fill="rgba(124,92,255,.08)" stroke="rgba(124,92,255,.75)" stroke-width="4"></circle>
+
+<circle cx="450" cy="55" r="24" fill="rgba(34,197,94,.25)" stroke="rgba(34,197,94,.85)" stroke-width="3"></circle>
+<text class="probText" x="450" y="61" text-anchor="middle">A</text>
+
+<circle cx="545" cy="150" r="24" fill="rgba(124,92,255,.25)" stroke="rgba(124,92,255,.85)" stroke-width="3"></circle>
+<text class="probText" x="545" y="156" text-anchor="middle">□</text>
+
+<circle cx="450" cy="245" r="24" fill="rgba(245,158,11,.25)" stroke="rgba(245,158,11,.85)" stroke-width="3"></circle>
+<text class="probText" x="450" y="251" text-anchor="middle">B</text>
+
+<circle cx="355" cy="150" r="24" fill="rgba(124,92,255,.25)" stroke="rgba(124,92,255,.85)" stroke-width="3"></circle>
+<text class="probText" x="355" y="156" text-anchor="middle">□</text>
+
+<text class="probText" x="450" y="285" text-anchor="middle">
+円では回転を区別しない → まずAを固定すると数えやすい
+</text>
+
+</svg>
+
+`,
+
+"CARD": `
+
+<div class="diagramTitle">
+トランプ：数字・スート・色を分けて数える
+</div>
+
+<svg class="probSvg" viewBox="0 0 900 300">
+
+<rect x="100" y="70" width="100" height="140" rx="14"
+fill="rgba(255,255,255,.95)" stroke="rgba(255,255,255,.8)" stroke-width="3"></rect>
+<text x="150" y="115" text-anchor="middle" font-size="34" fill="#111827">A♠</text>
+
+<rect x="230" y="70" width="100" height="140" rx="14"
+fill="rgba(255,255,255,.95)" stroke="rgba(255,255,255,.8)" stroke-width="3"></rect>
+<text x="280" y="115" text-anchor="middle" font-size="34" fill="#dc2626">A♥</text>
+
+<rect x="360" y="70" width="100" height="140" rx="14"
+fill="rgba(255,255,255,.95)" stroke="rgba(255,255,255,.8)" stroke-width="3"></rect>
+<text x="410" y="115" text-anchor="middle" font-size="34" fill="#dc2626">A♦</text>
+
+<rect x="490" y="70" width="100" height="140" rx="14"
+fill="rgba(255,255,255,.95)" stroke="rgba(255,255,255,.8)" stroke-width="3"></rect>
+<text x="540" y="115" text-anchor="middle" font-size="34" fill="#111827">A♣</text>
+
+<text class="probText" x="680" y="105" text-anchor="middle">Aは4枚</text>
+<text class="probText" x="680" y="140" text-anchor="middle">各スート13枚</text>
+<text class="probText" x="680" y="175" text-anchor="middle">赤26枚・黒26枚</text>
+
+<text class="probText" x="450" y="255" text-anchor="middle">
+トランプ問題は「数字」「スート」「色」のどれを条件にするかを先に見る
+</text>
+
+</svg>
+
+`
+
+};
+function getDiagramKey(problem){
+ const t = `${problem.title} ${problem.prompt}`;
+
+ if(t.includes("サイコロ")) return "DICE";
+ if(t.includes("コイン")) return "COIN";
+ if(t.includes("赤") || t.includes("白") || t.includes("不良品") || t.includes("箱")) return "BALL";
+ if(t.includes("条件") || t.includes("原因")) return "COND";
+ if(t.includes("円")) return "CIRCLE";
+ if(t.includes("一列") || t.includes("並べる") || t.includes("隣り合う") || t.includes("両端")) return "LINE";
+ if(t.includes("トランプ") || t.includes("スート") || t.includes("キング") || t.includes("A")) return "CARD";
+
+ return null;
+}
+
+function renderDiagram(problem){
+ const key = getDiagramKey(problem);
+ const html = key ? DIAGRAMS[key] : null;
+
+ if(!html){
+  diagramWrap.style.display='none';
+  diagramWrap.innerHTML='';
+  return;
+ }
+
+ diagramWrap.style.display='block';
+ diagramWrap.innerHTML=html;
+}
 // --- 以下は元ファイルのロジックそのまま（：分割、連続性判定、UI） --- [1](https://onedrive.live.com?cid=CE4107C842BEBF65&id=CE4107C842BEBF65!s4c1a9e196aa040f4838499728956a2fa)
 function splitOneStepText(stepText){
   const t = String(stepText || '').trim();
@@ -816,6 +1136,7 @@ function expandSteps(originalSteps){
 let current=null, currentExpandedSteps=[], poolCards=[], answerCards=[];
 const sel=document.getElementById('problemSelect');
 const promptEl=document.getElementById('prompt');
+const diagramWrap=document.getElementById('diagramWrap');
 const poolEl=document.getElementById('pool');
 const answerEl=document.getElementById('answer');
 const checkBtn=document.getElementById('checkBtn');
@@ -936,6 +1257,7 @@ function enableDrop(zoneEl,toZone){
 function loadProblem(problemId){
   current=PROBLEMS.find(p=>p.id===problemId) || PROBLEMS[0];
   promptEl.textContent=current.prompt;
+renderDiagram(current);
   currentExpandedSteps = expandSteps(current.steps);
   const cards=[];
   currentExpandedSteps.forEach(s=>cards.push({ id:s.id, label:s.label, text:s.text, zone:'pool' }));
